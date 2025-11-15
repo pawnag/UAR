@@ -1,20 +1,22 @@
 #include "ProstyUAR.h"
 
 ProstyUAR::ProstyUAR(ModelARX& arx, RegulatorPID& regulator)
-    : m_arx(arx), m_regulator(regulator), m_poprzedniaWartoscRegulowana(0.0)
+    : m_arx(arx), m_regulator(regulator),
+    m_poprzedniaWartoscRegulowana(0.0),
+    m_ostatniUchyb(0.0), m_ostatnieSterowanie(0.0)
 {
 }
 
 double ProstyUAR::symuluj(double wartoscZadana)
 {
     // Obliczenie uchybu: wartoœæ zadana - poprzednia wartoœæ regulowana
-    double uchyb = wartoscZadana - m_poprzedniaWartoscRegulowana;
+    m_ostatniUchyb = wartoscZadana - m_poprzedniaWartoscRegulowana;
 
     // Obliczenie sterowania przez regulator PID
-    double sterowanie = m_regulator.symuluj(uchyb);
+    m_ostatnieSterowanie = m_regulator.symuluj(m_ostatniUchyb);
 
     // Symulacja obiektu ARX z obliczonym sterowaniem
-    double wartoscRegulowana = m_arx.symuluj(sterowanie);
+    double wartoscRegulowana = m_arx.symuluj(m_ostatnieSterowanie);
 
     // Zapamiêtanie wartoœci regulowanej dla nastêpnego kroku
     m_poprzedniaWartoscRegulowana = wartoscRegulowana;
@@ -25,5 +27,6 @@ double ProstyUAR::symuluj(double wartoscZadana)
 void ProstyUAR::reset()
 {
     m_poprzedniaWartoscRegulowana = 0.0;
-    // Tutaj mo¿na dodaæ resetowanie stanu regulatora i modelu ARX jeœli potrzeba
+    m_ostatniUchyb = 0.0;
+    m_ostatnieSterowanie = 0.0;
 }

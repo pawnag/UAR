@@ -36,11 +36,14 @@
     <ClCompile Include="RegulatorPID.cpp">
       <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratorWartosciZadanej.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
     <ClCompile Include="ProstyUAR.cpp">
       <Filter>Pliki źródłowe\services</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratorWartosciZadanej.cpp">
-      <Filter>Pliki źródłowe</Filter>
+    <ClCompile Include="Symulacja.cpp">
+      <Filter>Pliki źródłowe\services</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="GeneratorWartosciZadanej.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Symulacja.h">
+      <Filter>Pliki nagłówkowe\services</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

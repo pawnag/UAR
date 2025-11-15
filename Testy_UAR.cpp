@@ -7,7 +7,9 @@
 #include "RegulatorPID.h"
 #include "ProstyUAR.h"
 
-#define DEBUG  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
+#include "Symulacja.h"
+
+#define MAIN  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
 
 #ifdef DEBUG
 
@@ -594,8 +596,32 @@ int main()
 
 int main()
 {
-	std::cout << "Hello";
-	//Twój program
+	std::cout << "SYMULATOR UAR W CZASIE RZECZYWISTYM" << std::endl;
+	std::cout << "Wybierz tryb symulacji:" << std::endl;
+	std::cout << "1 - Sygnal sinusoidalny (200ms)" << std::endl;
+	std::cout << "2 - Sygnal prostokatny (100ms)" << std::endl;
+	std::cout << "3 - Wartosc stala (150ms)" << std::endl;
+	std::cout << "Wybierz (1, 2 lub 3): ";
+
+	int wybor;
+	std::cin >> wybor;
+
+	switch (wybor) {
+	case 1:
+		Symulacja::uruchomSinus();
+		break;
+	case 2:
+		Symulacja::uruchomProstokat();
+		break;
+	case 3:
+		Symulacja::uruchomStala();
+		break;
+	default:
+		std::cout << "Nieprawidlowy wybor. Uruchamiam sygnal sinusoidalny." << std::endl;
+		Symulacja::uruchomSinus();
+		break;
+	}
+
 }
 
 #endif
