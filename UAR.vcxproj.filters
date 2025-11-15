@@ -13,35 +13,47 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Pliki źródłowe\services">
+      <UniqueIdentifier>{51d696b9-b653-4bc0-9f4a-d9dfa1643226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\services">
+      <UniqueIdentifier>{3b9071df-4494-49d5-accb-64b7ab4685a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\models">
+      <UniqueIdentifier>{b6ba51f4-2db9-4d6b-8b8d-0322f69aa926}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\models">
+      <UniqueIdentifier>{054572ec-44f7-4133-82ff-ba38ff4a78ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Testy_UAR.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="ModelARX.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
     <ClCompile Include="RegulatorPID.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="RegulatorOnOFF.cpp">
-      <Filter>Pliki źródłowe</Filter>
+      <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
     <ClCompile Include="ProstyUAR.cpp">
+      <Filter>Pliki źródłowe\services</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratorWartosciZadanej.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelARX.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\models</Filter>
     </ClInclude>
     <ClInclude Include="RegulatorPID.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="RegulatorOnOFF.h">
-      <Filter>Pliki nagłówkowe</Filter>
+      <Filter>Pliki nagłówkowe\models</Filter>
     </ClInclude>
     <ClInclude Include="ProstyUAR.h">
+      <Filter>Pliki nagłówkowe\services</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratorWartosciZadanej.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

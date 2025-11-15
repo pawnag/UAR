@@ -1,37 +1,196 @@
-#include "ModelARX.h"
-#include <iostream>
-double ModelARX::symuluj(double sygnalWe) 
+﻿#include "ModelARX.h"
+#include <algorithm>
+#include <stdexcept>
+#include <random>
+#include <cmath>
+#include <memory>
+
+ModelARX::ModelARX(const std::vector<double>& i_A,
+    const std::vector<double>& i_B,
+    int i_op,
+    double i_oss)
+    : m_A(i_A), m_B(i_B), m_ot(i_op), m_oss(0.0),
+    u_min(-10.0), u_max(10.0), y_min(-10.0), y_max(10.0),
+    m_ograniczenia(true),
+    rozklad_szumu(nullptr)
 {
-    double y = m_wektorB[0] * m_poprzednieWe[0] + m_wektorB[1] * m_poprzednieWe[1]
-        - m_wektorA[0] * m_poprzednieWy[0] - m_wektorA[1] * m_poprzednieWy[1];
+    if (i_A.empty() || i_B.empty()) {
+        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik w każdym wielomianie");
+    }
+    if (i_op < 1) {
+        throw std::invalid_argument("Opóźnienie transportowe musi być >= 1");
+    }
 
-    // Przesuni�cie pami�ci
-    m_poprzednieWe[1] = m_poprzednieWe[0];
-    m_poprzednieWe[0] = sygnalWe;
-
-    m_poprzednieWy[1] = m_poprzednieWy[0];
-    m_poprzednieWy[0] = y;
-
-    // TODO: Bufor kolejka z op�nieniem transportowym
-
-    return y;
+    ustawRozkladSzumu(i_oss);
+    inicjalizujBufory();
+    generator_losowy.seed(std::random_device{}());
 }
 
-void ModelARX::setWektorA(const std::array<double, 2>& wektorA)
+void ModelARX::ustawRozkladSzumu(double odchylenie)
 {
-    m_wektorA = wektorA;
+    if (odchylenie < 0.0) 
+    {
+        throw std::invalid_argument("Odchylenie standardowe szumu musi być nieujemne");
+    }
+
+    m_oss = odchylenie;
+
+    if (odchylenie > 0.0) 
+    {
+        // std::make_unique to bezpieczny sposób tworzenia obiektów na stercie.
+        // std::make_unique<Type>(argumenty...) tworzy:
+        // 1. Obiekt Type na stercie
+        // 2. Owija go w unique_ptr
+        // 3. Zwraca unique_ptr
+        rozklad_szumu = std::make_unique<std::normal_distribution<double>>(0.0, odchylenie);
+    }
+    else 
+    {
+        rozklad_szumu.reset();
+    }
 }
 
-void ModelARX::setWektorB(const std::array<double, 2>& wektorB)
+void ModelARX::inicjalizujBufory()
 {
-    m_wektorB = wektorB;
+    size_t rozmiar_buforu_ster = m_ot + m_B.size() - 1;
+    size_t rozmiar_buforu_wyj = m_A.size();
+
+    m_u.clear();
+    m_y.clear();
+
+    for (size_t i = 0; i < rozmiar_buforu_ster; i++) 
+    {
+        m_u.push_back(0.0);
+    }
+    for (size_t i = 0; i < rozmiar_buforu_wyj; i++) 
+    {
+        m_y.push_back(0.0);
+    }
 }
 
-void ModelARX::setOT(int ot) 
+double ModelARX::zastosujOgraniczenia(double i_wart, double i_min, double i_max)
 {
-    m_ot = ot;
+    if (i_wart < i_min) return i_min;
+    if (i_wart > i_max) return i_max;
+    return i_wart;
 }
 
-std::array<double, 2> ModelARX::getWektorA() { return m_wektorA; }
-std::array<double, 2> ModelARX::getWektorB() { return m_wektorB; }
-int ModelARX::getOT() { return m_ot; }
+double ModelARX::obliczWyjscie()
+{
+    double wyjscie = 0.0;
+
+    // Część związana z wejściem (wielomian B)
+    for (size_t i = 0; i < m_B.size(); i++) 
+    {
+        wyjscie += m_B[i] * m_u[m_B.size() - 1 - i];
+    }
+
+    // Część związana z wyjściem (wielomian A)
+    for (size_t i = 0; i < m_A.size(); i++) 
+    {
+        wyjscie -= m_A[i] * m_y[m_y.size() - 1 - i];
+    }
+
+    if (rozklad_szumu) 
+    {
+        wyjscie += (*rozklad_szumu)(generator_losowy); // Dereferencja wskaźnika i wywołanie operatora()
+    }
+
+    return wyjscie;
+}
+
+double ModelARX::symuluj(double i_wej)
+{
+    // 1. Obliczenie wartości regulowanej na podstawie obecnych buforów
+    double y = obliczWyjscie();
+
+    // 2. Sprawdzenie ograniczeń wartości regulowanej PRZED zapisaniem do bufora
+    double y_ograniczone = m_ograniczenia ? zastosujOgraniczenia(y, y_min, y_max) : y;
+
+    // 3. Aktualizacja buforu wartości regulowanej
+    if (!m_y.empty())
+    {
+        m_y.pop_front(); // RZUCİ WYJĄTEK jeśli bufor pusty!
+    }
+    m_y.push_back(y_ograniczone);
+
+    // 4. Sprawdzenie ograniczeń sterowania PRZED obliczeniami
+    double sterowanie_ograniczone = m_ograniczenia ? zastosujOgraniczenia(i_wej, u_min, u_max) : i_wej;
+
+    // 5. Aktualizacja buforu sterowania
+    m_u.pop_front();
+    m_u.push_back(sterowanie_ograniczone);
+
+    return y_ograniczone;
+}
+
+void ModelARX::resetuj()
+{
+    inicjalizujBufory();
+}
+
+void ModelARX::setA(const std::vector<double>& i_A)
+{
+    if (i_A.empty()) {
+        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik A");
+    }
+    m_A = i_A;
+    size_t nowy_rozmiar = m_A.size();
+    while (m_y.size() < nowy_rozmiar) {
+        m_y.push_back(0.0);
+    }
+    while (m_y.size() > nowy_rozmiar) {
+        m_y.pop_front();
+    }
+}
+
+void ModelARX::setB(const std::vector<double>& i_B)
+{
+    if (i_B.empty()) {
+        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik B");
+    }
+    m_B = i_B;
+    size_t nowy_rozmiar = m_ot + m_B.size() - 1;
+    while (m_u.size() < nowy_rozmiar) {
+        m_u.push_back(0.0);
+    }
+    while (m_u.size() > nowy_rozmiar) {
+        m_u.pop_front();
+    }
+}
+
+void ModelARX::setOpoznienieTransportowe(int i_ot)
+{
+    if (i_ot < 1) {
+        throw std::invalid_argument("Opóźnienie transportowe musi być >= 1");
+    }
+    m_ot = i_ot;
+    inicjalizujBufory();
+}
+
+void ModelARX::setOdchylenieStandardoweSzumu(double i_oss)
+{
+    ustawRozkladSzumu(i_oss);
+}
+
+void ModelARX::setOgraniczeniaSterowania(double i_umin, double i_umax)
+{
+    u_min = i_umin;
+    u_max = i_umax;
+}
+
+void ModelARX::setOgraniczeniaWyjscia(double i_ymin, double i_ymax)
+{
+    y_min = i_ymin;
+    y_max = i_ymax;
+}
+
+void ModelARX::setOgraniczenia(bool i_ograniczenia)
+{
+    m_ograniczenia = i_ograniczenia;
+}
+
+std::vector<double> ModelARX::getA() const { return m_A; }
+std::vector<double> ModelARX::getB() const { return m_B; }
+int ModelARX::getOpoznienieTransportowe() const { return m_ot; }
+double ModelARX::getOdchylenieStandardoweSzumu() const { return m_oss; }
