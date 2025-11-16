@@ -3,7 +3,7 @@
 class Symulacja
 {
 public:
-    static void uruchomSinus();
-    static void uruchomProstokat();
-    static void uruchomStala();
+    void uruchomSinus();
+    void uruchomProstokat();
+    void uruchomStala();
 };

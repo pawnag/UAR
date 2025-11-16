@@ -9,7 +9,7 @@
 
 #include "Symulacja.h"
 
-#define MAIN  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
+#define DEBUG  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
 
 #ifdef DEBUG
 
@@ -591,7 +591,6 @@ int main()
 
 #endif
 
-
 #ifdef MAIN
 
 int main()
@@ -605,23 +604,23 @@ int main()
 
 	int wybor;
 	std::cin >> wybor;
+	Symulacja symulacja;
 
 	switch (wybor) {
 	case 1:
-		Symulacja::uruchomSinus();
+		symulacja.uruchomSinus();
 		break;
 	case 2:
-		Symulacja::uruchomProstokat();
+		symulacja.uruchomProstokat();
 		break;
 	case 3:
-		Symulacja::uruchomStala();
+		symulacja.uruchomStala();
 		break;
 	default:
 		std::cout << "Nieprawidlowy wybor. Uruchamiam sygnal sinusoidalny." << std::endl;
-		Symulacja::uruchomSinus();
+		symulacja.uruchomSinus();
 		break;
-	}
-
+	} 
 }
 
 #endif

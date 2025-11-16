@@ -14,11 +14,13 @@ ModelARX::ModelARX(const std::vector<double>& i_A,
     m_ograniczenia(true),
     rozklad_szumu(nullptr)
 {
-    if (i_A.empty() || i_B.empty()) {
-        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik w każdym wielomianie");
+    if (i_A.empty() || i_B.empty())
+    {
+        throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik w kazdym wielomianie");
     }
-    if (i_op < 1) {
-        throw std::invalid_argument("Opóźnienie transportowe musi być >= 1");
+    if (i_op < 1)
+    {
+        throw std::invalid_argument("Opoznienie transportowe musi byc >= 1");
     }
 
     ustawRozkladSzumu(i_oss);
@@ -42,7 +44,7 @@ void ModelARX::ustawRozkladSzumu(double odchylenie)
         // 1. Obiekt Type na stercie
         // 2. Owija go w unique_ptr
         // 3. Zwraca unique_ptr
-        rozklad_szumu = std::make_unique<std::normal_distribution<double>>(0.0, odchylenie);
+        rozklad_szumu = std::make_unique<std::normal_distribution<double>>(0.0, odchylenie); // 0.0 to srednia
     }
     else 
     {
@@ -101,25 +103,22 @@ double ModelARX::obliczWyjscie()
 
 double ModelARX::symuluj(double i_wej)
 {
-    // 1. Obliczenie wartości regulowanej na podstawie obecnych buforów
-    double y = obliczWyjscie();
-
-    // 2. Sprawdzenie ograniczeń wartości regulowanej PRZED zapisaniem do bufora
-    double y_ograniczone = m_ograniczenia ? zastosujOgraniczenia(y, y_min, y_max) : y;
-
-    // 3. Aktualizacja buforu wartości regulowanej
-    if (!m_y.empty())
-    {
-        m_y.pop_front(); // RZUCİ WYJĄTEK jeśli bufor pusty!
-    }
-    m_y.push_back(y_ograniczone);
-
-    // 4. Sprawdzenie ograniczeń sterowania PRZED obliczeniami
+    // 1. SPRAWDZENIE OGRANICZEŃ STEROWANIA PRZED OBLICZENIAMI
     double sterowanie_ograniczone = m_ograniczenia ? zastosujOgraniczenia(i_wej, u_min, u_max) : i_wej;
 
-    // 5. Aktualizacja buforu sterowania
+    // 2. Aktualizacja buforu sterowania PRZED obliczeniami
     m_u.pop_front();
     m_u.push_back(sterowanie_ograniczone);
+
+    // 3. Obliczenie wartości regulowanej
+    double y = obliczWyjscie();
+
+    // 4. Sprawdzenie ograniczeń wartości regulowanej PRZED zapisaniem do bufora
+    double y_ograniczone = m_ograniczenia ? zastosujOgraniczenia(y, y_min, y_max) : y;
+
+    // 5. Aktualizacja buforu wartości regulowanej
+    if (!m_y.empty()) m_y.pop_front();
+    m_y.push_back(y_ograniczone);
 
     return y_ograniczone;
 }
@@ -131,38 +130,45 @@ void ModelARX::resetuj()
 
 void ModelARX::setA(const std::vector<double>& i_A)
 {
-    if (i_A.empty()) {
-        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik A");
+    if (i_A.empty())
+    {
+        throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik A");
     }
     m_A = i_A;
     size_t nowy_rozmiar = m_A.size();
-    while (m_y.size() < nowy_rozmiar) {
+    while (m_y.size() < nowy_rozmiar)
+    {
         m_y.push_back(0.0);
     }
-    while (m_y.size() > nowy_rozmiar) {
+    while (m_y.size() > nowy_rozmiar)
+    {
         m_y.pop_front();
     }
 }
 
 void ModelARX::setB(const std::vector<double>& i_B)
 {
-    if (i_B.empty()) {
-        throw std::invalid_argument("Wymagany co najmniej 1 współczynnik B");
+    if (i_B.empty()) 
+    {
+        throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik B");
     }
     m_B = i_B;
     size_t nowy_rozmiar = m_ot + m_B.size() - 1;
-    while (m_u.size() < nowy_rozmiar) {
+    while (m_u.size() < nowy_rozmiar) 
+    {
         m_u.push_back(0.0);
     }
-    while (m_u.size() > nowy_rozmiar) {
+    while (m_u.size() > nowy_rozmiar) 
+    {
         m_u.pop_front();
     }
 }
 
 void ModelARX::setOpoznienieTransportowe(int i_ot)
 {
-    if (i_ot < 1) {
-        throw std::invalid_argument("Opóźnienie transportowe musi być >= 1");
+    if (i_ot < 1) 
+    {
+        throw std::invalid_argument("Opoznienie transportowe musi byc >= 1");
     }
     m_ot = i_ot;
     inicjalizujBufory();

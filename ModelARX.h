@@ -22,7 +22,7 @@ private:
     std::default_random_engine generator_losowy;
     std::unique_ptr<std::normal_distribution<double>> rozklad_szumu;
     /*
-    UNIQUE_PTR - inteligentny wskaŸnik
+    UNIQUE_PTR - inteligentny wskaŸnik opcjonalnego posiadania (optional ownership)
     - Tylko JEDEN unique_ptr mo¿e posiadaæ dany obiekt
     - Nie mo¿na go kopiowaæ, tylko przenosiæ
     - Gdy unique_ptr jest niszczony, automatycznie usuwa obiekt

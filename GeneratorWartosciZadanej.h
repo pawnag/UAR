@@ -1,6 +1,7 @@
 #pragma once
 #define _USE_MATH_DEFINES // dla M_PI
 #include <cmath>
+#include <algorithm>
 
 class GeneratorWartosciZadanej {
 public:
@@ -13,30 +14,40 @@ public:
 private:
     TypSygnalu m_typ;
     double m_amplituda;
-    double m_okres;  // w sekundach
+    int m_okresDyskretny; // T - liczba próbek na okres
     double m_skladowaStala;
-    double m_wypelnienie;  // 0.0 - 1.0, tylko dla prostok¹ta
-    double m_czas;         // aktualny czas symulacji w sekundach
-    double m_interwal;     // interwa³ symulacji w sekundach
-    //static constexpr double M_PI = 3.14159265358979323846;
+    double m_wypelnienie;
+    int m_licznikKrokow; // i - numer aktualnej próbki
+    double m_okresRzeczywisty; // T_RZ - w sekundach
+    double m_interwal; // T_T - w sekundach
+
 public:
     GeneratorWartosciZadanej();
 
-    void ustawTypSygnalu(TypSygnalu typ) { m_typ = typ; }
-    void ustawAmplitude(double amplituda) { m_amplituda = amplituda; }
-    void ustawOkres(double okres) { m_okres = okres; }
-    void ustawSkladowaStala(double skladowa) { m_skladowaStala = skladowa; }
-    void ustawWypelnienie(double wypelnienie) { m_wypelnienie = wypelnienie; }
-    void ustawInterwal(double interwalMs) { m_interwal = interwalMs / 1000.0; } // konwersja ms na s
+    void setTypSygnalu(TypSygnalu typ) { m_typ = typ; }
+    void setAmplituda(double amplituda) { m_amplituda = amplituda; }
+    void setSkladowaStala(double skladowa) { m_skladowaStala = skladowa; }
+    void setWypelnienie(double wypelnienie)
+    {
+        if (wypelnienie < 0.0) m_wypelnienie = 0.0;
+        else if (wypelnienie > 1.0) m_wypelnienie = 1.0;
+        else m_wypelnienie = wypelnienie;
+    }
+
+
+    void setOkresRzeczywisty(double T_RZ);
+    void setInterwal(double T_T_ms);
+    void przeliczOkresDyskretny();
 
     double generuj();
-    void reset() { m_czas = 0.0; }
-    void aktualizujCzas() { m_czas += m_interwal; }
 
-    // Akcesory
-    TypSygnalu typSygnalu() const { return m_typ; }
-    double amplituda() const { return m_amplituda; }
-    double okres() const { return m_okres; }
-    double skladowaStala() const { return m_skladowaStala; }
-    double wypelnienie() const { return m_wypelnienie; }
+    void krokSymulacji() { m_licznikKrokow++; }
+    void reset() { m_licznikKrokow = 0; }
+
+    TypSygnalu getTypSygnalu() const { return m_typ; }
+    double getAmplituda() const { return m_amplituda; }
+    double getOkresRzeczywisty() const { return m_okresRzeczywisty; }
+    double getSkladowaStala() const { return m_skladowaStala; }
+    double getWypelnienie() const { return m_wypelnienie; }
+    int getOkresDyskretny() const { return m_okresDyskretny; }
 };
