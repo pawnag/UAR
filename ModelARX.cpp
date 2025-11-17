@@ -103,22 +103,24 @@ double ModelARX::obliczWyjscie()
 
 double ModelARX::symuluj(double i_wej)
 {
-    // 1. SPRAWDZENIE OGRANICZEŃ STEROWANIA PRZED OBLICZENIAMI
-    double sterowanie_ograniczone = m_ograniczenia ? zastosujOgraniczenia(i_wej, u_min, u_max) : i_wej;
+    // 1. SPRAWDZENIE OGRANICZEŃ STEROWANIA PRZED JAKIMIKOLWIEK OBLICZENIAMI
+    double sterowanie_ograniczone = m_ograniczenia ?
+        zastosujOgraniczenia(i_wej, u_min, u_max) : i_wej;
 
-    // 2. Aktualizacja buforu sterowania PRZED obliczeniami
-    m_u.pop_front();
-    m_u.push_back(sterowanie_ograniczone);
-
-    // 3. Obliczenie wartości regulowanej
+    // 2. OBLICZENIE WYJŚCIA NA PODSTAWIE OBECNYCH BUFORÓW (przed aktualizacją!)
     double y = obliczWyjscie();
 
-    // 4. Sprawdzenie ograniczeń wartości regulowanej PRZED zapisaniem do bufora
-    double y_ograniczone = m_ograniczenia ? zastosujOgraniczenia(y, y_min, y_max) : y;
+    // 3. SPRAWDZENIE OGRANICZEŃ WARTOŚCI REGULOWANEJ ZARAZ PO WYLICZENIU
+    double y_ograniczone = m_ograniczenia ?
+        zastosujOgraniczenia(y, y_min, y_max) : y;
 
-    // 5. Aktualizacja buforu wartości regulowanej
+    // 4. AKTUALIZACJA BUFORU WARTOŚCI REGULOWANEJ (PRZED zapisaniem do bufora)
     if (!m_y.empty()) m_y.pop_front();
     m_y.push_back(y_ograniczone);
+
+    // 5. AKTUALIZACJA BUFORU STEROWANIA (PO obliczeniach - dla następnego kroku)
+    m_u.pop_front();
+    m_u.push_back(sterowanie_ograniczone);
 
     return y_ograniczone;
 }
