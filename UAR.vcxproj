@@ -129,11 +129,12 @@
   <ItemGroup>
     <ClCompile Include="GeneratorWartosciZadanej.cpp" />
     <ClCompile Include="KlasaUslugowa.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelARX.cpp" />
     <ClCompile Include="ProstyUAR.cpp" />
     <ClCompile Include="RegulatorPID.cpp" />
     <ClCompile Include="Symulacja.cpp" />
-    <ClCompile Include="TestyARX.cpp" />
+    <ClCompile Include="TestyDodatkowe.cpp" />
     <ClCompile Include="Testy_UAR.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,7 +144,7 @@
     <ClInclude Include="ProstyUAR.h" />
     <ClInclude Include="RegulatorPID.h" />
     <ClInclude Include="Symulacja.h" />
-    <ClInclude Include="TestyARX.h" />
+    <ClInclude Include="TestyDodatkowe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

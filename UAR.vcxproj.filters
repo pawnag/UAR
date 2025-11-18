@@ -45,8 +45,14 @@
     <ClCompile Include="GeneratorWartosciZadanej.cpp">
       <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
-    <ClCompile Include="TestyARX.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="TestyDodatkowe.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="KlasaUslugowa.cpp">
+      <Filter>Pliki źródłowe\services</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,8 +71,11 @@
     <ClInclude Include="GeneratorWartosciZadanej.h">
       <Filter>Pliki nagłówkowe\models</Filter>
     </ClInclude>
-    <ClInclude Include="TestyARX.h">
+    <ClInclude Include="TestyDodatkowe.h">
       <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="KlasaUslugowa.h">
+      <Filter>Pliki nagłówkowe\services</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

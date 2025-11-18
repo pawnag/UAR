@@ -31,6 +31,7 @@ public:
     void tylkoGenerator();
     void generatorIModel();
     void pelnyUAR();
+    void wykonajKrok();
 private:
     std::shared_ptr<ModelARX> m_model;
     std::shared_ptr<RegulatorPID> m_regulator;
@@ -44,5 +45,4 @@ private:
     double m_sterowanie;
     double m_uchyb;
 
-    void wykonajKrok();
 };

@@ -10,7 +10,7 @@
 #include "Symulacja.h"
 #include <thread>
 
-#include "TestyARX.h"
+#include "TestyDodatkowe.h"
 
 #define DEBUG  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
 
@@ -591,7 +591,7 @@ int main()
 	TESTY_RegulatorPID::wykonaj_testy();
 	TESTY_ProstyUAR::wykonaj_testy();
 
-	TESTY_ModelARX_Dodatkowe::wykonaj_wszystkie_testy();
+	TESTY_Dodatkowe::wykonaj_wszystkie_testy();
 }
 
 #endif
