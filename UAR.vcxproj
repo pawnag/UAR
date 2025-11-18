@@ -129,7 +129,6 @@
   <ItemGroup>
     <ClCompile Include="GeneratorWartosciZadanej.cpp" />
     <ClCompile Include="KlasaUslugowa.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelARX.cpp" />
     <ClCompile Include="ProstyUAR.cpp" />
     <ClCompile Include="RegulatorPID.cpp" />

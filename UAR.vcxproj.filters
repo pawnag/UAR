@@ -45,9 +45,6 @@
     <ClCompile Include="GeneratorWartosciZadanej.cpp">
       <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="TestyDodatkowe.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>

@@ -25,9 +25,4 @@ namespace TESTY_Dodatkowe {
     void test_symulacja_tylko_generator();
     void test_symulacja_generator_i_model();
     void test_symulacja_pelny_uar();
-
-    // Funkcje pomocnicze
-    bool porownanie_z_tolerancja(double a, double b, double tolerancja = 1e-3);
-    void raport_pojedynczego_testu(const std::string& nazwa, bool wynik);
 }
-
