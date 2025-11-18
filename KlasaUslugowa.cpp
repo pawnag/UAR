@@ -1,6 +1,12 @@
 #include "KlasaUslugowa.h"
 
-void KlasaUslugowa::nowyGenerator(double amplituda, double okres, int interwalMs, GeneratorWartosciZadanej::TypSygnalu typ, double skladowa, double wypelnienie) {
+void KlasaUslugowa::nowyGenerator(double amplituda,
+    double okres,
+    int interwalMs,
+    GeneratorWartosciZadanej::TypSygnalu typ,
+    double skladowa,
+    double wypelnienie)
+{
     auto gen = std::make_shared<GeneratorWartosciZadanej>();
     gen->setTypSygnalu(typ);
     gen->setAmplituda(amplituda);
@@ -11,12 +17,17 @@ void KlasaUslugowa::nowyGenerator(double amplituda, double okres, int interwalMs
     m_symulacja.setGenerator(gen);
 }
 
-void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum) {
+void KlasaUslugowa::nowyModelARX(const std::vector<double>& A,
+    const std::vector<double>& B,
+    int opoznienie,
+    double szum)
+{
     auto model = std::make_shared<ModelARX>(A, B, opoznienie, szum);
     m_symulacja.setModel(model);
 }
 
-void KlasaUslugowa::nowyRegulator(double k, double TI, double TD) {
+void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
+{
     auto reg = std::make_shared<RegulatorPID>(k, TI, TD);
     m_symulacja.setRegulator(reg);
 }

@@ -48,7 +48,6 @@ void Symulacja::uruchom()
             m_generator->krokSymulacji();
         }
 
-        // Aktualizuj czas na podstawie interwału z generatora
         interwalMs = getInterwalMs();
         m_czas += interwalMs / 1000.0;
         std::this_thread::sleep_for(std::chrono::milliseconds(interwalMs));
@@ -76,51 +75,45 @@ void Symulacja::resetuj()
 
 void Symulacja::wykonajKrok()
 {
-    // 1. Generuj wartość zadaną
-    if (m_generator) {
-        m_wartoscZadana = m_generator->generuj();
-    }
-    else {
-        m_wartoscZadana = 0.0;
-    }
+    if (m_generator) { m_wartoscZadana = m_generator->generuj(); }
+    else { m_wartoscZadana = 0.0; }
 
-    // 2. Określ konfigurację i oblicz wartości
     bool hasModel = (m_model != nullptr);
     bool hasRegulator = (m_regulator != nullptr);
     bool hasGenerator = (m_generator != nullptr);
 
-    if (hasModel && hasRegulator) {
-        // PEŁNY UAR: generator -> regulator -> model
+    if (hasModel && hasRegulator) 
+    {
         m_uchyb = m_wartoscZadana - m_wartoscWyjscie;
         m_sterowanie = m_regulator->symuluj(m_uchyb);
         m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
     }
-    else if (hasRegulator && hasGenerator) {
-        // TYLKO PID: generator -> regulator -> wyjście = sterowanie
+    else if (hasRegulator && hasGenerator)
+    {
         m_uchyb = m_wartoscZadana;
         m_sterowanie = m_regulator->symuluj(m_uchyb);
-        m_wartoscWyjscie = m_sterowanie; // Pokaż sterowanie jako wyjście
+        m_wartoscWyjscie = m_sterowanie;
     }
-    else if (hasModel && hasGenerator) {
-        // UKŁAD OTWARTY: generator -> model
+    else if (hasModel && hasGenerator)
+    {
         m_sterowanie = m_wartoscZadana;
         m_uchyb = m_wartoscZadana;
         m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
     }
-    else if (hasModel) {
-        // TYLKO MODEL: stałe sterowanie = 0
+    else if (hasModel)
+    {
         m_sterowanie = 0.0;
         m_uchyb = 0.0;
         m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
     }
-    else if (hasGenerator) {
-        // TYLKO GENERATOR: pokaż wartość zadaną jako wyjście
+    else if (hasGenerator)
+    {
         m_sterowanie = m_wartoscZadana;
         m_uchyb = m_wartoscZadana;
         m_wartoscWyjscie = m_wartoscZadana;
     }
-    else {
-        // BRAK KOMPONENTÓW
+    else 
+    {
         m_sterowanie = 0.0;
         m_uchyb = 0.0;
         m_wartoscWyjscie = 0.0;

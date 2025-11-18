@@ -44,7 +44,6 @@ double GeneratorWartosciZadanej::generuj()
     case SYGNAL_SINUSOIDALNY:
     {
         if (m_okresDyskretny <= 0) return m_skladowaStala;
-        // Używamy wzoru z wymagań: w_i = A*sin((i mod T)/T * 2π) + S
         double faza = (m_licznikKrokow % m_okresDyskretny) / static_cast<double>(m_okresDyskretny) * 2.0 * M_PI;
         return m_amplituda * std::sin(faza) + m_skladowaStala;
     }
@@ -52,7 +51,6 @@ double GeneratorWartosciZadanej::generuj()
     case SYGNAL_PROSTOKATNY:
     {
         if (m_okresDyskretny <= 0) return m_skladowaStala;
-        // Używamy wzoru z wymagań: w_i = A+S gdy (i mod T) < p*T, w przeciwnym razie S
         int pozycjaWOkresie = m_licznikKrokow % m_okresDyskretny;
         double prog = m_wypelnienie * m_okresDyskretny;
         return (pozycjaWOkresie < prog) ? (m_amplituda + m_skladowaStala) : m_skladowaStala;

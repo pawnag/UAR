@@ -34,13 +34,11 @@ public:
         else m_wypelnienie = wypelnienie;
     }
 
-
     void setOkresRzeczywisty(double T_RZ);
     void setInterwal(double T_T_ms);
     void przeliczOkresDyskretny();
 
     double generuj();
-
     void krokSymulacji() { m_licznikKrokow++; }
     void reset() { m_licznikKrokow = 0; }
 

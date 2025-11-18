@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Testy_UAR.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="ModelARX.cpp">
       <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
@@ -49,6 +46,9 @@
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="KlasaUslugowa.cpp">
+      <Filter>Pliki źródłowe\services</Filter>
+    </ClCompile>
+    <ClCompile Include="Testy_UAR.cpp">
       <Filter>Pliki źródłowe\services</Filter>
     </ClCompile>
   </ItemGroup>
