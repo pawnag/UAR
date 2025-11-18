@@ -6,7 +6,7 @@
 #include "ModelARX.h"
 #include "RegulatorPID.h"
 #include "ProstyUAR.h"
-
+#include "GeneratorWartosciZadanej.h"
 #include "Symulacja.h"
 #include <thread>
 
