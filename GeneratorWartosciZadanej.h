@@ -50,4 +50,5 @@ public:
     double getSkladowaStala() const { return m_skladowaStala; }
     double getWypelnienie() const { return m_wypelnienie; }
     int getOkresDyskretny() const { return m_okresDyskretny; }
+    double getInterwal() const { return m_interwal; }
 };

@@ -8,8 +8,9 @@
 #include "ProstyUAR.h"
 
 #include "Symulacja.h"
+#include <thread>
 
-#define DEBUG  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
+#define MAIN  // ustaw na MAIN aby skompilować program docelowy / ustaw na DEBUG aby skompilować program testujacy 
 
 #ifdef DEBUG
 
@@ -595,32 +596,31 @@ int main()
 
 int main()
 {
-	std::cout << "SYMULATOR UAR W CZASIE RZECZYWISTYM" << std::endl;
-	std::cout << "Wybierz tryb symulacji:" << std::endl;
-	std::cout << "1 - Sygnal sinusoidalny (200ms)" << std::endl;
-	std::cout << "2 - Sygnal prostokatny (100ms)" << std::endl;
-	std::cout << "3 - Wartosc stala (150ms)" << std::endl;
-	std::cout << "Wybierz (1, 2 lub 3): ";
+	// 1. Tworzenie komponentów
+	auto generator = std::make_shared<GeneratorWartosciZadanej>();
+	generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
+	generator->setAmplituda(1.5);
+	generator->setOkresRzeczywisty(3.0);
+	generator->setInterwal(100); // 100ms
 
-	int wybor;
-	std::cin >> wybor;
+	auto model = std::make_shared<ModelARX>(
+		std::vector<double>{-0.4, -0.1},  // Współczynniki A
+		std::vector<double>{0.6, 0.2},    // Współczynniki B
+		1,                                // Opóźnienie
+		0.01                              // Zakłócenie
+	);
+
+	auto regulator = std::make_shared<RegulatorPID>(0.8, 4.0, 0.1);
+
+	// 2. Konfiguracja symulacji
 	Symulacja symulacja;
+	symulacja.setGenerator(generator);
+	symulacja.setModel(model);
+	symulacja.setRegulator(regulator);
 
-	switch (wybor) {
-	case 1:
-		symulacja.uruchomSinus();
-		break;
-	case 2:
-		symulacja.uruchomProstokat();
-		break;
-	case 3:
-		symulacja.uruchomStala();
-		break;
-	default:
-		std::cout << "Nieprawidlowy wybor. Uruchamiam sygnal sinusoidalny." << std::endl;
-		symulacja.uruchomSinus();
-		break;
-	} 
+	// 3. Uruchomienie
+	std::cout << "Uruchamianie symulacji..." << std::endl;
+	symulacja.uruchom();
 }
 
 #endif
