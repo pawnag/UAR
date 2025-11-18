@@ -40,9 +40,6 @@ public:
         int i_op = 1,
         double i_oss = 0.0);
 
-    ModelARX(const ModelARX&) = delete;
-    ModelARX& operator=(const ModelARX&) = delete;
-
     double symuluj(double i_u);
     void resetuj();
 

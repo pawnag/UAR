@@ -11,23 +11,11 @@ Symulacja::Symulacja()
     m_wartoscWyjscie(0.0),
     m_sterowanie(0.0),
     m_uchyb(0.0)
-{
-}
+{}
 
-void Symulacja::setModel(std::shared_ptr<ModelARX> i_model)
-{
-    m_model = i_model;
-}
-
-void Symulacja::setRegulator(std::shared_ptr<RegulatorPID> i_regulator)
-{
-    m_regulator = i_regulator;
-}
-
-void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator)
-{
-    m_generator = i_generator;
-}
+void Symulacja::setModel(std::shared_ptr<ModelARX> i_model) { m_model = i_model; }
+void Symulacja::setRegulator(std::shared_ptr<RegulatorPID> i_regulator) { m_regulator = i_regulator; }
+void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator) { m_generator = i_generator; }
 
 int Symulacja::getInterwalMs() const
 {
