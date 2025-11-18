@@ -45,6 +45,4 @@ private:
     double m_uchyb;
 
     void wykonajKrok();
-
-
 };

@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GeneratorWartosciZadanej.cpp" />
+    <ClCompile Include="KlasaUslugowa.cpp" />
     <ClCompile Include="ModelARX.cpp" />
     <ClCompile Include="ProstyUAR.cpp" />
     <ClCompile Include="RegulatorPID.cpp" />
@@ -137,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratorWartosciZadanej.h" />
+    <ClInclude Include="KlasaUslugowa.h" />
     <ClInclude Include="ModelARX.h" />
     <ClInclude Include="ProstyUAR.h" />
     <ClInclude Include="RegulatorPID.h" />
