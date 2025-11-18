@@ -45,6 +45,9 @@
     <ClCompile Include="GeneratorWartosciZadanej.cpp">
       <Filter>Pliki źródłowe\models</Filter>
     </ClCompile>
+    <ClCompile Include="TestyARX.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ModelARX.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="GeneratorWartosciZadanej.h">
       <Filter>Pliki nagłówkowe\models</Filter>
+    </ClInclude>
+    <ClInclude Include="TestyARX.h">
+      <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
