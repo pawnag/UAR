@@ -6,7 +6,6 @@
 
 namespace TESTY_Dodatkowe {
 
-// Definicje funkcji pomocniczych
 void raportBleduSekwencji(std::vector<double>& spodz, std::vector<double>& fakt)
 {
     constexpr size_t PREC = 3;
@@ -43,30 +42,23 @@ void myAssert(std::vector<double>& spodz, std::vector<double>& fakt)
 void wykonaj_wszystkie_testy() {
     std::cout << "\n=== DODATKOWE TESTY DLA ROZNYCH KLAS ===" << std::endl;
 
-    // Testy Generatora
     test_generator_sygnal_staly();
     test_generator_sygnal_sinusoidalny();
     test_generator_sygnal_prostokatny();
     test_generator_zmiana_parametrow();
     test_generator_zerowa_amplituda();
 
-    // Testy Regulatora
     test_regulator_reset_calki();
     test_regulator_zmiana_trybu_calkowania();
     test_regulator_skladowa_D();
     test_regulator_brak_akcji();
 
-    // Testy Symulacji
     test_symulacja_tylko_generator();
     test_symulacja_generator_i_model();
     test_symulacja_pelny_uar();
 
     std::cout << "=== KONIEC DODATKOWYCH TESTOW ===" << std::endl;
 }
-
-// ============================================================================
-// GENERATORWARTOSCIZADANEJ TESTS
-// ============================================================================
 
 void test_generator_sygnal_staly() {
     std::cout << "Generator -> test sygnalu stalego: ";
@@ -198,10 +190,6 @@ void test_generator_zerowa_amplituda() {
     }
 }
 
-// ============================================================================
-// REGULATORPID TESTS
-// ============================================================================
-
 void test_regulator_reset_calki() {
     std::cout << "RegulatorPID -> test resetu calki: ";
     try {
@@ -293,10 +281,6 @@ void test_regulator_brak_akcji() {
         std::cerr << "PRZERWANE! (nieoczekiwany wyjatek)\n";
     }
 }
-
-// ============================================================================
-// SYMULACJA TESTS
-// ============================================================================
 
 void test_symulacja_tylko_generator() {
     std::cout << "Symulacja -> test tylko generator: ";
