@@ -19,10 +19,7 @@ void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generat
 
 int Symulacja::getInterwalMs() const
 {
-    if (m_generator) {
-        // Pobierz interwał z generatora (konwersja z sekund na ms)
-        return static_cast<int>(m_generator->getInterwal() * 1000.0);
-    }
+    if (m_generator) { return m_generator->getInterwal(); }
     return 200; // Domyślny interwał 200ms
 }
 

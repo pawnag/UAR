@@ -8,7 +8,7 @@ GeneratorWartosciZadanej::GeneratorWartosciZadanej()
     m_wypelnienie(0.5),
     m_licznikKrokow(0),
     m_okresRzeczywisty(1.0),
-    m_interwal(0.2) // 200ms = 0.2s
+    m_interwal(200)
 { }
 
 void GeneratorWartosciZadanej::setOkresRzeczywisty(double T_RZ)
@@ -17,9 +17,9 @@ void GeneratorWartosciZadanej::setOkresRzeczywisty(double T_RZ)
     przeliczOkresDyskretny();
 }
 
-void GeneratorWartosciZadanej::setInterwal(double T_T_ms)
+void GeneratorWartosciZadanej::setInterwal(int T_T_ms)
 {
-    m_interwal = T_T_ms / 1000.0;
+    m_interwal = T_T_ms;
     przeliczOkresDyskretny();
 }
 
@@ -27,7 +27,8 @@ void GeneratorWartosciZadanej::przeliczOkresDyskretny()
 {
     if (m_interwal > 0 && m_okresRzeczywisty > 0)
     {
-        double T = m_okresRzeczywisty / m_interwal;
+        double interwalSekundy = m_interwal / 1000.0;
+        double T = m_okresRzeczywisty / interwalSekundy;
         m_okresDyskretny = static_cast<int>(std::round(T));
         m_okresDyskretny = std::max(1, m_okresDyskretny);
     }

@@ -19,7 +19,7 @@ private:
     double m_wypelnienie;
     int m_licznikKrokow; // i - numer aktualnej próbki
     double m_okresRzeczywisty; // T_RZ - w sekundach
-    double m_interwal; // T_T - w sekundach
+    int m_interwal; // T_T - w milisekundach
 
 public:
     GeneratorWartosciZadanej();
@@ -35,7 +35,7 @@ public:
     }
 
     void setOkresRzeczywisty(double T_RZ);
-    void setInterwal(double T_T_ms);
+    void setInterwal(int T_T_ms);
     void przeliczOkresDyskretny();
 
     double generuj();
@@ -48,5 +48,5 @@ public:
     double getSkladowaStala() const { return m_skladowaStala; }
     double getWypelnienie() const { return m_wypelnienie; }
     int getOkresDyskretny() const { return m_okresDyskretny; }
-    double getInterwal() const { return m_interwal; }
+    int getInterwal() const { return m_interwal; }
 };
