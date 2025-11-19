@@ -49,7 +49,7 @@
       <Filter>Pliki źródłowe\services</Filter>
     </ClCompile>
     <ClCompile Include="Testy_UAR.cpp">
-      <Filter>Pliki źródłowe\services</Filter>
+      <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,7 @@ public:
     void uruchom();
     void zatrzymaj();
     void resetuj();
+    void wykonajKrok();
 
     double getWartoscZadana() const { return m_wartoscZadana; }
     double getWartoscWyjscie() const { return m_wartoscWyjscie; }
@@ -39,5 +40,4 @@ public:
     void tylkoGenerator();
     void generatorIModel();
     void pelnyUAR();
-    void wykonajKrok();
 };
