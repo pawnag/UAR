@@ -2,6 +2,7 @@
 #include "ModelARX.h"
 #include "RegulatorPID.h"
 #include "GeneratorWartosciZadanej.h"
+#include "ProstyUAR.h"
 
 class Symulacja
 {
@@ -9,6 +10,7 @@ private:
     std::shared_ptr<ModelARX> m_model;
     std::shared_ptr<RegulatorPID> m_regulator;
     std::shared_ptr<GeneratorWartosciZadanej> m_generator;
+    std::shared_ptr<ProstyUAR> m_prostyUAR;
 
     bool m_czyDziala;
     double m_czas;
@@ -17,6 +19,9 @@ private:
     double m_wartoscWyjscie;
     double m_sterowanie;
     double m_uchyb;
+
+    void utworzProstyUAR();
+
 public:
     Symulacja();
 
@@ -35,6 +40,7 @@ public:
     double getUchyb() const { return m_uchyb; }
     double getCzas() const { return m_czas; }
     int getInterwalMs() const;
+
 
     // Przyk³adowe konfiguracje
     void tylkoGenerator();

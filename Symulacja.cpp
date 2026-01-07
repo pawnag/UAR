@@ -13,13 +13,35 @@ Symulacja::Symulacja()
     m_uchyb(0.0)
 {}
 
-void Symulacja::setModel(std::shared_ptr<ModelARX> i_model) { m_model = i_model; }
-void Symulacja::setRegulator(std::shared_ptr<RegulatorPID> i_regulator) { m_regulator = i_regulator; }
-void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator) { m_generator = i_generator; }
+void Symulacja::setModel(std::shared_ptr<ModelARX> i_model)
+{
+    m_model = i_model;
+    utworzProstyUAR();
+}
+
+void Symulacja::setRegulator(std::shared_ptr<RegulatorPID> i_regulator)
+{
+    m_regulator = i_regulator;
+    utworzProstyUAR();
+}
+
+void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator)
+{
+    m_generator = i_generator;
+}
+
+void Symulacja::utworzProstyUAR()
+{
+    if (m_model && m_regulator) {
+        m_prostyUAR = std::make_shared<ProstyUAR>(*m_model, *m_regulator);
+    }
+}
 
 int Symulacja::getInterwalMs() const
 {
-    if (m_generator) { return m_generator->getInterwal(); }
+    if (m_generator) {
+        return m_generator->getInterwal();
+    }
     return 200; // Domyślny interwał 200ms
 }
 
@@ -68,52 +90,66 @@ void Symulacja::resetuj()
     if (m_model) m_model->resetuj();
     if (m_regulator) m_regulator->resetuj();
     if (m_generator) m_generator->reset();
+    if (m_prostyUAR) m_prostyUAR->reset();
 }
 
 void Symulacja::wykonajKrok()
 {
-    if (m_generator) { m_wartoscZadana = m_generator->generuj(); }
-    else { m_wartoscZadana = 0.0; }
+    if (m_generator) {
+        m_wartoscZadana = m_generator->generuj();
+    }
+    else {
+        m_wartoscZadana = 0.0;
+    }
 
-    bool hasModel = (m_model != nullptr);
-    bool hasRegulator = (m_regulator != nullptr);
-    bool hasGenerator = (m_generator != nullptr);
+    if (m_prostyUAR)
+    {
+        m_wartoscWyjscie = m_prostyUAR->symuluj(m_wartoscZadana);
+        m_uchyb = m_prostyUAR->ostatniUchyb();
+        m_sterowanie = m_prostyUAR->ostatnieSterowanie();
+    }
+    else
+    {
+        bool hasModel = (m_model != nullptr);
+        bool hasRegulator = (m_regulator != nullptr);
+        bool hasGenerator = (m_generator != nullptr);
 
-    if (hasModel && hasRegulator) 
-    {
-        m_uchyb = m_wartoscZadana - m_wartoscWyjscie;
-        m_sterowanie = m_regulator->symuluj(m_uchyb);
-        m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-    }
-    else if (hasRegulator && hasGenerator)
-    {
-        m_uchyb = m_wartoscZadana;
-        m_sterowanie = m_regulator->symuluj(m_uchyb);
-        m_wartoscWyjscie = m_sterowanie;
-    }
-    else if (hasModel && hasGenerator)
-    {
-        m_sterowanie = m_wartoscZadana;
-        m_uchyb = m_wartoscZadana;
-        m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-    }
-    else if (hasModel)
-    {
-        m_sterowanie = 0.0;
-        m_uchyb = 0.0;
-        m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-    }
-    else if (hasGenerator)
-    {
-        m_sterowanie = m_wartoscZadana;
-        m_uchyb = m_wartoscZadana;
-        m_wartoscWyjscie = m_wartoscZadana;
-    }
-    else 
-    {
-        m_sterowanie = 0.0;
-        m_uchyb = 0.0;
-        m_wartoscWyjscie = 0.0;
+        if (hasModel && hasRegulator)
+        {
+            m_uchyb = m_wartoscZadana - m_wartoscWyjscie;
+            m_sterowanie = m_regulator->symuluj(m_uchyb);
+            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
+        }
+        else if (hasRegulator && hasGenerator)
+        {
+            m_uchyb = m_wartoscZadana;
+            m_sterowanie = m_regulator->symuluj(m_uchyb);
+            m_wartoscWyjscie = m_sterowanie;
+        }
+        else if (hasModel && hasGenerator)
+        {
+            m_sterowanie = m_wartoscZadana;
+            m_uchyb = m_wartoscZadana;
+            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
+        }
+        else if (hasModel)
+        {
+            m_sterowanie = 0.0;
+            m_uchyb = 0.0;
+            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
+        }
+        else if (hasGenerator)
+        {
+            m_sterowanie = m_wartoscZadana;
+            m_uchyb = m_wartoscZadana;
+            m_wartoscWyjscie = m_wartoscZadana;
+        }
+        else
+        {
+            m_sterowanie = 0.0;
+            m_uchyb = 0.0;
+            m_wartoscWyjscie = 0.0;
+        }
     }
 }
 // Przykład 1: Tylko generator
