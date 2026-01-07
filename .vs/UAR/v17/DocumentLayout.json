@@ -1,0 +1,147 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\TestyDodatkowe.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:TestyDodatkowe.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\RegulatorPID.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:RegulatorPID.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ProstyUAR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:ProstyUAR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Testy_UAR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:Testy_UAR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Symulacja.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:Symulacja.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\KlasaUslugowa.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:KlasaUslugowa.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ModelARX.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A9D292BA-F06D-48D5-904B-5D5A8A1DF488}|UAR.vcxproj|solutionrelative:ModelARX.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 366,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 665,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProstyUAR.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ProstyUAR.cpp",
+              "RelativeDocumentMoniker": "ProstyUAR.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ProstyUAR.cpp",
+              "RelativeToolTip": "ProstyUAR.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T11:19:56.085Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "RegulatorPID.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\RegulatorPID.cpp",
+              "RelativeDocumentMoniker": "RegulatorPID.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\RegulatorPID.cpp",
+              "RelativeToolTip": "RegulatorPID.cpp",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T10:11:49.497Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Testy_UAR.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Testy_UAR.cpp",
+              "RelativeDocumentMoniker": "Testy_UAR.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Testy_UAR.cpp",
+              "RelativeToolTip": "Testy_UAR.cpp",
+              "ViewState": "AgIAAPAAAAAAAAAAAAAAAA4AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T09:57:02.127Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TestyDodatkowe.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\TestyDodatkowe.cpp",
+              "RelativeDocumentMoniker": "TestyDodatkowe.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\TestyDodatkowe.cpp",
+              "RelativeToolTip": "TestyDodatkowe.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD8AAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T09:55:23.292Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Symulacja.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Symulacja.cpp",
+              "RelativeDocumentMoniker": "Symulacja.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\Symulacja.cpp",
+              "RelativeToolTip": "Symulacja.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T09:49:42.27Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "KlasaUslugowa.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\KlasaUslugowa.cpp",
+              "RelativeDocumentMoniker": "KlasaUslugowa.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\KlasaUslugowa.cpp",
+              "RelativeToolTip": "KlasaUslugowa.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T09:39:58.99Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ModelARX.cpp",
+              "DocumentMoniker": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ModelARX.cpp",
+              "RelativeDocumentMoniker": "ModelARX.cpp",
+              "ToolTip": "C:\\Users\\pnago\\Desktop\\1\\Studia\\3 Semestr\\Programowanie Komputer\u00F3w\\Projekt\\UAR\\ModelARX.cpp",
+              "RelativeToolTip": "ModelARX.cpp",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAAAIgAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-19T09:21:44.507Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
