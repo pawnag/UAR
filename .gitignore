@@ -80,3 +80,48 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+
+# --- QT CREATOR & QMAKE ---
+*.user
+*.user.*
+*.pro.user
+build/
+build-*/
+*.qmake.stash
+Makefile*
+object_script.*
+*.Release
+*.Debug
+release/
+debug/
+*.o
+*.obj
+*.moc
+*.ui
+ui_*.h
+moc_*.cpp
+.qmake.cache
+.qmake.stash
+
+# --- VISUAL STUDIO & VS CODE ---
+.vs/
+.vscode/
+*.ipch
+*.ap
+*.idb
+*.pdb
+*.suo
+*.opensdf
+*.sdf
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# --- CLANGD (Auto-completion cache) ---
+.qtc_clangd/
+.cache/
+compile_commands.json
+
+# --- WINDOWS THUMBS ---
+Thumbs.db
+Desktop.ini
