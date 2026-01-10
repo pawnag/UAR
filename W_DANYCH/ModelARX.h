@@ -58,6 +58,9 @@ public:
     int getOpoznienieTransportowe() const;
     double getOdchylenieStandardoweSzumu() const;
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
 signals:
     // Tu będziesz mógł kiedyś dodać np: void nowaWartosc(double y);
 };

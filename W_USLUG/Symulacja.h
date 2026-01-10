@@ -74,6 +74,10 @@ public:
     // Dostęp do obiektów (np. dla wykresów PID w MainWindow)
     const RegulatorPID& getRegulator() const { return m_regulator; }
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
+
 signals:
 };
 

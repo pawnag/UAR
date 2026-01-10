@@ -52,6 +52,10 @@ public:
     int getOkresDyskretny() const { return m_okresDyskretny; }
     int getInterwal() const { return m_interwal; }
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
+
 signals:
 };
 

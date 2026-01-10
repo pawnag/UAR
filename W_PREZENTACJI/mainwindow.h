@@ -6,6 +6,12 @@
 #include <QtCharts>
 #include "W_USLUG/KlasaUslugowa.h"
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QFileDialog>
+#include <QFile>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -28,6 +34,9 @@ private slots:
     void aktualizujParametryPID();
 
     void on_pushConfigARX_clicked();
+
+    void on_pushSaveConfig_clicked();
+    void on_pushLoadConfig_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -61,6 +70,17 @@ private:
     // Metody pomocnicze
     void setupChart(QLayout* layout, QChart*& chart, QChartView*& view);
     void stylizujWykres(QChart* chart, bool pokazLegende);
+
+    //JSON
+    void zapiszKonfiguracje();
+    void wczytajKonfiguracje();
+
+    ModelARX m_model;
+    RegulatorPID m_regulator;
+    GeneratorWartosciZadanej m_generator;
+    Symulacja m_symulacja;
+
+
 };
 
 #endif // MAINWINDOW_H

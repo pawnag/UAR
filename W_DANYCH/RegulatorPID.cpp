@@ -1,6 +1,11 @@
 #include "W_DANYCH/RegulatorPID.h" // Upewnij się, że ten include działa (ew. "W_DANYCH/RegulatorPID.h")
 #include <stdexcept>
 
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+
+
 // ZMIANA: Implementacja jednego, scalonego konstruktora
 RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
     : QObject(parent), // Inicjalizacja QObject
@@ -117,3 +122,31 @@ void RegulatorPID::setLiczCalk(LiczCalk tryb)
     }
     m_trybCalk = tryb;
 }
+
+QJsonObject RegulatorPID::toJson() const
+{
+    QJsonObject obj;
+
+    obj["k"]  = m_k;
+    obj["TI"] = m_TI;
+    obj["TD"] = m_TD;
+
+    // Tryb całkowania zapisujemy jako liczba (enum)
+    obj["trybCalk"] = static_cast<int>(m_trybCalk);
+
+    return obj;
+}
+
+void RegulatorPID::fromJson(const QJsonObject& obj)
+{
+    m_k  = obj["k"].toDouble();
+    m_TI = obj["TI"].toDouble();
+    m_TD = obj["TD"].toDouble();
+
+    m_trybCalk = static_cast<LiczCalk>(obj["trybCalk"].toInt());
+
+    // Stany wewnętrzne NIE są wczytywane
+    m_calka = 0.0;
+    m_e_prev = 0.0;
+}
+

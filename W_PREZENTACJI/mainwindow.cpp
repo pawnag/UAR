@@ -313,3 +313,38 @@ void MainWindow::on_pushConfigARX_clicked()
     }
 }
 
+void MainWindow::on_pushSaveConfig_clicked(){
+    zapiszKonfiguracje();
+}
+void MainWindow::on_pushLoadConfig_clicked(){
+    wczytajKonfiguracje();
+}
+
+void MainWindow::zapiszKonfiguracje() {
+    QString fileName = QFileDialog::getSaveFileName( this, tr("Zapisz konfigurację"), "", tr("Pliki JSON (*.json)") );
+    if (fileName.isEmpty()) return;
+    QJsonObject root;
+    root["modelARX"] = m_model.toJson();
+    root["regulatorPID"] = m_regulator.toJson();
+    root["generator"] = m_generator.toJson();
+    root["symulacja"] = m_symulacja.toJson();
+    QJsonDocument doc(root); QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) return;
+    file.write(doc.toJson()); file.close();
+}
+
+void MainWindow::wczytajKonfiguracje() { QString fileName = QFileDialog::getOpenFileName( this, tr("Wczytaj konfigurację"), "", tr("Pliki JSON (*.json)") );
+    if (fileName.isEmpty()) return;
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isObject()) return; QJsonObject root = doc.object();
+    if (root.contains("modelARX")) m_model.fromJson(root["modelARX"].toObject());
+    if (root.contains("regulatorPID")) m_regulator.fromJson(root["regulatorPID"].toObject());
+    if (root.contains("generator")) m_generator.fromJson(root["generator"].toObject());
+    if (root.contains("symulacja")) m_symulacja.fromJson(root["symulacja"].toObject());
+}
+
+

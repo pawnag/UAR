@@ -1,5 +1,10 @@
 #include "W_USLUG/Symulacja.h"
 
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+
+
 Symulacja::Symulacja(QObject *parent)
     : QObject(parent),
     m_trybPracy(TrybPracy::IDLE),
@@ -165,3 +170,52 @@ void Symulacja::wykonajKrok()
     double dt_sec = m_generator.getInterwal() / 1000.0;
     m_czas += dt_sec;
 }
+
+QJsonObject Symulacja::toJson() const
+{
+    QJsonObject obj;
+
+    // Konfiguracje podsystemów
+    obj["model"]     = m_model.toJson();
+    obj["regulator"] = m_regulator.toJson();
+    obj["generator"] = m_generator.toJson();
+
+    // Flagi dostępności
+    obj["maModel"]     = m_maModel;
+    obj["maRegulator"] = m_maRegulator;
+    obj["maGenerator"] = m_maGenerator;
+
+    return obj;
+}
+
+void Symulacja::fromJson(const QJsonObject& obj)
+{
+    // Wczytanie konfiguracji podsystemów
+    if (obj.contains("model"))
+        m_model.fromJson(obj["model"].toObject());
+
+    if (obj.contains("regulator"))
+        m_regulator.fromJson(obj["regulator"].toObject());
+
+    if (obj.contains("generator"))
+        m_generator.fromJson(obj["generator"].toObject());
+
+    // Flagi dostępności
+    m_maModel     = obj["maModel"].toBool();
+    m_maRegulator = obj["maRegulator"].toBool();
+    m_maGenerator = obj["maGenerator"].toBool();
+
+    // Stany dynamiczne NIE są wczytywane
+    m_trybPracy = TrybPracy::IDLE;
+    m_czyDziala = false;
+    m_czas = 0.0;
+
+    m_wartoscZadana = 0.0;
+    m_wartoscWyjscie = 0.0;
+    m_sterowanie = 0.0;
+    m_uchyb = 0.0;
+
+    // Aktualizacja trybu pracy po wczytaniu flag
+    aktualizujTrybPracy();
+}
+

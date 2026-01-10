@@ -42,6 +42,10 @@ public:
     double getStalaRozn() const { return m_TD; }
     LiczCalk getLiczCalk() const { return m_trybCalk; }
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
+
 signals:
     // Miejsce na ewentualne sygnały w przyszłości
 };
