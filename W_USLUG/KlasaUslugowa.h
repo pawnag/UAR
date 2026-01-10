@@ -1,16 +1,18 @@
 #ifndef KLASAUSLUGOWA_H
 #define KLASAUSLUGOWA_H
 
-#include <QMainWindow>
+#include <QObject>
 #include "W_USLUG/Symulacja.h"
 
-class KlasaUslugowa : public QMainWindow
+class KlasaUslugowa : public QObject
 {
     Q_OBJECT
 private:
     Symulacja m_symulacja;
+
 public:
-    explicit KlasaUslugowa(QWidget *parent = nullptr);
+    explicit KlasaUslugowa(QObject *parent = nullptr);
+
     void nowyGenerator(double amplituda,
                        double okres,
                        int interwalMs,
@@ -34,6 +36,9 @@ public:
     double getWartoscWyjscie() const;
     double getSterowanie() const;
     double getUchyb() const;
+
+    void wykonajKrokSymulacji();
+
 signals:
 };
 

@@ -1,78 +1,94 @@
 #include "W_USLUG/Symulacja.h"
-#include <iostream>
-#include <iomanip>
-#include <chrono>
-#include <thread>
 
 Symulacja::Symulacja(QObject *parent)
     : QObject(parent),
+    m_trybPracy(TrybPracy::IDLE),
     m_czyDziala(false),
     m_czas(0.0),
+    m_maModel(false),
+    m_maRegulator(false),
+    m_maGenerator(true), // Generator jest domyślnie aktywny (np. stała 0)
     m_wartoscZadana(0.0),
     m_wartoscWyjscie(0.0),
     m_sterowanie(0.0),
     m_uchyb(0.0)
 {
+    // Domyślna aktualizacja trybu
+    aktualizujTrybPracy();
 }
 
-void Symulacja::setModel(std::shared_ptr<ModelARX> i_model)
+// ==========================================
+// METODY KONFIGURACYJNE
+// ==========================================
+
+void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie)
 {
-    m_model = i_model;
-    utworzProstyUAR();
+    m_model.setA(A);
+    m_model.setB(B);
+    m_model.setOpoznienieTransportowe(opoznienie);
+    m_model.resetuj();
+
+    m_maModel = true;
+    aktualizujTrybPracy();
 }
 
-void Symulacja::setRegulator(std::shared_ptr<RegulatorPID> i_regulator)
+void Symulacja::konfigurujRegulator(double k, double ti, double td)
 {
-    m_regulator = i_regulator;
-    utworzProstyUAR();
+    m_regulator.setWzmocnienie(k);
+    m_regulator.setStalaCalk(ti);
+    m_regulator.setStalaRozn(td);
+    m_regulator.resetuj();
+
+    m_maRegulator = true;
+    aktualizujTrybPracy();
 }
 
-void Symulacja::setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator)
+void Symulacja::konfigurujGenerator(double ampl, double okres, int interwal,
+                                    GeneratorWartosciZadanej::TypSygnalu typ,
+                                    double skladowa, double wypelnienie)
 {
-    m_generator = i_generator;
+    m_generator.setAmplituda(ampl);
+    m_generator.setOkresRzeczywisty(okres);
+    m_generator.setInterwal(interwal);
+    m_generator.setTypSygnalu(typ);
+    m_generator.setSkladowaStala(skladowa);
+    m_generator.setWypelnienie(wypelnienie);
+    m_generator.przeliczOkresDyskretny();
+
+    m_maGenerator = true;
+    aktualizujTrybPracy();
 }
 
-void Symulacja::utworzProstyUAR()
+void Symulacja::aktualizujTrybPracy()
 {
-    if (m_model && m_regulator) {
-        m_prostyUAR = std::make_shared<ProstyUAR>(*m_model, *m_regulator);
+    // Logika decyzyjna: Co uruchamiamy?
+
+    if (!m_maGenerator) {
+        m_trybPracy = TrybPracy::IDLE;
+        return;
+    }
+
+    if (m_maRegulator && m_maModel) {
+        m_trybPracy = TrybPracy::ZAMKNIETA_UAR;
+    }
+    else if (m_maModel && !m_maRegulator) {
+        m_trybPracy = TrybPracy::OTWARTA_MODEL;
+    }
+    else if (m_maRegulator && !m_maModel) {
+        m_trybPracy = TrybPracy::OTWARTA_PID;
+    }
+    else {
+        m_trybPracy = TrybPracy::TYLKO_GENERATOR;
     }
 }
 
-int Symulacja::getInterwalMs() const
-{
-    if (m_generator) {
-        return m_generator->getInterwal();
-    }
-    return 200; // Domyślny interwał 200ms
-}
+// ==========================================
+// LOGIKA STEROWANIA
+// ==========================================
 
 void Symulacja::uruchom()
 {
     m_czyDziala = true;
-    int interwalMs = getInterwalMs();
-
-    std::cout << std::fixed << std::setprecision(4);
-    std::cout << "Czas[s]\tZadana\tWyjscie\tSterowanie\tUchyb\n";
-
-    while (m_czyDziala)
-    {
-        wykonajKrok();
-
-        std::cout << m_czas << "\t"
-                  << m_wartoscZadana << "\t"
-                  << m_wartoscWyjscie << "\t"
-                  << m_sterowanie << "\t\t"
-                  << m_uchyb << std::endl;
-
-        if (m_generator) {
-            m_generator->krokSymulacji();
-        }
-
-        interwalMs = getInterwalMs();
-        m_czas += interwalMs / 1000.0;
-        std::this_thread::sleep_for(std::chrono::milliseconds(interwalMs));
-    }
 }
 
 void Symulacja::zatrzymaj()
@@ -89,127 +105,63 @@ void Symulacja::resetuj()
     m_sterowanie = 0.0;
     m_uchyb = 0.0;
 
-    if (m_model) m_model->resetuj();
-    if (m_regulator) m_regulator->resetuj();
-    if (m_generator) m_generator->reset();
-    if (m_prostyUAR) m_prostyUAR->reset();
+    // Reset stanów wewnętrznych obiektów
+    m_model.resetuj();
+    m_regulator.resetuj();
+    m_generator.reset();
 }
 
 void Symulacja::wykonajKrok()
 {
-    if (m_generator) {
-        m_wartoscZadana = m_generator->generuj();
-    }
-    else {
+    // 1. Zawsze pobieramy wartość zadaną z generatora
+    if (m_maGenerator) {
+        m_wartoscZadana = m_generator.generuj();
+        m_generator.krokSymulacji();
+    } else {
         m_wartoscZadana = 0.0;
     }
 
-    if (m_prostyUAR)
+    // 2. MASZYNA STANÓW - SWITCH CASE
+    switch (m_trybPracy)
     {
-        m_wartoscWyjscie = m_prostyUAR->symuluj(m_wartoscZadana);
-        m_uchyb = m_prostyUAR->ostatniUchyb();
-        m_sterowanie = m_prostyUAR->ostatnieSterowanie();
+    case TrybPracy::ZAMKNIETA_UAR:
+        // Pełna pętla: e = w - y; u = PID(e); y = ARX(u)
+        m_uchyb = m_wartoscZadana - m_wartoscWyjscie;
+        m_sterowanie = m_regulator.symuluj(m_uchyb);
+        m_wartoscWyjscie = m_model.symuluj(m_sterowanie);
+        break;
+
+    case TrybPracy::OTWARTA_MODEL:
+        // Sterowanie ręczne: u = w; y = ARX(u)
+        m_uchyb = 0.0; // Brak regulacji
+        m_sterowanie = m_wartoscZadana;
+        m_wartoscWyjscie = m_model.symuluj(m_sterowanie);
+        break;
+
+    case TrybPracy::OTWARTA_PID:
+        // Test PID: e = w; u = PID(e); y = u (by widzieć wyjście na wykresie)
+        m_uchyb = m_wartoscZadana;
+        m_sterowanie = m_regulator.symuluj(m_uchyb);
+        m_wartoscWyjscie = m_sterowanie;
+        break;
+
+    case TrybPracy::TYLKO_GENERATOR:
+        // Test sygnału: y = w
+        m_uchyb = 0.0;
+        m_sterowanie = 0.0;
+        m_wartoscWyjscie = m_wartoscZadana;
+        break;
+
+    case TrybPracy::IDLE:
+    default:
+        m_wartoscZadana = 0.0;
+        m_uchyb = 0.0;
+        m_sterowanie = 0.0;
+        m_wartoscWyjscie = 0.0;
+        break;
     }
-    else
-    {
-        bool hasModel = (m_model != nullptr);
-        bool hasRegulator = (m_regulator != nullptr);
-        bool hasGenerator = (m_generator != nullptr);
 
-        if (hasModel && hasRegulator)
-        {
-            m_uchyb = m_wartoscZadana - m_wartoscWyjscie;
-            m_sterowanie = m_regulator->symuluj(m_uchyb);
-            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-        }
-        else if (hasRegulator && hasGenerator)
-        {
-            m_uchyb = m_wartoscZadana;
-            m_sterowanie = m_regulator->symuluj(m_uchyb);
-            m_wartoscWyjscie = m_sterowanie;
-        }
-        else if (hasModel && hasGenerator)
-        {
-            m_sterowanie = m_wartoscZadana;
-            m_uchyb = m_wartoscZadana;
-            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-        }
-        else if (hasModel)
-        {
-            m_sterowanie = 0.0;
-            m_uchyb = 0.0;
-            m_wartoscWyjscie = m_model->symuluj(m_sterowanie);
-        }
-        else if (hasGenerator)
-        {
-            m_sterowanie = m_wartoscZadana;
-            m_uchyb = m_wartoscZadana;
-            m_wartoscWyjscie = m_wartoscZadana;
-        }
-        else
-        {
-            m_sterowanie = 0.0;
-            m_uchyb = 0.0;
-            m_wartoscWyjscie = 0.0;
-        }
-    }
-}
-// Przykład 1: Tylko generator
-void Symulacja::tylkoGenerator()
-{
-    auto generator = std::make_shared<GeneratorWartosciZadanej>();
-    generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
-    generator->setAmplituda(1.0);
-    generator->setOkresRzeczywisty(2.0);
-    generator->setInterwal(200); // Ustawia interwał w ms
-
-    Symulacja sym;
-    sym.setGenerator(generator);
-    sym.uruchom();
-}
-
-// Przykład 2: Generator + model
-void Symulacja::generatorIModel()
-{
-    auto generator = std::make_shared<GeneratorWartosciZadanej>();
-    generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
-    generator->setAmplituda(2.0);
-    generator->setOkresRzeczywisty(3.0);
-    generator->setWypelnienie(0.4);
-    generator->setInterwal(100); // 100ms
-
-    auto model = std::make_shared<ModelARX>(
-        std::vector<double>{-0.4},
-        std::vector<double>{0.6},
-        1, 0.0
-        );
-
-    Symulacja sym;
-    sym.setGenerator(generator);
-    sym.setModel(model);
-    sym.uruchom();
-}
-
-// Przykład 3: Pełny układ regulacji
-void Symulacja::pelnyUAR()
-{
-    auto generator = std::make_shared<GeneratorWartosciZadanej>();
-    generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
-    generator->setAmplituda(1.0);
-    generator->setOkresRzeczywisty(2.0);
-    generator->setInterwal(50); // 50ms - szybsza symulacja
-
-    auto model = std::make_shared<ModelARX>(
-        std::vector<double>{-0.4},
-        std::vector<double>{0.6},
-        1, 0.0
-        );
-
-    auto regulator = std::make_shared<RegulatorPID>(0.5, 5.0, 0.2);
-
-    Symulacja sym;
-    sym.setGenerator(generator);
-    sym.setModel(model);
-    sym.setRegulator(regulator);
-    sym.uruchom();
+    // 3. Aktualizacja czasu
+    double dt_sec = m_generator.getInterwal() / 1000.0;
+    m_czas += dt_sec;
 }

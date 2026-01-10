@@ -1,8 +1,9 @@
 #include "W_USLUG/KlasaUslugowa.h"
 
-KlasaUslugowa::KlasaUslugowa(QWidget *parent)
-    : QMainWindow{parent}
-{}
+KlasaUslugowa::KlasaUslugowa(QObject *parent)
+    : QObject(parent)
+{
+}
 
 void KlasaUslugowa::nowyGenerator(double amplituda,
                                   double okres,
@@ -11,14 +12,7 @@ void KlasaUslugowa::nowyGenerator(double amplituda,
                                   double skladowa,
                                   double wypelnienie)
 {
-    auto gen = std::make_shared<GeneratorWartosciZadanej>();
-    gen->setTypSygnalu(typ);
-    gen->setAmplituda(amplituda);
-    gen->setOkresRzeczywisty(okres);
-    gen->setInterwal(interwalMs);
-    gen->setSkladowaStala(skladowa);
-    gen->setWypelnienie(wypelnienie);
-    m_symulacja.setGenerator(gen);
+    m_symulacja.konfigurujGenerator(amplituda, okres, interwalMs, typ, skladowa, wypelnienie);
 }
 
 void KlasaUslugowa::nowyModelARX(const std::vector<double>& A,
@@ -26,19 +20,24 @@ void KlasaUslugowa::nowyModelARX(const std::vector<double>& A,
                                  int opoznienie,
                                  double szum)
 {
-    auto model = std::make_shared<ModelARX>(A, B, opoznienie, szum);
-    m_symulacja.setModel(model);
+    m_symulacja.konfigurujModel(A, B, opoznienie);
+    // Jeśli dodasz obsługę szumu w Symulacji, odkomentuj:
+    // m_symulacja.setSzum(szum);
 }
 
 void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
 {
-    auto reg = std::make_shared<RegulatorPID>(k, TI, TD);
-    m_symulacja.setRegulator(reg);
+    m_symulacja.konfigurujRegulator(k, TI, TD);
 }
 
 void KlasaUslugowa::start() { m_symulacja.uruchom(); }
-void KlasaUslugowa::stop() { m_symulacja.zatrzymaj(); }
+void KlasaUslugowa::stop()  { m_symulacja.zatrzymaj(); }
 void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
+
+void KlasaUslugowa::wykonajKrokSymulacji()
+{
+    m_symulacja.wykonajKrok();
+}
 
 double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
 double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }

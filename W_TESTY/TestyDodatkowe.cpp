@@ -275,8 +275,7 @@ void test_symulacja_tylko_generator() {
         generator->setSkladowaStala(5.0);
 
         Symulacja simulation;
-        simulation.setGenerator(generator);
-
+        simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
         std::vector<double> setpointValues;
         for (int i = 0; i < 5; i++) {
             simulation.wykonajKrok();
@@ -303,8 +302,7 @@ void test_symulacja_generator_i_model() {
             );
 
         Symulacja simulation;
-        simulation.setGenerator(generator);
-        simulation.setModel(model);
+        simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
 
         std::vector<double> outputs;
         for (int i = 0; i < 3; i++) {
@@ -334,10 +332,8 @@ void test_symulacja_pelny_uar() {
         auto regulator = std::make_shared<RegulatorPID>(0.5, 1.0, 0.0);
 
         Symulacja simulation;
-        simulation.setGenerator(generator);
-        simulation.setModel(model);
-        simulation.setRegulator(regulator);
-
+        // TO JEST DOBRZE
+        simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
         std::vector<double> outputs;
         for (int i = 0; i < 3; i++) {
             simulation.wykonajKrok();

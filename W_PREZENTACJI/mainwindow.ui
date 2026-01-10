@@ -22,35 +22,23 @@
         <property name="title">
          <string>1. Regulowana (y) i Wartość Zadana (w)</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot1">
-         <item>
-          <widget class="QGraphicsView" name="plotOut"/>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout_Plot1"/>
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupPlotError">
+       <widget class="QGroupBox" name="groupPlotUchyb">
         <property name="title">
          <string>2. Uchyb regulacji (e)</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot2">
-         <item>
-          <widget class="QGraphicsView" name="plotUchyb"/>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout_Plot2"/>
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupPlotControl">
+       <widget class="QGroupBox" name="groupPlotSterowanie">
         <property name="title">
          <string>3. Sterowanie (u)</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot3">
-         <item>
-          <widget class="QGraphicsView" name="plotSterowanie"/>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout_Plot3"/>
        </widget>
       </item>
       <item>
@@ -58,11 +46,7 @@
         <property name="title">
          <string>4. Składowe sterowania (P, I, D)</string>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot4">
-         <item>
-          <widget class="QGraphicsView" name="plotSkladowe"/>
-         </item>
-        </layout>
+        <layout class="QVBoxLayout" name="verticalLayout_Plot4"/>
        </widget>
       </item>
      </layout>
@@ -347,7 +331,7 @@
            <item>
             <widget class="QPushButton" name="pushConfigARX">
              <property name="text">
-              <string>Konfiguracja parametrów ARX...</string>
+              <string>Konfiguracja parametrów ARX</string>
              </property>
             </widget>
            </item>

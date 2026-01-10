@@ -1,63 +1,80 @@
 #ifndef SYMULACJA_H
 #define SYMULACJA_H
 
-#include <QObject> // <--- ZMIANA: QObject zamiast QMainWindow
-#include <memory>
+#include <QObject>
 #include "W_DANYCH/ModelARX.h"
 #include "W_DANYCH/RegulatorPID.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
-#include "W_USLUG/ProstyUAR.h"
 
-// <--- ZMIANA: Dziedziczymy po QObject
 class Symulacja : public QObject
 {
     Q_OBJECT
-private:
-    std::shared_ptr<ModelARX> m_model;
-    std::shared_ptr<RegulatorPID> m_regulator;
-    std::shared_ptr<GeneratorWartosciZadanej> m_generator;
-    std::shared_ptr<ProstyUAR> m_prostyUAR;
 
+public:
+    // Definicja trybów pracy symulatora
+    enum class TrybPracy {
+        IDLE,               // Brak symulacji / Stop
+        TYLKO_GENERATOR,    // Wyjście = Zadana (test generatora)
+        OTWARTA_MODEL,      // Sterowanie ręczne: Zadana -> Model -> Wyjście
+        OTWARTA_PID,        // Test regulatora: Zadana -> PID -> Wyjście
+        ZAMKNIETA_UAR       // Pełna pętla: PID + Model ze sprzężeniem
+    };
+
+private:
+    // --- KOMPOZYCJA (Obiekty składowe) ---
+    ModelARX m_model;
+    RegulatorPID m_regulator;
+    GeneratorWartosciZadanej m_generator;
+
+    // --- STAN SYMULACJI ---
+    TrybPracy m_trybPracy;
     bool m_czyDziala;
     double m_czas;
 
+    // Flagi dostępności (czy użytkownik skonfigurował dany moduł)
+    bool m_maModel;
+    bool m_maRegulator;
+    bool m_maGenerator;
+
+    // --- ZMIENNE PROCESOWE ---
     double m_wartoscZadana;
     double m_wartoscWyjscie;
     double m_sterowanie;
     double m_uchyb;
 
-    void utworzProstyUAR();
+    // Metoda pomocnicza ustalająca tryb na podstawie flag
+    void aktualizujTrybPracy();
 
 public:
-    // <--- ZMIANA: Konstruktor przyjmuje QObject* parent
     explicit Symulacja(QObject *parent = nullptr);
 
-    // Usuń pusty konstruktor Symulacja(), ten powyżej wystarczy (ma wartość domyślną)
+    // --- KONFIGURACJA (API) ---
+    void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie);
+    void konfigurujRegulator(double k, double ti, double td);
+    void konfigurujGenerator(double ampl, double okres, int interwal,
+                             GeneratorWartosciZadanej::TypSygnalu typ,
+                             double skladowa, double wypelnienie);
 
-    void setModel(std::shared_ptr<ModelARX> i_model);
-    void setRegulator(std::shared_ptr<RegulatorPID> i_regulator);
-    void setGenerator(std::shared_ptr<GeneratorWartosciZadanej> i_generator);
-
+    // --- STEROWANIE ---
     void uruchom();
     void zatrzymaj();
     void resetuj();
     void wykonajKrok();
 
-    // Gettery bez zmian...
+    // --- GETTERY ---
     double getWartoscZadana() const { return m_wartoscZadana; }
     double getWartoscWyjscie() const { return m_wartoscWyjscie; }
     double getSterowanie() const { return m_sterowanie; }
     double getUchyb() const { return m_uchyb; }
     double getCzas() const { return m_czas; }
-    int getInterwalMs() const;
 
-    // Konfiguracje bez zmian...
-    void tylkoGenerator();
-    void generatorIModel();
-    void pelnyUAR();
+    // Interwał pobieramy zawsze z generatora (serce układu)
+    int getInterwalMs() const { return m_generator.getInterwal(); }
+
+    // Dostęp do obiektów (np. dla wykresów PID w MainWindow)
+    const RegulatorPID& getRegulator() const { return m_regulator; }
 
 signals:
-    // Tu ewentualnie sygnały o nowym kroku
 };
 
 #endif // SYMULACJA_H

@@ -157,3 +157,4 @@ release/
 # Pliki wykonywalne
 *.exe
 *.dll
+/.qtc_clangd
