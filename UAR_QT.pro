@@ -37,6 +37,7 @@ HEADERS += \
     W_USLUG/Symulacja.h
 
 FORMS += \
+    W_PREZENTACJI/ParametryARX.ui \
     W_PREZENTACJI/mainwindow.ui
 
 # Standardowe reguły

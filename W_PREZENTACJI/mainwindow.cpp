@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "ParametryARX.h"
 #include "ui_mainwindow.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
 
@@ -293,6 +294,22 @@ void MainWindow::aktualizujSymulacje()
 
 void MainWindow::on_pushConfigARX_clicked()
 {
+    ParametryARX dialog(this);
 
+    // 1. Opcjonalnie: pobierz aktualne dane z logiki, żeby pokazać je w oknie
+    // dialog.ustawAktualne(m_logika.getA(), m_logika.getB(), m_logika.getOpoz());
+
+    // 2. Wyświetl okno modalnie
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        // 3. Jeśli użytkownik kliknął OK, pobierz dane i wyślij do logiki
+        std::vector<double> a = dialog.getA();
+        std::vector<double> b = dialog.getB();
+        int d = dialog.getOpoznienie();
+
+        m_logika.nowyModelARX(a, b, d);
+
+        ui->statusbar->showMessage("Zaktualizowano parametry ARX", 3000);
+    }
 }
 
