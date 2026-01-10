@@ -125,3 +125,35 @@ compile_commands.json
 # --- WINDOWS THUMBS ---
 Thumbs.db
 Desktop.ini
+
+# Pliki kompilacji C++
+*.o
+*.obj
+*.moc
+*.ui
+*.db
+*.idb
+*.pdb
+*.suo
+*.sln
+*.vcxproj*
+*.filters
+*.user
+
+# Pliki generowane przez Qt (bardzo ważne!)
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+Makefile*
+.qmake.stash
+object_script.*
+
+# Foldery wyjściowe (które powstaną wewnątrz projektu)
+debug/
+release/
+.qtc_clangd/
+.vs/
+
+# Pliki wykonywalne
+*.exe
+*.dll
