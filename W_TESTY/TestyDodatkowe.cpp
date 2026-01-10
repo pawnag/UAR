@@ -1,4 +1,5 @@
 #include "W_TESTY/TestyDodatkowe.h"
+#include "W_TESTY/Testy.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -11,36 +12,7 @@ TestyDodatkowe::TestyDodatkowe(QObject *parent)
 namespace TESTY_Dodatkowe {
 
 // --- TE FUNKCJE ZOSTAJĄ BEZ ZMIAN (używają cerr) ---
-void raportBleduSekwencji(std::vector<double>& spodz, std::vector<double>& fakt)
-{
-    constexpr size_t PREC = 3;
-    std::cerr << std::fixed << std::setprecision(PREC);
-    std::cerr << "  Oczekiwany:\t";
-    for (auto& el : spodz) std::cerr << el << ", ";
-    std::cerr << "\n  Faktyczny:\t";
-    for (auto& el : fakt) std::cerr << el << ", ";
-    std::cerr << std::endl << std::endl;
-}
-
-bool porownanieSekwencji(std::vector<double>& spodz, std::vector<double>& fakt)
-{
-    constexpr double TOL = 1e-3;
-    bool result = fakt.size() == spodz.size();
-    for (size_t i = 0; result && i < fakt.size(); i++)
-        result = std::fabs(fakt[i] - spodz[i]) < TOL;
-    return result;
-}
-
-void myAssert(std::vector<double>& spodz, std::vector<double>& fakt)
-{
-    if (porownanieSekwencji(spodz, fakt))
-        std::cerr << "OK!\n"; // Tu jest cerr i nowa linia - to jest dobrze
-    else
-    {
-        std::cerr << "FAIL!\n";
-        raportBleduSekwencji(spodz, fakt);
-    }
-}
+//funkcje przeniesione do "W_TESTY/Testy.h"
 
 // --- TUTAJ ZMIENIAMY cout NA cerr ---
 
@@ -62,11 +34,13 @@ void wykonaj_wszystkie_testy() {
     test_symulacja_generator_i_model();
     test_symulacja_pelny_uar();
 
+    wynikiTestow();
+
     std::cerr << "=== KONIEC DODATKOWYCH TESTOW ===" << std::endl; // Zmiana na cerr
 }
 
 void test_generator_sygnal_staly() {
-    std::cerr << "Generator -> test sygnalu stalego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu stalego: "; // Zmiana na cerr
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -80,13 +54,13 @@ void test_generator_sygnal_staly() {
             generator.krokSymulacji();
         }
 
-        myAssert(expected, actual);
+        myAssert("Generator - test sygnalu stalego", expected, actual);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_generator_sygnal_sinusoidalny() {
-    std::cerr << "Generator -> test sygnalu sinusoidalnego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu sinusoidalnego: "; // Zmiana na cerr
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
@@ -103,13 +77,13 @@ void test_generator_sygnal_sinusoidalny() {
             generator.krokSymulacji();
         }
 
-        myAssert(expected, actual);
+        myAssert("Generator - test sygnalu sinusoidalnego",expected, actual);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_generator_sygnal_prostokatny() {
-    std::cerr << "Generator -> test sygnalu prostokatnego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu prostokatnego: "; // Zmiana na cerr
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
@@ -127,13 +101,13 @@ void test_generator_sygnal_prostokatny() {
             generator.krokSymulacji();
         }
 
-        myAssert(expected, actual);
+        myAssert("Generator - test sygnalu prostokatnego",expected, actual);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_generator_zmiana_parametrow() {
-    std::cerr << "Generator -> test zmiany parametrow: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test zmiany parametrow: "; // Zmiana na cerr
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -157,13 +131,13 @@ void test_generator_zmiana_parametrow() {
         generator.krokSymulacji();
 
         std::vector<double> expected = { 1.0, 2.0, 0.9511 };
-        myAssert(expected, actual);
+        myAssert("Generator - test zmiany parametrow",expected, actual);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_generator_zerowa_amplituda() {
-    std::cerr << "Generator -> test zerowej amplitudy: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test zerowej amplitudy: "; // Zmiana na cerr
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
@@ -180,13 +154,13 @@ void test_generator_zerowa_amplituda() {
             generator.krokSymulacji();
         }
 
-        myAssert(expected, actual);
+        myAssert("Generator - test zerowej amplitudy",expected, actual);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_regulator_reset_calki() {
-    std::cerr << "RegulatorPID -> test resetu calki: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test resetu calki: "; // Zmiana na cerr
     try {
         RegulatorPID regulator(0.5, 1.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -202,13 +176,13 @@ void test_regulator_reset_calki() {
         outputs.push_back(regulator.symuluj(1.0));
 
         std::vector<double> expected = { 1.5, 2.5, 3.5, 1.5 };
-        myAssert(expected, outputs);
+        myAssert("RegulatorPID - test resetu calki",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_regulator_zmiana_trybu_calkowania() {
-    std::cerr << "RegulatorPID -> test zmiany trybu calkowania: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test zmiany trybu calkowania: "; // Zmiana na cerr
     try {
         RegulatorPID regulator(1.0, 2.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -224,13 +198,13 @@ void test_regulator_zmiana_trybu_calkowania() {
         outputs.push_back(regulator.symuluj(1.0));
 
         std::vector<double> expected = { 1.5, 2.0, 2.5, 3.0 };
-        myAssert(expected, outputs);
+        myAssert("RegulatorPID - test zmiany trybu calkowania",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_regulator_skladowa_D() {
-    std::cerr << "RegulatorPID -> test skladowa D: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test skladowa D: "; // Zmiana na cerr
     try {
         RegulatorPID regulator(1.0, 0.0, 1.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -243,13 +217,13 @@ void test_regulator_skladowa_D() {
         }
 
         std::vector<double> expected = { 0.0, 2.0, 3.0, 4.0 };
-        myAssert(expected, outputs);
+        myAssert("RegulatorPID - test skladowa D",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_regulator_brak_akcji() {
-    std::cerr << "RegulatorPID -> test braku akcji: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test braku akcji: "; // Zmiana na cerr
     try {
         RegulatorPID regulator(0.0, 0.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -262,13 +236,13 @@ void test_regulator_brak_akcji() {
         }
 
         std::vector<double> expected = { 0.0, 0.0, 0.0 };
-        myAssert(expected, outputs);
+        myAssert("RegulatorPID - test braku akcji",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_symulacja_tylko_generator() {
-    std::cerr << "Symulacja -> test tylko generator: "; // Zmiana na cerr
+    //std::cerr << "Symulacja -> test tylko generator: "; // Zmiana na cerr
     try {
         auto generator = std::make_shared<GeneratorWartosciZadanej>();
         generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -283,13 +257,13 @@ void test_symulacja_tylko_generator() {
         }
 
         std::vector<double> expected(5, 5.0);
-        myAssert(expected, setpointValues);
+        myAssert("Symulacja - test tylko generator",expected, setpointValues);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_symulacja_generator_i_model() {
-    std::cerr << "Symulacja -> test generator i model: "; // Zmiana na cerr
+    //std::cerr << "Symulacja -> test generator i model: "; // Zmiana na cerr
     try {
         auto generator = std::make_shared<GeneratorWartosciZadanej>();
         generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -311,13 +285,13 @@ void test_symulacja_generator_i_model() {
         }
 
         std::vector<double> expected = { 0.0, 0.6, 0.84 };
-        myAssert(expected, outputs);
+        myAssert("Symulacja - test generator i model",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_symulacja_pelny_uar() {
-    std::cerr << "Symulacja -> test pelny UAR: "; // Zmiana na cerr
+    //std::cerr << "Symulacja -> test pelny UAR: "; // Zmiana na cerr
     try {
         auto generator = std::make_shared<GeneratorWartosciZadanej>();
         generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -341,7 +315,7 @@ void test_symulacja_pelny_uar() {
         }
 
         std::vector<double> expected = { 0.0, 0.9, 1.86 };
-        myAssert(expected, outputs);
+        myAssert("Symulacja - test pelny UAR",expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }

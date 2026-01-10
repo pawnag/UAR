@@ -31,6 +31,7 @@ HEADERS += \
     W_DANYCH/RegulatorPID.h \
     W_PREZENTACJI/ParametryARX.h \
     W_PREZENTACJI/mainwindow.h \
+    W_TESTY/Testy.h \
     W_TESTY/TestyDodatkowe.h \
     W_USLUG/KlasaUslugowa.h \
     W_USLUG/ProstyUAR.h \

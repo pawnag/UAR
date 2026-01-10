@@ -7,6 +7,7 @@
 #include <thread>
 
 // --- ZMIANA: Poprawne ścieżki do plików w folderze obok ---
+#include "W_TESTY/Testy.h"
 #include "W_DANYCH/ModelARX.h"
 #include "W_DANYCH/RegulatorPID.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
@@ -20,6 +21,8 @@
 // #define MAIN   // Tryb symulacji konsolowej (stary main)
 
 // Funkcje pomocnicze dla testów:
+
+/*
 void raportBleduSekwencji(const std::vector<double>& spodz, const std::vector<double>& fakt)
 {
     constexpr size_t PREC = 3;
@@ -50,6 +53,7 @@ void myAssert(const std::vector<double>& spodz, const std::vector<double>& fakt)
         raportBleduSekwencji(spodz, fakt);
     }
 }
+*/
 
 // ---------------------------------------------------------
 // TESTY DLA MODELU ARX
@@ -65,17 +69,17 @@ void test_skokJednostkowy_3();
 
 void TESTY_ModelARX::wykonaj_testy()
 {
-    std::cerr << "--- TESTY ARX ---\n";
+    //std::cerr << "--- TESTY ARX ---\n";
     test_brakPobudzenia();
     test_skokJednostkowy_1();
     test_skokJednostkowy_2();
     test_skokJednostkowy_3();
-    std::cerr << "\n";
+    //std::cerr << "\n";
 }
 
 void TESTY_ModelARX::test_brakPobudzenia()
 {
-    std::cerr << "ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test zerowego pobudzenia: ";
+    //std::cerr << "ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test zerowego pobudzenia: ";
     try {
         ModelARX instancjaTestowa({ -0.4 }, { 0.6 }, 1, 0);
         constexpr size_t LICZ_ITER = 30;
@@ -86,13 +90,13 @@ void TESTY_ModelARX::test_brakPobudzenia()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test zerowego pobudzenia:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ModelARX::test_skokJednostkowy_1()
 {
-    std::cerr << "ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test skoku jednostkowego nr 1: ";
+    //std::cerr << "ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test skoku jednostkowego nr 1: ";
     try {
         ModelARX instancjaTestowa({ -0.4 }, { 0.6 }, 1, 0);
         constexpr size_t LICZ_ITER = 30;
@@ -108,13 +112,13 @@ void TESTY_ModelARX::test_skokJednostkowy_1()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("ModelARX (-0.4 | 0.6 | 1 | 0 ) -> test skoku jednostkowego nr 1:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ModelARX::test_skokJednostkowy_2()
 {
-    std::cerr << "ModelARX (-0.4 | 0.6 | 2 | 0 ) -> test skoku jednostkowego nr 2: ";
+    //std::cerr << "ModelARX (-0.4 | 0.6 | 2 | 0 ) -> test skoku jednostkowego nr 2: ";
     try {
         ModelARX instancjaTestowa({ -0.4 }, { 0.6 }, 2, 0);
         constexpr size_t LICZ_ITER = 30;
@@ -128,13 +132,13 @@ void TESTY_ModelARX::test_skokJednostkowy_2()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("ModelARX (-0.4 | 0.6 | 2 | 0 ) -> test skoku jednostkowego nr 2:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ModelARX::test_skokJednostkowy_3()
 {
-    std::cerr << "ModelARX (-0.4, 0.2 | 0.6, 0.3 | 2 | 0 ) -> test skoku jednostkowego nr 3: ";
+    //std::cerr << "ModelARX (-0.4, 0.2 | 0.6, 0.3 | 2 | 0 ) -> test skoku jednostkowego nr 3: ";
     try {
         ModelARX instancjaTestowa({ -0.4, 0.2 }, { 0.6, 0.3 }, 2, 0);
         constexpr size_t LICZ_ITER = 30;
@@ -148,7 +152,7 @@ void TESTY_ModelARX::test_skokJednostkowy_3()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("ModelARX (-0.4, 0.2 | 0.6, 0.3 | 2 | 0 ) -> test skoku jednostkowego nr 3:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
@@ -168,19 +172,19 @@ void test_PI_skokJednostkowy_3();
 
 void TESTY_RegulatorPID::wykonaj_testy()
 {
-    std::cerr << "--- TESTY PID ---\n";
+    //std::cerr << "--- TESTY PID ---\n";
     test_P_brakPobudzenia();
     test_P_skokJednostkowy();
     test_PI_skokJednostkowy_1();
     test_PI_skokJednostkowy_2();
     test_PI_skokJednostkowy_3();
     test_PID_skokJednostkowy();
-    std::cerr << "\n";
+    //std::cerr << "\n";
 }
 
 void TESTY_RegulatorPID::test_P_brakPobudzenia()
 {
-    std::cerr << "RegP (k = 0.5) -> test zerowego pobudzenia: ";
+    //std::cerr << "RegP (k = 0.5) -> test zerowego pobudzenia: ";
     try {
         RegulatorPID instancjaTestowa(0.5);
         constexpr size_t LICZ_ITER = 30;
@@ -191,13 +195,13 @@ void TESTY_RegulatorPID::test_P_brakPobudzenia()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegP (k = 0.5) -> test zerowego pobudzenia:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_RegulatorPID::test_P_skokJednostkowy()
 {
-    std::cerr << "RegP (k = 0.5) -> test skoku jednostkowego: ";
+    //std::cerr << "RegP (k = 0.5) -> test skoku jednostkowego: ";
     try {
         RegulatorPID instancjaTestowa(0.5);
         constexpr size_t LICZ_ITER = 30;
@@ -212,13 +216,13 @@ void TESTY_RegulatorPID::test_P_skokJednostkowy()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegP (k = 0.5) -> test skoku jednostkowego:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_RegulatorPID::test_PI_skokJednostkowy_1()
 {
-    std::cerr << "RegPI (k = 0.5, TI = 1.0) -> test skoku jednostkowego nr 1: ";
+    //std::cerr << "RegPI (k = 0.5, TI = 1.0) -> test skoku jednostkowego nr 1: ";
     try {
         RegulatorPID instancjaTestowa(0.5, 1.0);
         constexpr size_t LICZ_ITER = 30;
@@ -234,13 +238,13 @@ void TESTY_RegulatorPID::test_PI_skokJednostkowy_1()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegPI (k = 0.5, TI = 1.0) -> test skoku jednostkowego nr 1:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_RegulatorPID::test_PI_skokJednostkowy_2()
 {
-    std::cerr << "RegPI (k = 0.5, TI = 10.0) -> test skoku jednostkowego nr 2: ";
+    //std::cerr << "RegPI (k = 0.5, TI = 10.0) -> test skoku jednostkowego nr 2: ";
     try {
         RegulatorPID instancjaTestowa(0.5, 10.0);
         constexpr size_t LICZ_ITER = 30;
@@ -255,13 +259,13 @@ void TESTY_RegulatorPID::test_PI_skokJednostkowy_2()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegPI (k = 0.5, TI = 10.0) -> test skoku jednostkowego nr 2:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_RegulatorPID::test_PID_skokJednostkowy()
 {
-    std::cerr << "RegPID (k = 0.5, TI = 10.0, TD = 0.2) -> test skoku jednostkowego: ";
+    //std::cerr << "RegPID (k = 0.5, TI = 10.0, TD = 0.2) -> test skoku jednostkowego: ";
     try {
         RegulatorPID instancjaTestowa(0.5, 10.0, 0.2);
         constexpr size_t LICZ_ITER = 30;
@@ -276,13 +280,13 @@ void TESTY_RegulatorPID::test_PID_skokJednostkowy()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegPID (k = 0.5, TI = 10.0, TD = 0.2) -> test skoku jednostkowego:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_RegulatorPID::test_PI_skokJednostkowy_3()
 {
-    std::cerr << "RegPI (k = 0.5, TI = 10.0 -> 5.0 -> 10.0) -> test skoku jednostkowego nr 3: ";
+    //std::cerr << "RegPI (k = 0.5, TI = 10.0 -> 5.0 -> 10.0) -> test skoku jednostkowego nr 3: ";
     try {
         RegulatorPID instancjaTestowa(0.5, 10.0);
         constexpr size_t LICZ_ITER = 30;
@@ -303,7 +307,7 @@ void TESTY_RegulatorPID::test_PI_skokJednostkowy_3()
 
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
         }
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("RegPI (k = 0.5, TI = 10.0 -> 5.0 -> 10.0) -> test skoku jednostkowego nr 3:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
@@ -321,17 +325,17 @@ void test_UAR_3_skokJednostkowyPID();
 
 void TESTY_ProstyUAR::wykonaj_testy()
 {
-    std::cerr << "--- TESTY UAR ---\n";
+    //std::cerr << "--- TESTY UAR ---\n";
     test_UAR_1_brakPobudzenia();
     test_UAR_1_skokJednostkowyPID();
     test_UAR_2_skokJednostkowyPID();
     test_UAR_3_skokJednostkowyPID();
-    std::cerr << "\n";
+    //std::cerr << "\n";
 }
 
 void TESTY_ProstyUAR::test_UAR_1_brakPobudzenia()
 {
-    std::cerr << "UAR_1 -> test zerowego pobudzenia: ";
+    //std::cerr << "UAR_1 -> test zerowego pobudzenia: ";
     try {
         RegulatorPID testPID(0.5, 5.0, 0.2);
         ModelARX testARX({ -0.4 }, { 0.6 });
@@ -344,13 +348,13 @@ void TESTY_ProstyUAR::test_UAR_1_brakPobudzenia()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("UAR_1 -> test zerowego pobudzenia:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ProstyUAR::test_UAR_1_skokJednostkowyPID()
 {
-    std::cerr << "UAR_1 PID -> test skoku jednostkowego: ";
+    //std::cerr << "UAR_1 PID -> test skoku jednostkowego: ";
     try {
         RegulatorPID testPID(0.5, 5.0, 0.2);
         ModelARX testARX({ -0.4 }, { 0.6 });
@@ -370,13 +374,13 @@ void TESTY_ProstyUAR::test_UAR_1_skokJednostkowyPID()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("UAR_1 PID -> test skoku jednostkowego:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ProstyUAR::test_UAR_2_skokJednostkowyPID()
 {
-    std::cerr << "UAR_2 PID (k = 2) -> test skoku jednostkowego: ";
+    //std::cerr << "UAR_2 PID (k = 2) -> test skoku jednostkowego: ";
     try {
         RegulatorPID testPID(0.5, 5.0, 0.2);
         ModelARX testARX({ -0.4 }, { 0.6 }, 2);
@@ -396,13 +400,13 @@ void TESTY_ProstyUAR::test_UAR_2_skokJednostkowyPID()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("UAR_2 PID (k = 2) -> test skoku jednostkowego:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
 void TESTY_ProstyUAR::test_UAR_3_skokJednostkowyPID()
 {
-    std::cerr << "UAR_3 PID (kP=1.0,Ti=2.0) -> test skoku jednostkowego: ";
+    //std::cerr << "UAR_3 PID (kP=1.0,Ti=2.0) -> test skoku jednostkowego: ";
     try {
         RegulatorPID testPID(1.0, 2.0, 0.2);
         ModelARX testARX({ -0.4 }, { 0.6 }, 1);
@@ -422,7 +426,7 @@ void TESTY_ProstyUAR::test_UAR_3_skokJednostkowyPID()
         for (size_t i = 0; i < LICZ_ITER; i++)
             faktSygWy[i] = instancjaTestowa.symuluj(sygWe[i]);
 
-        myAssert(spodzSygWy, faktSygWy);
+        myAssert("UAR_3 PID (kP=1.0,Ti=2.0) -> test skoku jednostkowego:",spodzSygWy, faktSygWy);
     } catch (...) { std::cerr << "INTERUPTED!\n"; }
 }
 
@@ -440,7 +444,7 @@ void uruchomWszystkieTesty()
 
     TESTY_Dodatkowe::wykonaj_wszystkie_testy();
 
-    std::cerr << "=== KONIEC TESTÓW ===\n";
+    std::cerr << "=== KONIEC TESTOW ===\n";
 }
 
 // #ifdef DEBUG
