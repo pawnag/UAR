@@ -44,3 +44,25 @@ double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZa
 double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
 double KlasaUslugowa::getSterowanie() const { return m_symulacja.getSterowanie(); }
 double KlasaUslugowa::getUchyb() const { return m_symulacja.getUchyb(); }
+
+// KlasaUslugowa.cpp
+
+std::vector<double> KlasaUslugowa::getWektorA() const
+{
+    return m_symulacja.getModelA();
+}
+
+std::vector<double> KlasaUslugowa::getWektorB() const
+{
+    return m_symulacja.getModelB();
+}
+
+int KlasaUslugowa::getOpoznienie() const
+{
+    return m_symulacja.getModelOpoznienie();
+}
+
+double KlasaUslugowa::getSzum() const
+{
+    return m_symulacja.getModelSzum();
+}

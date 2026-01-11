@@ -375,8 +375,12 @@ void MainWindow::on_pushConfigARX_clicked()
 {
     ParametryARX dialog(this);
 
-    // 1. Opcjonalnie: pobierz aktualne dane z logiki, żeby pokazać je w oknie
-    // dialog.ustawAktualne(m_logika.getA(), m_logika.getB(), m_logika.getOpoz());
+    dialog.ustawAktualne(
+        m_logika.getWektorA(),       // np. zwraca std::vector<double>
+        m_logika.getWektorB(),       // np. zwraca std::vector<double>
+        m_logika.getOpoznienie(),    // np. zwraca int
+        m_logika.getSzum()           // np. zwraca double
+        );
 
     // 2. Wyświetl okno modalnie
     if (dialog.exec() == QDialog::Accepted)

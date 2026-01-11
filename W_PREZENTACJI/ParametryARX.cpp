@@ -40,12 +40,37 @@ void ParametryARX::accept()
     QDialog::accept();
 }
 
-// Funkcja ustawiająca wartości w oknie
-void ParametryARX::ustawAktualne(const std::vector<double>& a, const std::vector<double>& b, int opoznienie)
+// ZAKTUALIZOWANA FUNKCJA
+void ParametryARX::ustawAktualne(const std::vector<double>& a,
+                                 const std::vector<double>& b,
+                                 int opoznienie,
+                                 double zaklocenie)
 {
-    ui->editA->setText(vectorToString(a));
-    ui->editB->setText(vectorToString(b));
+    // 1. Konwersja wektorów na tekst
+    QString strA = vectorToString(a);
+    QString strB = vectorToString(b);
+
+    // 2. Wypełnienie pól edycyjnych (żeby użytkownik miał co edytować)
+    ui->editA->setText(strA);
+    ui->editB->setText(strB);
     ui->spinOpoznienie->setValue(opoznienie);
+
+    // Jeśli w UI masz spinBox od zakłóceń, ustaw go też:
+    if(ui->spinZaklocenie) {
+        ui->spinZaklocenie->setValue(zaklocenie);
+    }
+
+    // 3. AKTUALIZACJA ETYKIETY PODSUMOWANIA (To, o co chodziło)
+    QString info = QString("A: [%1]\n"
+                           "B: [%2]\n"
+                           "k: %3, Szum: %4")
+                       .arg(strA)
+                       .arg(strB)
+                       .arg(opoznienie)
+                       .arg(zaklocenie);
+
+    // Upewnij się, że nazwa labela w .ui to labelCurrentSummary
+    ui->labelCurrentSummary->setText(info);
 }
 
 // Gettery

@@ -20,7 +20,7 @@
       <item>
        <widget class="QGroupBox" name="groupPlotOutput">
         <property name="title">
-         <string>1. Regulowana (y) i Wartość Zadana (w)</string>
+         <string>Wartość Zadana (w) i Regulowana (y) </string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_Plot1"/>
        </widget>
@@ -28,7 +28,7 @@
       <item>
        <widget class="QGroupBox" name="groupPlotUchyb">
         <property name="title">
-         <string>2. Uchyb regulacji (e)</string>
+         <string>Uchyb regulacji (e)</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_Plot2"/>
        </widget>
@@ -36,7 +36,7 @@
       <item>
        <widget class="QGroupBox" name="groupPlotSterowanie">
         <property name="title">
-         <string>3. Sterowanie (u)</string>
+         <string>Sterowanie (u)</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_Plot3"/>
        </widget>
@@ -44,7 +44,7 @@
       <item>
        <widget class="QGroupBox" name="groupPlotPID">
         <property name="title">
-         <string>4. Składowe sterowania (P, I, D)</string>
+         <string>Składowe sterowania (P, I, D)</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_Plot4"/>
        </widget>

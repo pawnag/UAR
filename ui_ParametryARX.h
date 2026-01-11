@@ -31,6 +31,10 @@ class Ui_ParametryARX
 {
 public:
     QVBoxLayout *verticalLayout;
+    QGroupBox *groupCurrentValues;
+    QVBoxLayout *verticalLayout_Current;
+    QLabel *labelCurrentSummary;
+    QGroupBox *groupEdit;
     QFormLayout *formLayout;
     QLabel *labelA;
     QLineEdit *editA;
@@ -56,50 +60,65 @@ public:
     {
         if (ParametryARX->objectName().isEmpty())
             ParametryARX->setObjectName("ParametryARX");
-        ParametryARX->resize(420, 450);
+        ParametryARX->resize(420, 530);
         verticalLayout = new QVBoxLayout(ParametryARX);
         verticalLayout->setObjectName("verticalLayout");
-        formLayout = new QFormLayout();
+        groupCurrentValues = new QGroupBox(ParametryARX);
+        groupCurrentValues->setObjectName("groupCurrentValues");
+        verticalLayout_Current = new QVBoxLayout(groupCurrentValues);
+        verticalLayout_Current->setObjectName("verticalLayout_Current");
+        labelCurrentSummary = new QLabel(groupCurrentValues);
+        labelCurrentSummary->setObjectName("labelCurrentSummary");
+        labelCurrentSummary->setWordWrap(true);
+
+        verticalLayout_Current->addWidget(labelCurrentSummary);
+
+
+        verticalLayout->addWidget(groupCurrentValues);
+
+        groupEdit = new QGroupBox(ParametryARX);
+        groupEdit->setObjectName("groupEdit");
+        formLayout = new QFormLayout(groupEdit);
         formLayout->setObjectName("formLayout");
         formLayout->setVerticalSpacing(15);
-        labelA = new QLabel(ParametryARX);
+        labelA = new QLabel(groupEdit);
         labelA->setObjectName("labelA");
 
         formLayout->setWidget(0, QFormLayout::LabelRole, labelA);
 
-        editA = new QLineEdit(ParametryARX);
+        editA = new QLineEdit(groupEdit);
         editA->setObjectName("editA");
 
         formLayout->setWidget(0, QFormLayout::FieldRole, editA);
 
-        labelB = new QLabel(ParametryARX);
+        labelB = new QLabel(groupEdit);
         labelB->setObjectName("labelB");
 
         formLayout->setWidget(1, QFormLayout::LabelRole, labelB);
 
-        editB = new QLineEdit(ParametryARX);
+        editB = new QLineEdit(groupEdit);
         editB->setObjectName("editB");
 
         formLayout->setWidget(1, QFormLayout::FieldRole, editB);
 
-        labelD = new QLabel(ParametryARX);
+        labelD = new QLabel(groupEdit);
         labelD->setObjectName("labelD");
 
         formLayout->setWidget(2, QFormLayout::LabelRole, labelD);
 
-        spinOpoznienie = new QSpinBox(ParametryARX);
+        spinOpoznienie = new QSpinBox(groupEdit);
         spinOpoznienie->setObjectName("spinOpoznienie");
         spinOpoznienie->setMinimum(1);
         spinOpoznienie->setMaximum(100);
 
         formLayout->setWidget(2, QFormLayout::FieldRole, spinOpoznienie);
 
-        labelZaklocenie = new QLabel(ParametryARX);
+        labelZaklocenie = new QLabel(groupEdit);
         labelZaklocenie->setObjectName("labelZaklocenie");
 
         formLayout->setWidget(3, QFormLayout::LabelRole, labelZaklocenie);
 
-        spinZaklocenie = new QDoubleSpinBox(ParametryARX);
+        spinZaklocenie = new QDoubleSpinBox(groupEdit);
         spinZaklocenie->setObjectName("spinZaklocenie");
         spinZaklocenie->setDecimals(2);
         spinZaklocenie->setSingleStep(0.010000000000000);
@@ -107,7 +126,7 @@ public:
         formLayout->setWidget(3, QFormLayout::FieldRole, spinZaklocenie);
 
 
-        verticalLayout->addLayout(formLayout);
+        verticalLayout->addWidget(groupEdit);
 
         groupOgraniczenia = new QGroupBox(ParametryARX);
         groupOgraniczenia->setObjectName("groupOgraniczenia");
@@ -164,7 +183,7 @@ public:
 
         verticalLayout->addWidget(groupOgraniczenia);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+        verticalSpacer = new QSpacerItem(20, 20, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
         verticalLayout->addItem(verticalSpacer);
 
@@ -190,12 +209,17 @@ public:
     void retranslateUi(QDialog *ParametryARX)
     {
         ParametryARX->setWindowTitle(QCoreApplication::translate("ParametryARX", "Konfiguracja Modelu ARX", nullptr));
+        groupCurrentValues->setTitle(QCoreApplication::translate("ParametryARX", "Aktualnie aktywne parametry obiektu:", nullptr));
+        labelCurrentSummary->setText(QCoreApplication::translate("ParametryARX", "A: [1.0, -0.4]\n"
+"B: [0.6]\n"
+"k: 1, Zak\305\202\303\263cenia: 0.00", nullptr));
+        groupEdit->setTitle(QCoreApplication::translate("ParametryARX", "Edycja parametr\303\263w:", nullptr));
         labelA->setText(QCoreApplication::translate("ParametryARX", "Wielomian A (np. 1 -0.4):", nullptr));
         editA->setPlaceholderText(QCoreApplication::translate("ParametryARX", "Wpisz wsp\303\263\305\202czynniki po spacji", nullptr));
         labelB->setText(QCoreApplication::translate("ParametryARX", "Wielomian B (np. 0.6 0.2):", nullptr));
         editB->setPlaceholderText(QCoreApplication::translate("ParametryARX", "Wpisz wsp\303\263\305\202czynniki po spacji", nullptr));
-        labelD->setText(QCoreApplication::translate("ParametryARX", "Op\303\263\305\272nienie:", nullptr));
-        labelZaklocenie->setText(QCoreApplication::translate("ParametryARX", "Zak\305\202\303\263cenia:", nullptr));
+        labelD->setText(QCoreApplication::translate("ParametryARX", "Op\303\263\305\272nienie (k):", nullptr));
+        labelZaklocenie->setText(QCoreApplication::translate("ParametryARX", "Odchylenie szumu:", nullptr));
         groupOgraniczenia->setTitle(QCoreApplication::translate("ParametryARX", "Ograniczenia Sygna\305\202\303\263w:", nullptr));
         checkOgraniczenia->setText(QCoreApplication::translate("ParametryARX", "W\305\202\304\205cz ograniczenia", nullptr));
         labelU->setText(QCoreApplication::translate("ParametryARX", "Sterowanie (u):", nullptr));

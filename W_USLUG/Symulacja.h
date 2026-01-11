@@ -2,83 +2,64 @@
 #define SYMULACJA_H
 
 #include <QObject>
-#include "W_DANYCH/ModelARX.h"
-#include "W_DANYCH/RegulatorPID.h"
-#include "W_DANYCH/GeneratorWartosciZadanej.h"
+#include <QJsonObject>
+#include "../W_DANYCH/GeneratorWartosciZadanej.h"
+#include "ProstyUAR.h"
 
 class Symulacja : public QObject
 {
     Q_OBJECT
 
 public:
-    // Definicja trybów pracy symulatora
-    enum class TrybPracy {
-        IDLE,               // Brak symulacji / Stop
-        TYLKO_GENERATOR,    // Wyjście = Zadana (test generatora)
-        OTWARTA_MODEL,      // Sterowanie ręczne: Zadana -> Model -> Wyjście
-        OTWARTA_PID,        // Test regulatora: Zadana -> PID -> Wyjście
-        ZAMKNIETA_UAR       // Pełna pętla: PID + Model ze sprzężeniem
-    };
-
-private:
-    // --- KOMPOZYCJA (Obiekty składowe) ---
-    ModelARX m_model;
-    RegulatorPID m_regulator;
-    GeneratorWartosciZadanej m_generator;
-
-    // --- STAN SYMULACJI ---
-    TrybPracy m_trybPracy;
-    bool m_czyDziala;
-    double m_czas;
-
-    // Flagi dostępności (czy użytkownik skonfigurował dany moduł)
-    bool m_maModel;
-    bool m_maRegulator;
-    bool m_maGenerator;
-
-    // --- ZMIENNE PROCESOWE ---
-    double m_wartoscZadana;
-    double m_wartoscWyjscie;
-    double m_sterowanie;
-    double m_uchyb;
-
-    // Metoda pomocnicza ustalająca tryb na podstawie flag
-    void aktualizujTrybPracy();
-
-public:
     explicit Symulacja(QObject *parent = nullptr);
 
-    // --- KONFIGURACJA (API) ---
+    // --- Konfiguracja ---
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie);
     void konfigurujRegulator(double k, double ti, double td);
     void konfigurujGenerator(double ampl, double okres, int interwal,
                              GeneratorWartosciZadanej::TypSygnalu typ,
                              double skladowa, double wypelnienie);
 
-    // --- STEROWANIE ---
+    // --- Sterowanie ---
     void uruchom();
     void zatrzymaj();
     void resetuj();
     void wykonajKrok();
 
-    // --- GETTERY ---
+    // --- Gettery ---
+    // Te metody teraz muszą "sięgać" głębiej do ProstyUAR
+    std::vector<double> getModelA() const { return m_prostyUAR.getModel().getA(); }
+    std::vector<double> getModelB() const { return m_prostyUAR.getModel().getB(); }
+    int getModelOpoznienie() const { return m_prostyUAR.getModel().getOpoznienieTransportowe(); }
+    double getModelSzum() const { return m_prostyUAR.getModel().getOdchylenieStandardoweSzumu(); }
+
+    // Dane procesowe
     double getWartoscZadana() const { return m_wartoscZadana; }
     double getWartoscWyjscie() const { return m_wartoscWyjscie; }
     double getSterowanie() const { return m_sterowanie; }
     double getUchyb() const { return m_uchyb; }
-    double getCzas() const { return m_czas; }
 
-    // Interwał pobieramy zawsze z generatora (serce układu)
+    double getCzas() const { return m_czas; }
+    bool czyDziala() const { return m_czyDziala; }
     int getInterwalMs() const { return m_generator.getInterwal(); }
 
-    // Dostęp do obiektów (np. dla wykresów PID w MainWindow)
-    const RegulatorPID& getRegulator() const { return m_regulator; }
-
+    // --- JSON ---
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
 
+private:
+    GeneratorWartosciZadanej m_generator;
+    ProstyUAR m_prostyUAR;
 
-signals:
+    // Stan
+    bool m_czyDziala;
+    double m_czas;
+
+    // Bufory do wizualizacji
+    double m_wartoscZadana;
+    double m_wartoscWyjscie;
+    double m_sterowanie;
+    double m_uchyb;
 };
 
 #endif // SYMULACJA_H

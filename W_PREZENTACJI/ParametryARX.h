@@ -19,8 +19,11 @@ public:
     std::vector<double> getB() const;
     int getOpoznienie() const;
 
-    // Metody do ustawiania danych
-    void ustawAktualne(const std::vector<double>& a, const std::vector<double>& b, int opoznienie);
+    // ZMIANA: Dodajemy 'double zaklocenie'
+    void ustawAktualne(const std::vector<double>& a,
+                       const std::vector<double>& b,
+                       int opoznienie,
+                       double zaklocenie);
 
 public slots:
     // --- TUTAJ DODAJEMY NADPISANIE METODY ACCEPT ---

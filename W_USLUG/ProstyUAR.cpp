@@ -1,28 +1,52 @@
-#include "W_USLUG/ProstyUAR.h"
-// Include ModelARX i RegulatorPID nie są tu konieczne, jeśli są w .h,
-// ale mogą zostać dla pewności.
+#include "ProstyUAR.h"
 
-// <--- ZMIANA 4: Implementacja konstruktora
-ProstyUAR::ProstyUAR(ModelARX& arx, RegulatorPID& regulator, QObject *parent)
-    : QObject(parent),      // <--- ZMIANA 5: Wywołujemy konstruktor QObject
-    m_arx(arx),
-    m_regulator(regulator),
+// Konstruktor domyślny
+ProstyUAR::ProstyUAR(QObject *parent)
+    : QObject(parent),
+    m_arx(),       // Domyślny konstruktor ARX
+    m_regulator(), // Domyślny konstruktor PID
     m_poprzedniaWartoscRegulowana(0.0),
     m_ostatniUchyb(0.0),
     m_ostatnieSterowanie(0.0)
 {
-    // Usunęliśmy wszelkie odwołania do ui->setupUi, bo to nie jest okno.
+}
+
+// Konstruktor dla testów - "Ręczne Kopiowanie Ustawień"
+ProstyUAR::ProstyUAR(const ModelARX& wzorzecARX, const RegulatorPID& wzorzecPID, QObject *parent)
+    : QObject(parent),
+    m_arx(),
+    m_regulator(),
+    m_poprzedniaWartoscRegulowana(0.0),
+    m_ostatniUchyb(0.0),
+    m_ostatnieSterowanie(0.0)
+{
+    // TERAZ RĘCZNIE PRZEPISUJEMY WARTOŚCI Z WZORCA DO NASZEGO OBIEKTU WEWNĘTRZNEGO
+
+    // 1. Przepisanie nastaw Modelu ARX
+    m_arx.setA(wzorzecARX.getA());
+    m_arx.setB(wzorzecARX.getB());
+    m_arx.setOpoznienieTransportowe(wzorzecARX.getOpoznienieTransportowe());
+    m_arx.setOdchylenieStandardoweSzumu(wzorzecARX.getOdchylenieStandardoweSzumu());
+    // Jeśli są limity, też je przepisz:
+    // m_arx.setLimitGora(wzorzecARX.getLimitGora()); ...
+    m_arx.resetuj(); // Na wszelki wypadek
+
+    // 2. Przepisanie nastaw Regulatora PID
+    m_regulator.setWzmocnienie(wzorzecPID.getWzmocnienie());
+    m_regulator.setStalaCalk(wzorzecPID.getStalaCalk());
+    m_regulator.setStalaRozn(wzorzecPID.getStalaRozn());
+    // Przepisz inne ustawienia (np. tryb całki, limity) jeśli istnieją gettery:
+    // m_regulator.setTrybCalki(wzorzecPID.getTrybCalki());
+    m_regulator.resetuj();
 }
 
 double ProstyUAR::symuluj(double wartoscZadana)
 {
-    // Logika bez zmian...
     m_ostatniUchyb = wartoscZadana - m_poprzedniaWartoscRegulowana;
     m_ostatnieSterowanie = m_regulator.symuluj(m_ostatniUchyb);
-    double wartoscRegulowana = m_arx.symuluj(m_ostatnieSterowanie);
-    m_poprzedniaWartoscRegulowana = wartoscRegulowana;
-
-    return wartoscRegulowana;
+    double noweWyjscie = m_arx.symuluj(m_ostatnieSterowanie);
+    m_poprzedniaWartoscRegulowana = noweWyjscie;
+    return noweWyjscie;
 }
 
 void ProstyUAR::reset()
@@ -30,4 +54,6 @@ void ProstyUAR::reset()
     m_poprzedniaWartoscRegulowana = 0.0;
     m_ostatniUchyb = 0.0;
     m_ostatnieSterowanie = 0.0;
+    m_arx.resetuj();
+    m_regulator.resetuj();
 }

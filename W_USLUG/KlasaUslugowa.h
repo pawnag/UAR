@@ -37,6 +37,12 @@ public:
     double getSterowanie() const;
     double getUchyb() const;
 
+    // Gettery potrzebne aby wyświetlić w oknie ParametryARX.ui
+    std::vector<double> getWektorA() const;
+    std::vector<double> getWektorB() const;
+    int getOpoznienie() const;
+    double getSzum() const;
+
     void wykonajKrokSymulacji();
 
 signals:
