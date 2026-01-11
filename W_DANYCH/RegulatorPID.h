@@ -39,8 +39,7 @@ public:
     void setStalaRozn(double TD);
     void setLiczCalk(LiczCalk tryb);
 
-    QJsonObject toJson() const;
-    void fromJson(const QJsonObject& obj);
+
 };
 
 #endif // REGULATORPID_H

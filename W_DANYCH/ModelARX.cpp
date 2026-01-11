@@ -2,11 +2,6 @@
 #include <stdexcept>
 #include <algorithm> // Do std::max
 
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-
-
 // --- 1. KONSTRUKTORY (Poprawione pod QObject) ---
 ModelARX::ModelARX(QObject *parent)
     : QObject(parent)

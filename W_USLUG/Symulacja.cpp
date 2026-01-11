@@ -103,27 +103,3 @@ void Symulacja::wykonajKrok()
     double dt_sec = m_generator.getInterwal() / 1000.0;
     m_czas += dt_sec;
 }
-
-QJsonObject Symulacja::toJson() const
-{
-    QJsonObject obj;
-    // Pobieramy config z obiektów wewnątrz ProstyUAR
-    obj["model"]     = m_prostyUAR.getModel().toJson();
-    obj["regulator"] = m_prostyUAR.getRegulator().toJson();
-    obj["generator"] = m_generator.toJson();
-    return obj;
-}
-
-void Symulacja::fromJson(const QJsonObject& obj)
-{
-    if (obj.contains("model"))
-        m_prostyUAR.getModel().fromJson(obj["model"].toObject());
-
-    if (obj.contains("regulator"))
-        m_prostyUAR.getRegulator().fromJson(obj["regulator"].toObject());
-
-    if (obj.contains("generator"))
-        m_generator.fromJson(obj["generator"].toObject());
-
-    resetuj();
-}

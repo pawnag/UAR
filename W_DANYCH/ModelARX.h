@@ -64,8 +64,6 @@ public:
     void setOgraniczeniaWyjscia(double i_ymin, double i_ymax);
     void setOgraniczenia(bool i_ograniczenia);
 
-    QJsonObject toJson() const;
-    void fromJson(const QJsonObject& obj);
 };
 
 #endif // MODELARX_H

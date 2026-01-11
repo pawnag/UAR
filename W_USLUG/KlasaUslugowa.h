@@ -37,6 +37,7 @@ public:
     double getSterowanie() const;
     double getUchyb() const;
 
+
     // Gettery potrzebne aby wyświetlić w oknie ParametryARX.ui
     std::vector<double> getWektorA() const;
     std::vector<double> getWektorB() const;
@@ -45,7 +46,15 @@ public:
 
     void wykonajKrokSymulacji();
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
+    const RegulatorPID& getRegulator() const { return m_symulacja.getRegulator(); }
+    const GeneratorWartosciZadanej& getGenerator() const { return m_symulacja.getGenerator(); }
+
+
 signals:
 };
+
 
 #endif // KLASAUSLUGOWA_H
