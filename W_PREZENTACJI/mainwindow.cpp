@@ -143,25 +143,25 @@ void MainWindow::setupChart(QLayout* layout, QChart*& chart, QChartView*& view) 
 void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
     // 1. Ciemne tło
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
-
-    // NAPRAWA BŁĘDU C2039: Używamy metody setPlotAreaBackgroundVisible
     chart->setPlotAreaBackgroundVisible(false);
 
-    // 2. Usunięcie marginesów
+    // 2. Marginesy
+    // Layout wewnętrzny na 0, żeby nie marnować miejsca
     chart->layout()->setContentsMargins(0, 0, 0, 0);
-    chart->setMargins(QMargins(5, 5, 5, 5));
+
+    // >>> POPRAWKA: Zwiększamy LEWY margines (pierwsza liczba) z 5 na 45-50 <<<
+    // QMargins(lewy, górny, prawy, dolny)
+    chart->setMargins(QMargins(50, 5, 5, 5));
+
     chart->setBackgroundRoundness(0);
-    chart->setTitle(""); // Brak tytułu
+    chart->setTitle("");
 
     // 3. Legenda
     if (pokazLegende) {
         chart->legend()->setVisible(true);
-        // >>> ZMIANA: LEGENDA PO PRAWEJ STRONIE <<<
-        chart->legend()->setAlignment(Qt::AlignRight);
-
+        chart->legend()->setAlignment(Qt::AlignRight); // Legenda po prawej
         chart->legend()->setLabelBrush(QBrush(Qt::white));
         chart->legend()->setBackgroundVisible(false);
-
         QFont font = chart->legend()->font();
         font.setPointSize(8);
         chart->legend()->setFont(font);
@@ -170,17 +170,78 @@ void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
     }
 
     // 4. Osie
+    // Tutaj upewniamy się, że etykiety są widoczne
     auto axes = chart->axes();
     for (auto axis : axes) {
         axis->setLabelsBrush(QBrush(Qt::white));
         axis->setGridLineColor(QColor(60, 60, 60));
         axis->setTitleText("");
+
+        // Wymuszamy widoczność etykiet
+        axis->setLabelsVisible(true);
+
         QFont axisFont = axis->labelsFont();
         axisFont.setPointSize(8);
         axis->setLabelsFont(axisFont);
     }
 }
 
+void MainWindow::autoSkalujOsY(QChart* chart)
+{
+    if (!chart) return;
+
+    // 1. Pobierz aktualny zakres osi X (czasu), żeby wiedzieć co jest widoczne
+    double minX = 0;
+    double maxX = 0;
+    auto axesX = chart->axes(Qt::Horizontal);
+    if (axesX.isEmpty()) return;
+
+    // Zakładamy, że oś X to QValueAxis
+    if (auto axisX = qobject_cast<QValueAxis*>(axesX.first())) {
+        minX = axisX->min();
+        maxX = axisX->max();
+    }
+
+    double minVal = 1e9;
+    double maxVal = -1e9;
+    bool hasData = false;
+
+    // 2. Przeszukaj serie, ALE bierz tylko punkty z widocznego okna czasowego
+    for (QAbstractSeries* series : chart->series()) {
+        QLineSeries* lineSeries = qobject_cast<QLineSeries*>(series);
+        if (!lineSeries || !lineSeries->isVisible()) continue;
+
+        for (const QPointF& p : lineSeries->points()) {
+            // KLUCZOWA ZMIANA: Ignoruj stare punkty, które wyjechały z lewej strony
+            if (p.x() < minX || p.x() > maxX) continue;
+
+            if (p.y() < minVal) minVal = p.y();
+            if (p.y() > maxVal) maxVal = p.y();
+            hasData = true;
+        }
+    }
+
+    // Jeśli w aktualnym oknie nie ma danych (np. dopiero zaczęliśmy)
+    if (!hasData) {
+        minVal = -1.0;
+        maxVal = 1.0;
+    }
+
+    // 3. Oblicz margines i ustaw oś
+    double diff = maxVal - minVal;
+    if (diff < 0.01) diff = 1.0; // Zabezpieczenie dla linii prostej
+    double margin = diff * 0.1;  // 10% marginesu
+
+    QList<QAbstractAxis*> axesY = chart->axes(Qt::Vertical);
+    if (!axesY.isEmpty()) {
+        QValueAxis* axisY = qobject_cast<QValueAxis*>(axesY.first());
+        if (axisY) {
+            axisY->setRange(minVal - margin, maxVal + margin);
+            axisY->setLabelFormat("%.2f");
+            axisY->setTickCount(6);
+        }
+    }
+}
 // ==========================================
 // SLOTY
 // ==========================================
@@ -290,6 +351,24 @@ void MainWindow::aktualizujSymulacje()
     updateAxisX(m_chartError);
     updateAxisX(m_chartControl);
     updateAxisX(m_chartPID); // Jeśli używasz
+
+    // 3. >>> NOWE: AUTO-SKALOWANIE OSI Y <<<
+    autoSkalujOsY(m_chartOutput);   // Wykres Wyjścia i Zadanej
+    autoSkalujOsY(m_chartError);    // Wykres Uchybu
+    autoSkalujOsY(m_chartControl);  // Wykres Sterowania
+    autoSkalujOsY(m_chartPID);      // Wykres PID
+
+    // OPTYMALIZACJA: Usuwanie starych punktów, które są już daleko poza ekranem
+    // np. jeśli są starsze niż 2x szerokość okna
+    double limitCzasu = t - (windowSize * 2.0);
+
+    if (m_seriesZadana->count() > 0 && m_seriesZadana->at(0).x() < limitCzasu) {
+        m_seriesZadana->remove(0);
+    }
+    if (m_seriesWyjscie->count() > 0 && m_seriesWyjscie->at(0).x() < limitCzasu) {
+        m_seriesWyjscie->remove(0);
+    }
+    // ... powtórz dla uchybu, sterowania, PID ...
 }
 
 void MainWindow::on_pushConfigARX_clicked()

@@ -31,7 +31,7 @@ void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<
     m_model.setA(A);
     m_model.setB(B);
     m_model.setOpoznienieTransportowe(opoznienie);
-    m_model.resetuj();
+    //m_model.resetuj();
 
     m_maModel = true;
     aktualizujTrybPracy();

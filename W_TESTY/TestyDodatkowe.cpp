@@ -242,14 +242,13 @@ void test_regulator_brak_akcji() {
 }
 
 void test_symulacja_tylko_generator() {
-    //std::cerr << "Symulacja -> test tylko generator: "; // Zmiana na cerr
     try {
-        auto generator = std::make_shared<GeneratorWartosciZadanej>();
-        generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
-        generator->setSkladowaStala(5.0);
-
         Symulacja simulation;
-        simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
+
+        // POPRAWKA: Konfigurujemy symulację tak, aby pasowała do oczekiwań (5.0)
+        // Wcześniej konfigurowałeś prostokąt 1.0, a oczekiwałeś 5.0 ze zmiennej lokalnej.
+        simulation.konfigurujGenerator(0.0, 1.0, 100, GeneratorWartosciZadanej::SYGNAL_STALY, 5.0, 0.5);
+
         std::vector<double> setpointValues;
         for (int i = 0; i < 5; i++) {
             simulation.wykonajKrok();
@@ -257,26 +256,21 @@ void test_symulacja_tylko_generator() {
         }
 
         std::vector<double> expected(5, 5.0);
-        myAssert("Symulacja - test tylko generator",expected, setpointValues);
+        myAssert("Symulacja - test tylko generator", expected, setpointValues);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_symulacja_generator_i_model() {
-    //std::cerr << "Symulacja -> test generator i model: "; // Zmiana na cerr
     try {
-        auto generator = std::make_shared<GeneratorWartosciZadanej>();
-        generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
-        generator->setSkladowaStala(1.0);
-
-        auto model = std::make_shared<ModelARX>(
-            std::vector<double>{-0.4},
-            std::vector<double>{0.6},
-            1, 0.0
-            );
-
         Symulacja simulation;
+
+        // Generator: Skok jednostkowy (Prostokąt, Ampl=1.0, Offset=0.0 -> stan wysoki = 1.0)
         simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
+
+        // POPRAWKA: Musisz skonfigurować model w symulacji!
+        // Parametry z Twojego testu: A=[-0.4], B=[0.6], k=1
+        simulation.konfigurujModel({-0.4}, {0.6}, 1);
 
         std::vector<double> outputs;
         for (int i = 0; i < 3; i++) {
@@ -284,38 +278,40 @@ void test_symulacja_generator_i_model() {
             outputs.push_back(simulation.getWartoscWyjscie());
         }
 
+        // T0: u=1.0 (start), y=0 (opóźnienie k=1) -> wyjscie=0
+        // T1: u=1.0, y(1) = 0.6*u(0) - (-0.4)*y(0) = 0.6*1.0 - 0 = 0.6
+        // T2: u=1.0, y(2) = 0.6*u(1) - (-0.4)*y(1) = 0.6*1.0 + 0.4*0.6 = 0.6 + 0.24 = 0.84
         std::vector<double> expected = { 0.0, 0.6, 0.84 };
-        myAssert("Symulacja - test generator i model",expected, outputs);
+        myAssert("Symulacja - test generator i model", expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }
 
 void test_symulacja_pelny_uar() {
-    //std::cerr << "Symulacja -> test pelny UAR: "; // Zmiana na cerr
     try {
-        auto generator = std::make_shared<GeneratorWartosciZadanej>();
-        generator->setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
-        generator->setSkladowaStala(1.0);
-
-        auto model = std::make_shared<ModelARX>(
-            std::vector<double>{-0.4},
-            std::vector<double>{0.6},
-            1, 0.0
-            );
-
-        auto regulator = std::make_shared<RegulatorPID>(0.5, 1.0, 0.0);
-
         Symulacja simulation;
-        // TO JEST DOBRZE
+
+        // Generator: Skok 1.0
         simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
+
+        // POPRAWKA: Konfiguracja Modelu (A=[-0.4], B=[0.6], k=1)
+        simulation.konfigurujModel({-0.4}, {0.6}, 1);
+
+        // POPRAWKA: Konfiguracja Regulatora (Kp=0.5, Ti=1.0, Td=0.0)
+        simulation.konfigurujRegulator(0.5, 1.0, 0.0);
+
         std::vector<double> outputs;
         for (int i = 0; i < 3; i++) {
             simulation.wykonajKrok();
             outputs.push_back(simulation.getWartoscWyjscie());
         }
 
+        // Obliczenia ręczne (dla weryfikacji):
+        // Krok 1: e=1, Up=0.5, Ui=1.0 -> u=1.5. Model(k=1) -> y=0.0.
+        // Krok 2: e=1, Up=0.5, Ui+=1.0(2.0) -> u=2.5. Model: y = 0.6*1.5 + 0.4*0 = 0.9.
+        // Krok 3: e=0.1, Up=0.05, Ui+=0.1(2.1) -> u=2.15. Model: y = 0.6*2.5 + 0.4*0.9 = 1.5 + 0.36 = 1.86.
         std::vector<double> expected = { 0.0, 0.9, 1.86 };
-        myAssert("Symulacja - test pelny UAR",expected, outputs);
+        myAssert("Symulacja - test pelny UAR", expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }
 }

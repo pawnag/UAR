@@ -8,9 +8,9 @@ class GeneratorWartosciZadanej : public QObject
     Q_OBJECT
 public:
     enum TypSygnalu {
+        SYGNAL_STALY,
         SYGNAL_PROSTOKATNY,
-        SYGNAL_SINUSOIDALNY,
-        SYGNAL_STALY
+        SYGNAL_SINUSOIDALNY
     };
 
 private:

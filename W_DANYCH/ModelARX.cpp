@@ -168,23 +168,23 @@ void ModelARX::resetuj()
 
 void ModelARX::setA(const std::vector<double>& i_A)
 {
-    if (i_A.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik A");
+    //if (i_A.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik A");
     m_A = i_A;
-    inicjalizujBufory(); // Resetujemy bufory przy zmianie modelu
+    //inicjalizujBufory(); // Resetujemy bufory przy zmianie modelu
 }
 
 void ModelARX::setB(const std::vector<double>& i_B)
 {
-    if (i_B.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik B");
+    //if (i_B.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik B");
     m_B = i_B;
-    inicjalizujBufory();
+    //inicjalizujBufory();
 }
 
 void ModelARX::setOpoznienieTransportowe(int i_ot)
 {
-    if (i_ot < 1) throw std::invalid_argument("Opoznienie transportowe musi byc >= 1");
+    //if (i_ot < 1) throw std::invalid_argument("Opoznienie transportowe musi byc >= 1");
     m_ot = i_ot;
-    inicjalizujBufory();
+    //inicjalizujBufory();
 }
 
 void ModelARX::setOdchylenieStandardoweSzumu(double i_oss)

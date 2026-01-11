@@ -12,8 +12,6 @@ int main(int argc, char *argv[])
     return 0;
 #else
     QApplication a(argc, argv);
-
-    // Tworzymy i pokazujemy główne okno
     MainWindow w;
     w.show();
 

@@ -70,6 +70,7 @@ private:
     // Metody pomocnicze
     void setupChart(QLayout* layout, QChart*& chart, QChartView*& view);
     void stylizujWykres(QChart* chart, bool pokazLegende);
+    void autoSkalujOsY(QChart* chart);
 
     //JSON
     void zapiszKonfiguracje();
