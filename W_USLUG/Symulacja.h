@@ -43,9 +43,16 @@ public:
     bool czyDziala() const { return m_czyDziala; }
     int getInterwalMs() const { return m_generator.getInterwal(); }
 
-    // --- JSON ---
-    QJsonObject toJson() const;
-    void fromJson(const QJsonObject& obj);
+    //
+    GeneratorWartosciZadanej& getGenerator() { return m_generator; }
+    const GeneratorWartosciZadanej& getGenerator() const { return m_generator; }
+
+    ModelARX& getModel() { return m_prostyUAR.getModel(); }
+    const ModelARX& getModel() const { return m_prostyUAR.getModel(); }
+
+    RegulatorPID& getRegulator() { return m_prostyUAR.getRegulator(); }
+    const RegulatorPID& getRegulator() const { return m_prostyUAR.getRegulator(); }
+
 
 private:
     GeneratorWartosciZadanej m_generator;

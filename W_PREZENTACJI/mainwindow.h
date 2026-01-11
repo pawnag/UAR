@@ -76,11 +76,6 @@ private:
     void zapiszKonfiguracje();
     void wczytajKonfiguracje();
 
-    ModelARX m_model;
-    RegulatorPID m_regulator;
-    GeneratorWartosciZadanej m_generator;
-    Symulacja m_symulacja;
-
 
 };
 

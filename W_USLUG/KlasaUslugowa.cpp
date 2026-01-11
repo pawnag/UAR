@@ -1,5 +1,9 @@
 #include "W_USLUG/KlasaUslugowa.h"
 
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+
 KlasaUslugowa::KlasaUslugowa(QObject *parent)
     : QObject(parent)
 {
@@ -66,3 +70,107 @@ double KlasaUslugowa::getSzum() const
 {
     return m_symulacja.getModelSzum();
 }
+
+QJsonObject KlasaUslugowa::toJson() const
+{
+    QJsonObject root;
+
+    // --- MODEL ARX ---
+    QJsonObject modelObj;
+    {
+        auto A = m_symulacja.getModelA();
+        auto B = m_symulacja.getModelB();
+
+        QJsonArray arrA;
+        for (double v : A) arrA.append(v);
+        modelObj["A"] = arrA;
+
+        QJsonArray arrB;
+        for (double v : B) arrB.append(v);
+        modelObj["B"] = arrB;
+
+        modelObj["opoznienie"] = m_symulacja.getModelOpoznienie();
+        modelObj["szum"] = m_symulacja.getModelSzum();
+    }
+    root["modelARX"] = modelObj;
+
+    // --- REGULATOR PID ---
+    QJsonObject pidObj;
+    {
+        const auto& pid = m_symulacja.getRegulator();
+        pidObj["k"]  = pid.getWzmocnienie();
+        pidObj["TI"] = pid.getStalaCalk();
+        pidObj["TD"] = pid.getStalaRozn();
+        pidObj["trybCalk"] = static_cast<int>(pid.getLiczCalk());
+    }
+    root["regulatorPID"] = pidObj;
+
+    // --- GENERATOR ---
+    QJsonObject genObj;
+    {
+        genObj["typ"] = static_cast<int>(m_symulacja.getGenerator().getTypSygnalu());
+        genObj["amplituda"] = m_symulacja.getGenerator().getAmplituda();
+        genObj["okres"] = m_symulacja.getGenerator().getOkresRzeczywisty();
+        genObj["interwal"] = m_symulacja.getGenerator().getInterwal();
+        genObj["skladowa"] = m_symulacja.getGenerator().getSkladowaStala();
+        genObj["wypelnienie"] = m_symulacja.getGenerator().getWypelnienie();
+    }
+    root["generator"] = genObj;
+
+    return root;
+}
+
+void KlasaUslugowa::fromJson(const QJsonObject& root)
+{
+    // --- MODEL ARX ---
+    if (root.contains("modelARX"))
+    {
+        auto obj = root["modelARX"].toObject();
+
+        std::vector<double> A, B;
+
+        for (auto v : obj["A"].toArray()) A.push_back(v.toDouble());
+        for (auto v : obj["B"].toArray()) B.push_back(v.toDouble());
+
+        int op = obj["opoznienie"].toInt();
+        double szum = obj["szum"].toDouble();
+
+        m_symulacja.konfigurujModel(A, B, op);
+        m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
+    }
+
+    // --- REGULATOR PID ---
+    if (root.contains("regulatorPID"))
+    {
+        auto obj = root["regulatorPID"].toObject();
+
+        double k  = obj["k"].toDouble();
+        double TI = obj["TI"].toDouble();
+        double TD = obj["TD"].toDouble();
+        int tryb  = obj["trybCalk"].toInt();
+
+        m_symulacja.konfigurujRegulator(k, TI, TD);
+        m_symulacja.getRegulator().setLiczCalk(
+            static_cast<RegulatorPID::LiczCalk>(tryb)
+            );
+    }
+
+    // --- GENERATOR ---
+    if (root.contains("generator"))
+    {
+        auto obj = root["generator"].toObject();
+
+        auto typ = static_cast<GeneratorWartosciZadanej::TypSygnalu>(obj["typ"].toInt());
+        double ampl = obj["amplituda"].toDouble();
+        double okres = obj["okres"].toDouble();
+        int interwal = obj["interwal"].toInt();
+        double skladowa = obj["skladowa"].toDouble();
+        double wypelnienie = obj["wypelnienie"].toDouble();
+
+        m_symulacja.konfigurujGenerator(ampl, okres, interwal, typ, skladowa, wypelnienie);
+    }
+
+    // Reset symulacji po wczytaniu
+    m_symulacja.resetuj();
+}
+

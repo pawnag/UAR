@@ -104,6 +104,7 @@ void Symulacja::wykonajKrok()
     m_czas += dt_sec;
 }
 
+/*
 QJsonObject Symulacja::toJson() const
 {
     QJsonObject obj;
@@ -127,3 +128,4 @@ void Symulacja::fromJson(const QJsonObject& obj)
 
     resetuj();
 }
+*/

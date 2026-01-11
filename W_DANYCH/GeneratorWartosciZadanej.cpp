@@ -1,9 +1,5 @@
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
 
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
-
 
 // ZMIANA: Scalony konstruktor inicjalizujący QObject i zmienne
 GeneratorWartosciZadanej::GeneratorWartosciZadanej(QObject *parent)
@@ -71,33 +67,3 @@ double GeneratorWartosciZadanej::generuj()
         return m_skladowaStala;
     }
 }
-
-QJsonObject GeneratorWartosciZadanej::toJson() const
-{
-    QJsonObject obj;
-
-    obj["typ"] = static_cast<int>(m_typ);
-    obj["amplituda"] = m_amplituda;
-    obj["okresDyskretny"] = m_okresDyskretny;
-    obj["skladowaStala"] = m_skladowaStala;
-    obj["wypelnienie"] = m_wypelnienie;
-    obj["okresRzeczywisty"] = m_okresRzeczywisty;
-    obj["interwal"] = m_interwal;
-
-    return obj;
-}
-
-void GeneratorWartosciZadanej::fromJson(const QJsonObject& obj)
-{
-    m_typ = static_cast<TypSygnalu>(obj["typ"].toInt());
-    m_amplituda = obj["amplituda"].toDouble();
-    m_okresDyskretny = obj["okresDyskretny"].toInt();
-    m_skladowaStala = obj["skladowaStala"].toDouble();
-    m_wypelnienie = obj["wypelnienie"].toDouble();
-    m_okresRzeczywisty = obj["okresRzeczywisty"].toDouble();
-    m_interwal = obj["interwal"].toInt();
-
-    // Stan wewnętrzny generatora NIE jest wczytywany
-    m_licznikKrokow = 0;
-}
-

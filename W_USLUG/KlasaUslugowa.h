@@ -45,7 +45,12 @@ public:
 
     void wykonajKrokSymulacji();
 
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& obj);
+
+
 signals:
 };
+
 
 #endif // KLASAUSLUGOWA_H
