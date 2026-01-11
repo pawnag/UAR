@@ -6,7 +6,6 @@
 #include <vector>
 #include <random>
 #include <memory>
-#include <QJsonObject>
 
 class ModelARX : public QObject
 {

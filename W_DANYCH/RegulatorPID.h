@@ -2,7 +2,6 @@
 #define REGULATORPID_H
 
 #include <QObject>
-#include <QJsonObject>
 
 class RegulatorPID : public QObject
 {

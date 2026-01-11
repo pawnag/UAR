@@ -2,7 +2,6 @@
 #define SYMULACJA_H
 
 #include <QObject>
-#include <QJsonObject>
 #include "../W_DANYCH/GeneratorWartosciZadanej.h"
 #include "ProstyUAR.h"
 

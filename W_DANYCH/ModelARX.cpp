@@ -1,6 +1,7 @@
 #include "W_DANYCH/ModelARX.h"
 #include <stdexcept>
 #include <algorithm> // Do std::max
+#include <QDebug>
 
 // --- 1. KONSTRUKTORY (Poprawione pod QObject) ---
 ModelARX::ModelARX(QObject *parent)
@@ -223,64 +224,6 @@ std::vector<double> ModelARX::getA() const { return m_A; }
 std::vector<double> ModelARX::getB() const { return m_B; }
 int ModelARX::getOpoznienieTransportowe() const { return m_ot; }
 double ModelARX::getOdchylenieStandardoweSzumu() const { return m_oss; }
-
-QJsonObject ModelARX::toJson() const
-{
-    QJsonObject obj;
-
-    // Współczynniki A
-    QJsonArray arrA;
-    for (double v : m_A)
-        arrA.append(v);
-    obj["A"] = arrA;
-
-    // Współczynniki B
-    QJsonArray arrB;
-    for (double v : m_B)
-        arrB.append(v);
-    obj["B"] = arrB;
-
-    // Parametry modelu
-    obj["ot"] = m_ot;
-    obj["oss"] = m_oss;
-
-    // Ograniczenia
-    obj["u_min"] = u_min;
-    obj["u_max"] = u_max;
-    obj["y_min"] = y_min;
-    obj["y_max"] = y_max;
-    obj["ograniczenia"] = m_ograniczenia;
-
-    return obj;
-}
-
-void ModelARX::fromJson(const QJsonObject& obj)
-{
-    // Współczynniki A
-    m_A.clear();
-    for (auto v : obj["A"].toArray())
-        m_A.push_back(v.toDouble());
-
-    // Współczynniki B
-    m_B.clear();
-    for (auto v : obj["B"].toArray())
-        m_B.push_back(v.toDouble());
-
-    // Parametry modelu
-    m_ot  = obj["ot"].toInt();
-    m_oss = obj["oss"].toDouble();
-
-    // Ograniczenia
-    u_min = obj["u_min"].toDouble();
-    u_max = obj["u_max"].toDouble();
-    y_min = obj["y_min"].toDouble();
-    y_max = obj["y_max"].toDouble();
-    m_ograniczenia = obj["ograniczenia"].toBool();
-
-    // Bufory sygnałów NIE są wczytywane — zgodnie z wymaganiami
-    m_u.clear();
-    m_y.clear();
-}
 
 void ModelARX::aktualizuj(const std::vector<double>& A,
                           const std::vector<double>& B,
