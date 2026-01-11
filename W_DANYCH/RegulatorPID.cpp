@@ -27,37 +27,30 @@ RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
 
 double RegulatorPID::symuluj(double e)
 {
-    // Składowa proporcjonalna
-    double m_lastP = m_k * e;
-
-    // Składowa całkująca
-    double m_lastI = 0.0;
+    // P
+    m_lastP = m_k * e;
+    // I
+    m_lastI = 0.0;
     if (m_TI > 0.0)
     {
         if (m_trybCalk == LiczCalk::Zew)
         {
-            // Tryb zewnętrzny: stała przed sumą
             m_calka += e;
             m_lastI = (1.0 / m_TI) * m_calka;
         }
         else
         {
-            // Tryb wewnętrzny: stała pod sumą
             m_calka += e / m_TI;
             m_lastI = m_calka;
         }
     }
-
-    // Składowa różniczkująca
-    double m_lastD = 0.0;
+    // D
+    m_lastD = 0.0;
     if (m_TD > 0.0)
     {
         m_lastD = m_TD * (e - m_e_prev);
     }
-
-    // Zapamiętanie bieżącego uchybu dla następnego kroku
     m_e_prev = e;
-
     return m_lastP + m_lastI + m_lastD;
 }
 
