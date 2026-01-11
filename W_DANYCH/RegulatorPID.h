@@ -39,6 +39,7 @@ public:
     void setStalaRozn(double TD);
     void setLiczCalk(LiczCalk tryb);
 
+
 };
 
 #endif // REGULATORPID_H

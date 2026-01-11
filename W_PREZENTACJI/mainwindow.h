@@ -76,6 +76,8 @@ private:
     void zapiszKonfiguracje();
     void wczytajKonfiguracje();
 
+    void odswiezGUI();
+
 
 };
 

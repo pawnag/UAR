@@ -445,6 +445,58 @@ void MainWindow::wczytajKonfiguracje() { QString fileName = QFileDialog::getOpen
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject()) return; QJsonObject root = doc.object();
     m_logika.fromJson(root);
+    odswiezGUI();
 }
+
+void MainWindow::odswiezGUI()
+{
+    // === GENERATOR ===
+    const auto& gen = m_logika.getGenerator();
+
+    ui->comboTypSygnalu->blockSignals(true);
+    ui->spinAmplituda->blockSignals(true);
+    ui->spinOkres->blockSignals(true);
+    ui->spinInterwal->blockSignals(true);
+    ui->spinSkladowaStala->blockSignals(true);
+    ui->spinWypelnienie->blockSignals(true);
+
+    ui->comboTypSygnalu->setCurrentIndex(static_cast<int>(gen.getTypSygnalu()));
+    ui->spinAmplituda->setValue(gen.getAmplituda());
+    ui->spinOkres->setValue(gen.getOkresRzeczywisty());
+    ui->spinInterwal->setValue(gen.getInterwal());
+    ui->spinSkladowaStala->setValue(gen.getSkladowaStala());
+    ui->spinWypelnienie->setValue(gen.getWypelnienie());
+
+    ui->comboTypSygnalu->blockSignals(false);
+    ui->spinAmplituda->blockSignals(false);
+    ui->spinOkres->blockSignals(false);
+    ui->spinInterwal->blockSignals(false);
+    ui->spinSkladowaStala->blockSignals(false);
+    ui->spinWypelnienie->blockSignals(false);
+
+
+    // === PID ===
+    const auto& pid = m_logika.getRegulator();
+
+    ui->spinPidKp->blockSignals(true);
+    ui->spinPidTi->blockSignals(true);
+    ui->spinPidTd->blockSignals(true);
+    ui->comboMetCalk->blockSignals(true);
+
+    ui->spinPidKp->setValue(pid.getWzmocnienie());
+    ui->spinPidTi->setValue(pid.getStalaCalk());
+    ui->spinPidTd->setValue(pid.getStalaRozn());
+    ui->comboMetCalk->setCurrentIndex(static_cast<int>(pid.getLiczCalk()));
+
+    ui->spinPidKp->blockSignals(false);
+    ui->spinPidTi->blockSignals(false);
+    ui->spinPidTd->blockSignals(false);
+    ui->comboMetCalk->blockSignals(false);
+
+    ui->statusbar->showMessage("Wczytano konfigurację z pliku JSON", 3000);
+}
+
+
+
 
 
