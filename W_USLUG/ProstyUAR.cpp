@@ -57,6 +57,7 @@ void ProstyUAR::setTrybOtwarty(bool tak)
     if (m_trybOtwarty) m_regulator.resetuj();
 }
 
+
 double ProstyUAR::symuluj(double wartoscZadana)
 {
     // 1. Obliczamy uchyb: e(k) = w(k) - y(k-1)
@@ -87,4 +88,11 @@ double ProstyUAR::symuluj(double wartoscZadana)
     m_ostatnieWyjscie = noweWyjscie;
 
     return noweWyjscie;
+}
+void ProstyUAR::aktualizujModel(const std::vector<double>& A,
+                                const std::vector<double>& B,
+                                int opoznienie,
+                                double szum)
+{
+    m_model.aktualizuj(A, B, opoznienie, szum);
 }

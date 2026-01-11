@@ -38,6 +38,11 @@ public:
     double getOstatnieSterowanie() const { return m_ostatnieSterowanie; }
     double getOstatnieWyjscie() const { return m_ostatnieWyjscie; }
 
+    void aktualizujModel(const std::vector<double>& A,
+                const std::vector<double>& B,
+                int opoznienie,
+                         double szum);
+
 private:
     // Podzespoły
     ModelARX m_model;

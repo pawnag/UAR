@@ -8,7 +8,6 @@
 
 
 // --- 1. KONSTRUKTORY (Poprawione pod QObject) ---
-
 ModelARX::ModelARX(QObject *parent)
     : QObject(parent)
 {
@@ -20,8 +19,8 @@ ModelARX::ModelARX(QObject *parent)
     m_ograniczenia = true;
 
     // Inicjalizacja pustych wektorów, żeby nie było błędów przy resize
-    m_A = {0.0};
-    m_B = {1.0};
+    m_A = {0.0, 0.0, 0.0};
+    m_B = {1.0, 1.0, 1.0};
 
     inicjalizujBufory();
 }
@@ -288,3 +287,15 @@ void ModelARX::fromJson(const QJsonObject& obj)
     m_y.clear();
 }
 
+void ModelARX::aktualizuj(const std::vector<double>& A,
+                          const std::vector<double>& B,
+                          int opoznienie,
+                          double szum)
+{
+    setA(A);
+    setB(B);
+    setOpoznienieTransportowe(opoznienie);
+    setOdchylenieStandardoweSzumu(szum);
+
+    resetuj(); // <<< bardzo ważne — czyści pamięć modelu
+}

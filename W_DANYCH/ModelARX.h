@@ -50,6 +50,11 @@ public:
     int getOpoznienieTransportowe() const;
     double getOdchylenieStandardoweSzumu() const;
 
+    void aktualizuj(const std::vector<double>& A,
+               const std::vector<double>& B,
+               int opoznienie,
+                    double szum);
+
     // Settery...
     void setA(const std::vector<double>& i_A);
     void setB(const std::vector<double>& i_B);

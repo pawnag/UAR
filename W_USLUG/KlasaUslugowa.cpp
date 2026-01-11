@@ -20,6 +20,7 @@ void KlasaUslugowa::nowyModelARX(const std::vector<double>& A,
                                  int opoznienie,
                                  double szum)
 {
+
     m_symulacja.konfigurujModel(A, B, opoznienie);
     // Jeśli dodasz obsługę szumu w Symulacji, odkomentuj:
     // m_symulacja.setSzum(szum);

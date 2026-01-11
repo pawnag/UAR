@@ -19,6 +19,7 @@ void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<
     m_prostyUAR.getModel().setA(A);
     m_prostyUAR.getModel().setB(B);
     m_prostyUAR.getModel().setOpoznienieTransportowe(opoznienie);
+    m_prostyUAR.setTrybOtwarty(false);
 }
 
 void Symulacja::konfigurujRegulator(double k, double ti, double td)
@@ -27,7 +28,6 @@ void Symulacja::konfigurujRegulator(double k, double ti, double td)
     m_prostyUAR.getRegulator().setWzmocnienie(k);
     m_prostyUAR.getRegulator().setStalaCalk(ti);
     m_prostyUAR.getRegulator().setStalaRozn(td);
-    m_prostyUAR.setTrybOtwarty(false);
 }
 
 void Symulacja::konfigurujGenerator(double ampl, double okres, int interwal,
