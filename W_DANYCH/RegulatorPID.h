@@ -17,6 +17,10 @@ private:
     double m_calka;
     double m_e_prev;
 
+    double m_lastP = 0.0;
+    double m_lastI = 0.0;
+    double m_lastD = 0.0;
+
 public:
     // KONSTRUKTOR DLA TESTU: Test podaje 3 double, parent jest opcjonalny
     explicit RegulatorPID(double k = 1.0,
@@ -37,6 +41,10 @@ public:
     void setStalaCalk(double TI);
     void setStalaRozn(double TD);
     void setLiczCalk(LiczCalk tryb);
+
+    double getLastP() const { return m_lastP; }
+    double getLastI() const { return m_lastI; }
+    double getLastD() const { return m_lastD; }
 
 
 };

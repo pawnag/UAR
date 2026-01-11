@@ -28,37 +28,37 @@ RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
 double RegulatorPID::symuluj(double e)
 {
     // Składowa proporcjonalna
-    double u_P = m_k * e;
+    double m_lastP = m_k * e;
 
     // Składowa całkująca
-    double u_I = 0.0;
+    double m_lastI = 0.0;
     if (m_TI > 0.0)
     {
         if (m_trybCalk == LiczCalk::Zew)
         {
             // Tryb zewnętrzny: stała przed sumą
             m_calka += e;
-            u_I = (1.0 / m_TI) * m_calka;
+            m_lastI = (1.0 / m_TI) * m_calka;
         }
         else
         {
             // Tryb wewnętrzny: stała pod sumą
             m_calka += e / m_TI;
-            u_I = m_calka;
+            m_lastI = m_calka;
         }
     }
 
     // Składowa różniczkująca
-    double u_D = 0.0;
+    double m_lastD = 0.0;
     if (m_TD > 0.0)
     {
-        u_D = m_TD * (e - m_e_prev);
+        m_lastD = m_TD * (e - m_e_prev);
     }
 
     // Zapamiętanie bieżącego uchybu dla następnego kroku
     m_e_prev = e;
 
-    return u_P + u_I + u_D;
+    return m_lastP + m_lastI + m_lastD;
 }
 
 void RegulatorPID::resetuj()

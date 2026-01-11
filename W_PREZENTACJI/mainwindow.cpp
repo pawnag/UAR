@@ -376,6 +376,12 @@ void MainWindow::aktualizujSymulacje()
         m_seriesWyjscie->remove(0);
     }
     // ... powtórz dla uchybu, sterowania, PID ...
+
+    //PID
+    m_seriesP->append(t, m_logika.getP());
+    m_seriesI->append(t, m_logika.getI());
+    m_seriesD->append(t, m_logika.getD());
+
 }
 
 void MainWindow::on_pushConfigARX_clicked()
