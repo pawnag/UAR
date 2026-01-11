@@ -12,9 +12,13 @@
 #include <QtCore/QVariant>
 #include <QtWidgets/QAbstractButton>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QSpacerItem>
@@ -34,6 +38,17 @@ public:
     QLineEdit *editB;
     QLabel *labelD;
     QSpinBox *spinOpoznienie;
+    QLabel *labelZaklocenie;
+    QDoubleSpinBox *spinZaklocenie;
+    QGroupBox *groupOgraniczenia;
+    QGridLayout *gridLayout;
+    QCheckBox *checkOgraniczenia;
+    QLabel *labelU;
+    QDoubleSpinBox *spinMinU;
+    QDoubleSpinBox *spinMaxU;
+    QLabel *labelY;
+    QDoubleSpinBox *spinMinY;
+    QDoubleSpinBox *spinMaxY;
     QSpacerItem *verticalSpacer;
     QDialogButtonBox *buttonBox;
 
@@ -41,13 +56,7 @@ public:
     {
         if (ParametryARX->objectName().isEmpty())
             ParametryARX->setObjectName("ParametryARX");
-        ParametryARX->resize(400, 250);
-        ParametryARX->setStyleSheet(QString::fromUtf8("QDialog { background-color: #1e1e1e; color: white; }\n"
-"QLabel { color: white; }\n"
-"QLineEdit { background-color: #2d2d2d; color: white; border: 1px solid #555; padding: 5px; border-radius: 3px; }\n"
-"QSpinBox { background-color: #2d2d2d; color: white; border: 1px solid #555; padding: 5px; }\n"
-"QPushButton { background-color: #3d3d3d; color: white; border: 1px solid #555; padding: 5px 15px; border-radius: 3px; }\n"
-"QPushButton:hover { background-color: #4d4d4d; }"));
+        ParametryARX->resize(420, 450);
         verticalLayout = new QVBoxLayout(ParametryARX);
         verticalLayout->setObjectName("verticalLayout");
         formLayout = new QFormLayout();
@@ -85,8 +94,75 @@ public:
 
         formLayout->setWidget(2, QFormLayout::FieldRole, spinOpoznienie);
 
+        labelZaklocenie = new QLabel(ParametryARX);
+        labelZaklocenie->setObjectName("labelZaklocenie");
+
+        formLayout->setWidget(3, QFormLayout::LabelRole, labelZaklocenie);
+
+        spinZaklocenie = new QDoubleSpinBox(ParametryARX);
+        spinZaklocenie->setObjectName("spinZaklocenie");
+        spinZaklocenie->setDecimals(2);
+        spinZaklocenie->setSingleStep(0.010000000000000);
+
+        formLayout->setWidget(3, QFormLayout::FieldRole, spinZaklocenie);
+
 
         verticalLayout->addLayout(formLayout);
+
+        groupOgraniczenia = new QGroupBox(ParametryARX);
+        groupOgraniczenia->setObjectName("groupOgraniczenia");
+        gridLayout = new QGridLayout(groupOgraniczenia);
+        gridLayout->setObjectName("gridLayout");
+        checkOgraniczenia = new QCheckBox(groupOgraniczenia);
+        checkOgraniczenia->setObjectName("checkOgraniczenia");
+        checkOgraniczenia->setChecked(true);
+
+        gridLayout->addWidget(checkOgraniczenia, 0, 0, 1, 3);
+
+        labelU = new QLabel(groupOgraniczenia);
+        labelU->setObjectName("labelU");
+
+        gridLayout->addWidget(labelU, 1, 0, 1, 1);
+
+        spinMinU = new QDoubleSpinBox(groupOgraniczenia);
+        spinMinU->setObjectName("spinMinU");
+        spinMinU->setMinimum(-1000.000000000000000);
+        spinMinU->setMaximum(1000.000000000000000);
+        spinMinU->setValue(-10.000000000000000);
+
+        gridLayout->addWidget(spinMinU, 1, 1, 1, 1);
+
+        spinMaxU = new QDoubleSpinBox(groupOgraniczenia);
+        spinMaxU->setObjectName("spinMaxU");
+        spinMaxU->setMinimum(-1000.000000000000000);
+        spinMaxU->setMaximum(1000.000000000000000);
+        spinMaxU->setValue(10.000000000000000);
+
+        gridLayout->addWidget(spinMaxU, 1, 2, 1, 1);
+
+        labelY = new QLabel(groupOgraniczenia);
+        labelY->setObjectName("labelY");
+
+        gridLayout->addWidget(labelY, 2, 0, 1, 1);
+
+        spinMinY = new QDoubleSpinBox(groupOgraniczenia);
+        spinMinY->setObjectName("spinMinY");
+        spinMinY->setMinimum(-1000.000000000000000);
+        spinMinY->setMaximum(1000.000000000000000);
+        spinMinY->setValue(-10.000000000000000);
+
+        gridLayout->addWidget(spinMinY, 2, 1, 1, 1);
+
+        spinMaxY = new QDoubleSpinBox(groupOgraniczenia);
+        spinMaxY->setObjectName("spinMaxY");
+        spinMaxY->setMinimum(-1000.000000000000000);
+        spinMaxY->setMaximum(1000.000000000000000);
+        spinMaxY->setValue(10.000000000000000);
+
+        gridLayout->addWidget(spinMaxY, 2, 2, 1, 1);
+
+
+        verticalLayout->addWidget(groupOgraniczenia);
 
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
 
@@ -94,8 +170,8 @@ public:
 
         buttonBox = new QDialogButtonBox(ParametryARX);
         buttonBox->setObjectName("buttonBox");
-        buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+        buttonBox->setOrientation(Qt::Orientation::Horizontal);
+        buttonBox->setStandardButtons(QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok);
 
         verticalLayout->addWidget(buttonBox);
 
@@ -103,6 +179,10 @@ public:
         retranslateUi(ParametryARX);
         QObject::connect(buttonBox, &QDialogButtonBox::accepted, ParametryARX, qOverload<>(&QDialog::accept));
         QObject::connect(buttonBox, &QDialogButtonBox::rejected, ParametryARX, qOverload<>(&QDialog::reject));
+        QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMinU, &QDoubleSpinBox::setEnabled);
+        QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMaxU, &QDoubleSpinBox::setEnabled);
+        QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMinY, &QDoubleSpinBox::setEnabled);
+        QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMaxY, &QDoubleSpinBox::setEnabled);
 
         QMetaObject::connectSlotsByName(ParametryARX);
     } // setupUi
@@ -114,7 +194,16 @@ public:
         editA->setPlaceholderText(QCoreApplication::translate("ParametryARX", "Wpisz wsp\303\263\305\202czynniki po spacji", nullptr));
         labelB->setText(QCoreApplication::translate("ParametryARX", "Wielomian B (np. 0.6 0.2):", nullptr));
         editB->setPlaceholderText(QCoreApplication::translate("ParametryARX", "Wpisz wsp\303\263\305\202czynniki po spacji", nullptr));
-        labelD->setText(QCoreApplication::translate("ParametryARX", "Op\303\263\305\272nienie (d):", nullptr));
+        labelD->setText(QCoreApplication::translate("ParametryARX", "Op\303\263\305\272nienie:", nullptr));
+        labelZaklocenie->setText(QCoreApplication::translate("ParametryARX", "Zak\305\202\303\263cenia:", nullptr));
+        groupOgraniczenia->setTitle(QCoreApplication::translate("ParametryARX", "Ograniczenia Sygna\305\202\303\263w:", nullptr));
+        checkOgraniczenia->setText(QCoreApplication::translate("ParametryARX", "W\305\202\304\205cz ograniczenia", nullptr));
+        labelU->setText(QCoreApplication::translate("ParametryARX", "Sterowanie (u):", nullptr));
+        spinMinU->setPrefix(QCoreApplication::translate("ParametryARX", "Min: ", nullptr));
+        spinMaxU->setPrefix(QCoreApplication::translate("ParametryARX", "Max: ", nullptr));
+        labelY->setText(QCoreApplication::translate("ParametryARX", "Wyj\305\233cie (y):", nullptr));
+        spinMinY->setPrefix(QCoreApplication::translate("ParametryARX", "Min: ", nullptr));
+        spinMaxY->setPrefix(QCoreApplication::translate("ParametryARX", "Max: ", nullptr));
     } // retranslateUi
 
 };
