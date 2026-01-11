@@ -1,13 +1,13 @@
 #ifndef MODELARX_H
 #define MODELARX_H
 
-#include <QObject> // ZMIANA 1: Zamiast QMainWindow
+#include <QObject>
 #include <deque>
-#include <vector>  // Dodane, bo używasz std::vector
+#include <vector>
 #include <random>
-#include <memory>  // Dodane dla unique_ptr
+#include <memory>
+#include <QJsonObject>
 
-// ZMIANA 2: Dziedziczymy po QObject, a nie QMainWindow
 class ModelARX : public QObject
 {
     Q_OBJECT
@@ -32,19 +32,25 @@ private:
     void ustawRozkladSzumu(double odchylenie);
 
 public:
-    // ZMIANA 3: Rodzicem QObject jest QObject, nie QWidget
     explicit ModelARX(QObject *parent = nullptr);
 
+    // KONSTRUKTOR DLA TESTU: Dzięki wartościom domyślnym test może podać tylko A i B
     ModelARX(const std::vector<double>& i_A,
              const std::vector<double>& i_B,
-             int i_op = 1,
-             double i_oss = 0.0,
-             QObject *parent = nullptr); // Można dodać parent tutaj opcjonalnie
+             int i_op = 1,              // Domyślne opóźnienie
+             double i_oss = 0.0,        // Domyślny brak szumu
+             QObject *parent = nullptr); // Domyślny rodzic
 
     double symuluj(double i_u);
     void resetuj();
 
-    // Settery i Gettery bez zmian...
+    // Gettery potrzebne do przepisania wartości w ProstyUAR
+    std::vector<double> getA() const;
+    std::vector<double> getB() const;
+    int getOpoznienieTransportowe() const;
+    double getOdchylenieStandardoweSzumu() const;
+
+    // Settery...
     void setA(const std::vector<double>& i_A);
     void setB(const std::vector<double>& i_B);
     void setOpoznienieTransportowe(int i_ot);
@@ -53,16 +59,8 @@ public:
     void setOgraniczeniaWyjscia(double i_ymin, double i_ymax);
     void setOgraniczenia(bool i_ograniczenia);
 
-    std::vector<double> getA() const;
-    std::vector<double> getB() const;
-    int getOpoznienieTransportowe() const;
-    double getOdchylenieStandardoweSzumu() const;
-
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
-
-signals:
-    // Tu będziesz mógł kiedyś dodać np: void nowaWartosc(double y);
 };
 
 #endif // MODELARX_H

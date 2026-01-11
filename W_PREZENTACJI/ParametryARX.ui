@@ -14,7 +14,6 @@
    <string>Konfiguracja Modelu ARX</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <!-- SEKCJA 1: Podsumowanie aktualnych parametrów (Zwykły tekst) -->
    <item>
     <widget class="QGroupBox" name="groupCurrentValues">
      <property name="title">
@@ -36,8 +35,6 @@ k: 1, Zakłócenia: 0.00</string>
      </layout>
     </widget>
    </item>
-
-   <!-- SEKCJA 2: Formularz edycji parametrów ARX -->
    <item>
     <widget class="QGroupBox" name="groupEdit">
      <property name="title">
@@ -112,8 +109,6 @@ k: 1, Zakłócenia: 0.00</string>
      </layout>
     </widget>
    </item>
-
-   <!-- SEKCJA 3: Ograniczenia sygnałów -->
    <item>
     <widget class="QGroupBox" name="groupOgraniczenia">
      <property name="title">
@@ -225,12 +220,16 @@ k: 1, Zakłócenia: 0.00</string>
     </spacer>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
+    <widget class="QPushButton" name="pushZapisz">
+     <property name="text">
+      <string>Zapisz</string>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="pushAnuluj">
+     <property name="text">
+      <string>Anuluj</string>
      </property>
     </widget>
    </item>
@@ -239,40 +238,68 @@ k: 1, Zakłócenia: 0.00</string>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>ParametryARX</receiver>
-   <slot>accept()</slot>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>ParametryARX</receiver>
-   <slot>reject()</slot>
-  </connection>
-  <connection>
    <sender>checkOgraniczenia</sender>
    <signal>toggled(bool)</signal>
    <receiver>spinMinU</receiver>
    <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>checkOgraniczenia</sender>
    <signal>toggled(bool)</signal>
    <receiver>spinMaxU</receiver>
    <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>checkOgraniczenia</sender>
    <signal>toggled(bool)</signal>
    <receiver>spinMinY</receiver>
    <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
   <connection>
    <sender>checkOgraniczenia</sender>
    <signal>toggled(bool)</signal>
    <receiver>spinMaxY</receiver>
    <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>20</x>
+     <y>20</y>
+    </hint>
+   </hints>
   </connection>
  </connections>
 </ui>

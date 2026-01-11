@@ -168,23 +168,39 @@ void ModelARX::resetuj()
 
 void ModelARX::setA(const std::vector<double>& i_A)
 {
-    //if (i_A.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik A");
     m_A = i_A;
-    //inicjalizujBufory(); // Resetujemy bufory przy zmianie modelu
+
+    // NAPRAWA: Jeśli nowy wektor A jest dłuższy, musimy "dopychać" zera na POCZĄTEK.
+    // Dzięki temu aktualna historia przesuwa się na właściwe indeksy, a model "widzi" nowe dane.
+    while (m_y.size() < m_A.size()) {
+        m_y.push_front(0.0);
+    }
+
+    // Diagnostyka: Zobaczysz to w konsoli
+    qDebug() << "ModelARX::setA -> Nowy rozmiar A:" << m_A.size() << "Bufor y:" << m_y.size();
 }
 
 void ModelARX::setB(const std::vector<double>& i_B)
 {
-    //if (i_B.empty()) throw std::invalid_argument("Wymagany co najmniej 1 wspolczynnik B");
     m_B = i_B;
-    //inicjalizujBufory();
+    size_t wymaganyRozmiar = m_ot + m_B.size();
+
+    // To samo dla sterowania
+    while (m_u.size() < wymaganyRozmiar) {
+        m_u.push_front(0.0);
+    }
+    qDebug() << "ModelARX::setB -> Nowy rozmiar B:" << m_B.size() << "Bufor u:" << m_u.size();
 }
 
 void ModelARX::setOpoznienieTransportowe(int i_ot)
 {
-    //if (i_ot < 1) throw std::invalid_argument("Opoznienie transportowe musi byc >= 1");
+    if (i_ot < 1) return;
     m_ot = i_ot;
-    //inicjalizujBufory();
+
+    size_t wymaganyRozmiar = m_ot + m_B.size();
+    while (m_u.size() < wymaganyRozmiar) {
+        m_u.push_front(0.0);
+    }
 }
 
 void ModelARX::setOdchylenieStandardoweSzumu(double i_oss)

@@ -10,17 +10,16 @@
 #define UI_PARAMETRYARX_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAbstractButton>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDialog>
-#include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QVBoxLayout>
@@ -54,7 +53,8 @@ public:
     QDoubleSpinBox *spinMinY;
     QDoubleSpinBox *spinMaxY;
     QSpacerItem *verticalSpacer;
-    QDialogButtonBox *buttonBox;
+    QPushButton *pushZapisz;
+    QPushButton *pushAnuluj;
 
     void setupUi(QDialog *ParametryARX)
     {
@@ -187,17 +187,18 @@ public:
 
         verticalLayout->addItem(verticalSpacer);
 
-        buttonBox = new QDialogButtonBox(ParametryARX);
-        buttonBox->setObjectName("buttonBox");
-        buttonBox->setOrientation(Qt::Orientation::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok);
+        pushZapisz = new QPushButton(ParametryARX);
+        pushZapisz->setObjectName("pushZapisz");
 
-        verticalLayout->addWidget(buttonBox);
+        verticalLayout->addWidget(pushZapisz);
+
+        pushAnuluj = new QPushButton(ParametryARX);
+        pushAnuluj->setObjectName("pushAnuluj");
+
+        verticalLayout->addWidget(pushAnuluj);
 
 
         retranslateUi(ParametryARX);
-        QObject::connect(buttonBox, &QDialogButtonBox::accepted, ParametryARX, qOverload<>(&QDialog::accept));
-        QObject::connect(buttonBox, &QDialogButtonBox::rejected, ParametryARX, qOverload<>(&QDialog::reject));
         QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMinU, &QDoubleSpinBox::setEnabled);
         QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMaxU, &QDoubleSpinBox::setEnabled);
         QObject::connect(checkOgraniczenia, &QCheckBox::toggled, spinMinY, &QDoubleSpinBox::setEnabled);
@@ -228,6 +229,8 @@ public:
         labelY->setText(QCoreApplication::translate("ParametryARX", "Wyj\305\233cie (y):", nullptr));
         spinMinY->setPrefix(QCoreApplication::translate("ParametryARX", "Min: ", nullptr));
         spinMaxY->setPrefix(QCoreApplication::translate("ParametryARX", "Max: ", nullptr));
+        pushZapisz->setText(QCoreApplication::translate("ParametryARX", "Zapisz", nullptr));
+        pushAnuluj->setText(QCoreApplication::translate("ParametryARX", "Anuluj", nullptr));
     } // retranslateUi
 
 };

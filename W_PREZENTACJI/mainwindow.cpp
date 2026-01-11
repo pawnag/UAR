@@ -16,12 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->verticalLayout_Plot3->setContentsMargins(0, 5, 0, 0);
     ui->verticalLayout_Plot4->setContentsMargins(0, 5, 0, 0);
 
-    // 2. Proporcje (Stretch) - wszystkie równe
-    ui->verticalLayout_Graphs->setStretch(0, 1);
-    ui->verticalLayout_Graphs->setStretch(1, 1);
-    ui->verticalLayout_Graphs->setStretch(2, 1);
-    ui->verticalLayout_Graphs->setStretch(3, 1);
-
     // ==========================================
     // KONFIGURACJA WYKRESÓW
     // ==========================================
@@ -98,12 +92,17 @@ MainWindow::MainWindow(QWidget *parent)
     // Generator
     connect(ui->comboTypSygnalu, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
+
+    // POPRAWIONE LINIE: Zamiast pushZapisz jest QDoubleSpinBox
     connect(ui->spinAmplituda, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
+
     connect(ui->spinOkres, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
+
     connect(ui->spinSkladowaStala, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
+
     connect(ui->spinWypelnienie, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
 
@@ -115,11 +114,12 @@ MainWindow::MainWindow(QWidget *parent)
     // PID
     connect(ui->spinPidKp, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
+
     connect(ui->spinPidTi, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
+
     connect(ui->spinPidTd, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
-
     aktualizujParametryGeneratora();
     aktualizujParametryPID();
 }
@@ -145,23 +145,33 @@ void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
     chart->setPlotAreaBackgroundVisible(false);
 
-    // 2. Marginesy
-    // Layout wewnętrzny na 0, żeby nie marnować miejsca
+    // 2. Marginesy wewnętrzne layoutu na 0
     chart->layout()->setContentsMargins(0, 0, 0, 0);
 
-    // >>> POPRAWKA: Zwiększamy LEWY margines (pierwsza liczba) z 5 na 45-50 <<<
-    // QMargins(lewy, górny, prawy, dolny)
-    chart->setMargins(QMargins(50, 5, 5, 5));
+    // 3. INTELIGENTNE MARGINESY (To jest kluczowa zmiana)
+    if (pokazLegende) {
+        // Jeśli jest legenda po lewej, ustawiamy margines lewy na 0.
+        // Legenda sama zadba o odstęp, a my nie chcemy dodatkowej dziury.
+        chart->setMargins(QMargins(0, 5, 5, 5));
+    } else {
+        // Jeśli nie ma legendy, musimy zostawić trochę miejsca na cyferki osi Y (np. 1.00).
+        // 40 pikseli powinno wystarczyć, żeby liczby nie ucięło.
+        chart->setMargins(QMargins(40, 5, 5, 5));
+    }
 
     chart->setBackgroundRoundness(0);
     chart->setTitle("");
 
-    // 3. Legenda
+    // 4. Legenda
     if (pokazLegende) {
         chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignRight); // Legenda po prawej
+        chart->legend()->setAlignment(Qt::AlignLeft); // Legenda po lewej
         chart->legend()->setLabelBrush(QBrush(Qt::white));
         chart->legend()->setBackgroundVisible(false);
+
+        // Zmniejszenie marginesów samej legendy, żeby "przykleiła się" bardziej do krawędzi
+        chart->legend()->setContentsMargins(0, 0, 0, 0);
+
         QFont font = chart->legend()->font();
         font.setPointSize(8);
         chart->legend()->setFont(font);
@@ -169,15 +179,12 @@ void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
         chart->legend()->setVisible(false);
     }
 
-    // 4. Osie
-    // Tutaj upewniamy się, że etykiety są widoczne
+    // 5. Osie
     auto axes = chart->axes();
     for (auto axis : axes) {
         axis->setLabelsBrush(QBrush(Qt::white));
         axis->setGridLineColor(QColor(60, 60, 60));
         axis->setTitleText("");
-
-        // Wymuszamy widoczność etykiet
         axis->setLabelsVisible(true);
 
         QFont axisFont = axis->labelsFont();
@@ -375,24 +382,39 @@ void MainWindow::on_pushConfigARX_clicked()
 {
     ParametryARX dialog(this);
 
+    // 1. Ustawiamy aktualne wartości (żeby nie było pusto)
     dialog.ustawAktualne(
-        m_logika.getWektorA(),       // np. zwraca std::vector<double>
-        m_logika.getWektorB(),       // np. zwraca std::vector<double>
-        m_logika.getOpoznienie(),    // np. zwraca int
-        m_logika.getSzum()           // np. zwraca double
+        m_logika.getWektorA(),
+        m_logika.getWektorB(),
+        m_logika.getOpoznienie(),
+        m_logika.getSzum()
         );
 
-    // 2. Wyświetl okno modalnie
+    // 2. Otwieramy okno i czekamy na wynik
+    // exec() zatrzymuje kod w tym miejscu, dopóki okno się nie zamknie.
+    // Jeśli klikniesz "Zapisz" -> zwróci Accepted.
+    // Jeśli klikniesz "Anuluj" lub "X" -> zwróci Rejected.
+
     if (dialog.exec() == QDialog::Accepted)
     {
-        // 3. Jeśli użytkownik kliknął OK, pobierz dane i wyślij do logiki
-        std::vector<double> a = dialog.getA();
-        std::vector<double> b = dialog.getB();
-        int d = dialog.getOpoznienie();
+        // === TUTAJ WCHODZIMY TYLKO JAK KLIKNIESZ ZAPISZ ===
 
-        m_logika.nowyModelARX(a, b, d);
+        // 3. Pobieramy dane PRZED zniszczeniem obiektu dialog
+        auto a = dialog.getA();
+        auto b = dialog.getB();
+        int op = dialog.getOpoznienie();
+        double szum = dialog.getSzum();
 
-        ui->statusbar->showMessage("Zaktualizowano parametry ARX", 3000);
+        qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
+
+        // 4. Wysyłamy do logiki
+        m_logika.nowyModelARX(a, b, op, szum);
+
+        ui->statusbar->showMessage("Zaktualizowano parametry ARX.", 3000);
+    }
+    else
+    {
+        qDebug() << "Anulowano okno (nie kliknięto Zapisz)";
     }
 }
 

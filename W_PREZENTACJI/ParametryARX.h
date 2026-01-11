@@ -18,6 +18,7 @@ public:
     std::vector<double> getA() const;
     std::vector<double> getB() const;
     int getOpoznienie() const;
+    double getSzum() const;
 
     // ZMIANA: Dodajemy 'double zaklocenie'
     void ustawAktualne(const std::vector<double>& a,
@@ -28,6 +29,11 @@ public:
 public slots:
     // --- TUTAJ DODAJEMY NADPISANIE METODY ACCEPT ---
     void accept() override;
+
+private slots:
+    void on_pushAnuluj_clicked();
+
+    void on_pushZapisz_clicked();
 
 private:
     Ui::ParametryARX *ui;

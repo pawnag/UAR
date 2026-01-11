@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>750</height>
+    <width>1184</width>
+    <height>930</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,38 +16,73 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_Main" stretch="1,0">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_Graphs" stretch="3,1,1,1">
+     <layout class="QVBoxLayout" name="verticalLayout_Graphs" stretch="2,1,1,1">
       <item>
-       <widget class="QGroupBox" name="groupPlotOutput">
-        <property name="title">
-         <string>Wartość Zadana (w) i Regulowana (y) </string>
+       <layout class="QVBoxLayout" name="verticalLayout_Plot1">
+        <property name="spacing">
+         <number>6</number>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot1"/>
-       </widget>
+        <item>
+         <widget class="QLabel" name="labelTitleOutput">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Wartość Zadana (w) i Regulowana (y)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupPlotUchyb">
-        <property name="title">
-         <string>Uchyb regulacji (e)</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot2"/>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_Plot2">
+        <item>
+         <widget class="QLabel" name="labelTitleUchyb">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Uchyb regulacji (e)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupPlotSterowanie">
-        <property name="title">
-         <string>Sterowanie (u)</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot3"/>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_Plot3">
+        <item>
+         <widget class="QLabel" name="labelTitleSterowanie">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Sterowanie (u)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupPlotPID">
-        <property name="title">
-         <string>Składowe sterowania (P, I, D)</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_Plot4"/>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_Plot4">
+        <item>
+         <widget class="QLabel" name="labelTitlePID">
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Składowe sterowania (P, I, D)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -74,7 +109,7 @@
          <x>0</x>
          <y>0</y>
          <width>278</width>
-         <height>708</height>
+         <height>888</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_Controls">
@@ -121,7 +156,7 @@
               <number>1000</number>
              </property>
              <property name="value">
-              <number>100</number>
+              <number>200</number>
              </property>
             </widget>
            </item>
@@ -315,7 +350,7 @@
            <item row="4" column="0" colspan="2">
             <widget class="QPushButton" name="pushResetPID">
              <property name="text">
-              <string>Resetuj PID (Całkę)</string>
+              <string>Resetuj PID</string>
              </property>
             </widget>
            </item>

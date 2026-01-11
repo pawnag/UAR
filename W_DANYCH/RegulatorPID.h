@@ -1,29 +1,25 @@
 #ifndef REGULATORPID_H
 #define REGULATORPID_H
 
-#include <QObject> // ZMIANA: QObject zamiast QMainWindow
+#include <QObject>
+#include <QJsonObject>
 
 class RegulatorPID : public QObject
 {
     Q_OBJECT
 public:
-    enum class LiczCalk {
-        Zew,  // stała całkowania przed sumą
-        Wew   // stała całkowania pod sumą
-    };
+    enum class LiczCalk { Zew, Wew };
 
 private:
-    double m_k;          // wzmocnienie (nastawa P)
-    double m_TI;         // stała całkowania (nastawa I)
-    double m_TD;         // stała różniczkowania (nastawa D)
-    LiczCalk m_trybCalk; // tryb liczenia składowej całkującej
-    double m_calka;      // akumulator dla składowej całkującej
-    double m_e_prev;     // poprzednia wartość uchybu
+    double m_k;
+    double m_TI;
+    double m_TD;
+    LiczCalk m_trybCalk;
+    double m_calka;
+    double m_e_prev;
 
 public:
-    // ZMIANA: Jeden scalony konstruktor.
-    // Domyślne wartości pozwalają tworzyć obiekt jako:
-    // new RegulatorPID(1.0, 2.0, 0.5)  LUB  new RegulatorPID(1.0, 2.0, 0.5, parent)
+    // KONSTRUKTOR DLA TESTU: Test podaje 3 double, parent jest opcjonalny
     explicit RegulatorPID(double k = 1.0,
                           double TI = 0.0,
                           double TD = 0.0,
@@ -32,22 +28,19 @@ public:
     double symuluj(double e);
     void resetuj();
 
-    void setWzmocnienie(double k);
-    void setStalaCalk(double TI);
-    void setStalaRozn(double TD);
-    void setLiczCalk(LiczCalk tryb);
-
+    // Gettery potrzebne do przepisania wartości w ProstyUAR
     double getWzmocnienie() const { return m_k; }
     double getStalaCalk() const { return m_TI; }
     double getStalaRozn() const { return m_TD; }
     LiczCalk getLiczCalk() const { return m_trybCalk; }
 
+    void setWzmocnienie(double k);
+    void setStalaCalk(double TI);
+    void setStalaRozn(double TD);
+    void setLiczCalk(LiczCalk tryb);
+
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
-
-
-signals:
-    // Miejsce na ewentualne sygnały w przyszłości
 };
 
 #endif // REGULATORPID_H

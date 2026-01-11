@@ -27,6 +27,7 @@ void Symulacja::konfigurujRegulator(double k, double ti, double td)
     m_prostyUAR.getRegulator().setWzmocnienie(k);
     m_prostyUAR.getRegulator().setStalaCalk(ti);
     m_prostyUAR.getRegulator().setStalaRozn(td);
+    m_prostyUAR.setTrybOtwarty(false);
 }
 
 void Symulacja::konfigurujGenerator(double ampl, double okres, int interwal,
@@ -64,8 +65,12 @@ void Symulacja::resetuj()
 
     m_generator.reset();
 
-    // Resetujemy ProstyUAR (on zresetuje ARX i PID wewnątrz)
+    // Resetujemy stan wewnętrzny obiektów, ale NIE zmieniamy trybu pracy!
     m_prostyUAR.reset();
+
+    // USUNIĘTO: m_prostyUAR.setTrybOtwarty(true);
+    // Tryb powinien być zmieniany tylko przez konfigurujRegulator()
+    // lub jawnie przez UI.
 }
 
 void Symulacja::wykonajKrok()
@@ -80,6 +85,19 @@ void Symulacja::wykonajKrok()
     // 3. Pobranie danych do wykresów
     m_uchyb = m_prostyUAR.getOstatniUchyb();
     m_sterowanie = m_prostyUAR.getOstatnieSterowanie();
+
+
+    // --- DEBUGOWANIE ---
+    // Pokaż co 10-tą próbkę lub zawsze, jeśli krok jest wolny
+    // static int licznik = 0;
+    // if (licznik++ % 10 == 0) {
+    qDebug() << "T:" << m_czas
+             << " Zad:" << m_wartoscZadana
+             << " Ster:" << m_sterowanie
+             << " Wyj:" << m_wartoscWyjscie
+             << " TrybOtwarty:" << m_prostyUAR.czyTrybOtwarty();
+    // }
+    // -------------------
 
     // 4. Czas
     double dt_sec = m_generator.getInterwal() / 1000.0;

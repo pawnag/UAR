@@ -2,45 +2,52 @@
 #define PROSTYUAR_H
 
 #include <QObject>
-#include "../W_DANYCH/ModelARX.h"
-#include "../W_DANYCH/RegulatorPID.h"
+#include "W_DANYCH/ModelARX.h"
+#include "W_DANYCH/RegulatorPID.h"
 
 class ProstyUAR : public QObject
 {
     Q_OBJECT
 
 public:
-    // Konstruktor uproszczony - nie potrzebuje już zewnętrznych obiektów
     explicit ProstyUAR(QObject *parent = nullptr);
 
-    // DLA TESTÓW
-    ProstyUAR(const ModelARX& arx, const RegulatorPID& regulator, QObject *parent = nullptr);
+    // Konstruktor dla testów (kopiujący parametry)
+    ProstyUAR(const ModelARX& model, const RegulatorPID& reg, QObject *parent = nullptr);
 
-    // Główna pętla (bez zmian)
+    // --- Główna metoda symulacji ---
     double symuluj(double wartoscZadana);
+
+    // --- Sterowanie stanem ---
     void reset();
+    void setTrybOtwarty(bool tak);
+    bool czyTrybOtwarty() const { return m_trybOtwarty; }
 
-    // --- DOSTĘP DO OBIEKTÓW WEWNĘTRZNYCH ---
-    // Zwracamy referencje, aby Symulacja mogła zmieniać ich ustawienia (A, B, Kp, Ti...)
-    ModelARX& getModel() { return m_arx; }
-    const ModelARX& getModel() const { return m_arx; }
+    // --- DOSTĘP DO PODZESPOŁÓW (POPRAWKA: Wersje zwykłe i const) ---
 
+    // 1. Wersje do modyfikacji (np. zmiana nastaw w GUI)
+    ModelARX& getModel() { return m_model; }
     RegulatorPID& getRegulator() { return m_regulator; }
+
+    // 2. Wersje do odczytu (dla toJson, wykresów i obiektów const) - TO NAPRAWIA C2662
+    const ModelARX& getModel() const { return m_model; }
     const RegulatorPID& getRegulator() const { return m_regulator; }
 
-    // Gettery wyników (bez zmian)
+    // --- DOSTĘP DO WYNIKÓW POŚREDNICH (POPRAWKA: Brakujące gettery) ---
     double getOstatniUchyb() const { return m_ostatniUchyb; }
     double getOstatnieSterowanie() const { return m_ostatnieSterowanie; }
-    double getPoprzedniaWartoscRegulowana() const { return m_poprzedniaWartoscRegulowana; }
+    double getOstatnieWyjscie() const { return m_ostatnieWyjscie; }
 
 private:
-    // TERAZ TO SĄ INSTANCJE (WŁASNOŚĆ), A NIE REFERENCJE
-    ModelARX m_arx;
+    // Podzespoły
+    ModelARX m_model;
     RegulatorPID m_regulator;
 
-    double m_poprzedniaWartoscRegulowana;
-    double m_ostatniUchyb;
-    double m_ostatnieSterowanie;
+    // Stan wewnętrzny
+    bool m_trybOtwarty;
+    double m_ostatniUchyb;       // Przechowuje e(k)
+    double m_ostatnieSterowanie; // Przechowuje u(k)
+    double m_ostatnieWyjscie;    // Przechowuje y(k)
 };
 
 #endif // PROSTYUAR_H
