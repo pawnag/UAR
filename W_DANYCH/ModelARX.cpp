@@ -121,29 +121,6 @@ double ModelARX::obliczWyjscie()
     return wyjscie;
 }
 
-// double ModelARX::obliczWyjscie()
-// {
-//     double y = 0.0;
-
-//     // B — wejście z opóźnieniem
-//     for (size_t i = 0; i < m_B.size(); i++)
-//     {
-//         y += m_B[i] * m_u[m_ot + i];
-//     }
-
-//     // A — wyjścia poprzednie
-//     for (size_t i = 0; i < m_A.size(); i++)
-//     {
-//         y -= m_A[i] * m_y[i];
-//     }
-
-//     if (rozklad_szumu)
-//         y += (*rozklad_szumu)(generator_losowy);
-
-//     return y;
-// }
-
-
 double ModelARX::symuluj(double i_wej)
 {
     // 1. Ograniczenie wejścia
