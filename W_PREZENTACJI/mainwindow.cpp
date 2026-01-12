@@ -294,6 +294,14 @@ void MainWindow::on_pushResetSym_clicked()
     resetX(m_chartControl);
 
     ui->statusbar->showMessage("Symulacja ZRESETOWANA.");
+    
+    //zerowanie wartosci
+
+    //delete m_logika.getRegulator();
+    //delete m_logika.getGenerator();
+    //delete m_logika.get();
+
+    odswiezGUI();
 }
 
 void MainWindow::aktualizujParametryGeneratora()
@@ -506,11 +514,4 @@ void MainWindow::odswiezGUI()
     ui->spinPidTi->blockSignals(false);
     ui->spinPidTd->blockSignals(false);
     ui->comboMetCalk->blockSignals(false);
-
-    ui->statusbar->showMessage("Wczytano konfigurację z pliku JSON", 3000);
 }
-
-
-
-
-

@@ -35,15 +35,6 @@ void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
     m_symulacja.konfigurujRegulator(k, TI, TD);
 }
 
-void KlasaUslugowa::start() { m_symulacja.uruchom(); }
-void KlasaUslugowa::stop()  { m_symulacja.zatrzymaj(); }
-void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
-
-void KlasaUslugowa::wykonajKrokSymulacji()
-{
-    m_symulacja.wykonajKrok();
-}
-
 double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
 double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }
 double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
@@ -68,6 +59,15 @@ int KlasaUslugowa::getOpoznienie() const
 double KlasaUslugowa::getSzum() const
 {
     return m_symulacja.getModelSzum();
+}
+
+void KlasaUslugowa::start() { m_symulacja.uruchom(); }
+void KlasaUslugowa::stop()  { m_symulacja.zatrzymaj(); }
+void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
+
+void KlasaUslugowa::wykonajKrokSymulacji()
+{
+    m_symulacja.wykonajKrok();
 }
 
 QJsonObject KlasaUslugowa::toJson() const

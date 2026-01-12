@@ -50,7 +50,8 @@ public:
     void fromJson(const QJsonObject& obj);
 
     RegulatorPID& getRegulator() { return m_symulacja.getRegulator(); }
-    const GeneratorWartosciZadanej& getGenerator() const { return m_symulacja.getGenerator(); }
+    GeneratorWartosciZadanej& getGenerator() { return m_symulacja.getGenerator(); }
+    ModelARX& getModelARX() { return m_symulacja.getModel(); }
 
     double getP() const { return m_symulacja.getRegulator().getLastP(); }
     double getI() const { return m_symulacja.getRegulator().getLastI(); }
