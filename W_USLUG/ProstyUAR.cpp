@@ -44,11 +44,11 @@ ProstyUAR::ProstyUAR(const ModelARX& model, const RegulatorPID& reg, QObject *pa
 void ProstyUAR::reset()
 {
     m_model.resetuj();
-    m_regulator.resetuj(); // Upewnij się, że to NIE kasuje Kp, Ti, Td!
+    m_regulator.resetuj();
     m_ostatniUchyb = 0.0;
     m_ostatnieSterowanie = 0.0;
     m_ostatnieWyjscie = 0.0;
-    m_trybOtwarty = true;
+    m_trybOtwarty = false;
 }
 
 void ProstyUAR::setTrybOtwarty(bool tak)

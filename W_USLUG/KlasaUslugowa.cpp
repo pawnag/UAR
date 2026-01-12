@@ -19,16 +19,20 @@ void KlasaUslugowa::nowyGenerator(double amplituda,
     m_symulacja.konfigurujGenerator(amplituda, okres, interwalMs, typ, skladowa, wypelnienie);
 }
 
-void KlasaUslugowa::nowyModelARX(const std::vector<double>& A,
-                                 const std::vector<double>& B,
-                                 int opoznienie,
-                                 double szum)
+void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
 {
+    if (A == m_symulacja.getModelA() &&
+        B == m_symulacja.getModelB() &&
+        opoznienie == m_symulacja.getModelOpoznienie() &&
+        szum == m_symulacja.getModelSzum())
+    {
+        return;
+    }
 
     m_symulacja.konfigurujModel(A, B, opoznienie);
-    // Jeśli dodasz obsługę szumu w Symulacji, odkomentuj:
-    // m_symulacja.setSzum(szum);
+    m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
 }
+
 
 void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
 {
@@ -134,24 +138,23 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
         int op = obj["opoznienie"].toInt();
         double szum = obj["szum"].toDouble();
 
-        m_symulacja.konfigurujModel(A, B, op);
-        m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
+        nowyModelARX(A, B, op, szum);
     }
 
-    // --- REGULATOR PID ---
+    // --- PID ---
     if (root.contains("regulatorPID"))
     {
         auto obj = root["regulatorPID"].toObject();
 
-        double k  = obj["k"].toDouble();
+        double k = obj["k"].toDouble();
         double TI = obj["TI"].toDouble();
         double TD = obj["TD"].toDouble();
-        int tryb  = obj["trybCalk"].toInt();
+        int tryb = obj["trybCalk"].toInt();
 
-        m_symulacja.konfigurujRegulator(k, TI, TD);
+        nowyRegulator(k, TI, TD);
         m_symulacja.getRegulator().setLiczCalk(
             static_cast<RegulatorPID::LiczCalk>(tryb)
-            );
+        );
     }
 
     // --- GENERATOR ---
@@ -166,9 +169,9 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
         double skladowa = obj["skladowa"].toDouble();
         double wypelnienie = obj["wypelnienie"].toDouble();
 
-        m_symulacja.konfigurujGenerator(ampl, okres, interwal, typ, skladowa, wypelnienie);
+        nowyGenerator(ampl, okres, interwal, typ, skladowa, wypelnienie);
     }
 
-    // Reset symulacji po wczytaniu
+    //m_symulacja.resetUAR();
     m_symulacja.resetuj();
 }

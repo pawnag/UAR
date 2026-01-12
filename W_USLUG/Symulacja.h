@@ -52,6 +52,7 @@ public:
     RegulatorPID& getRegulator() { return m_prostyUAR.getRegulator(); }
     const RegulatorPID& getRegulator() const { return m_prostyUAR.getRegulator(); }
 
+    void resetUAR();
 
 private:
     GeneratorWartosciZadanej m_generator;

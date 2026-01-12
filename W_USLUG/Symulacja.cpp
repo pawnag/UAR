@@ -105,3 +105,8 @@ void Symulacja::wykonajKrok()
     double dt_sec = m_generator.getInterwal() / 1000.0;
     m_czas += dt_sec;
 }
+
+void Symulacja::resetUAR()
+{
+    m_prostyUAR.reset();
+}
