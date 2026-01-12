@@ -50,8 +50,6 @@ double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscW
 double KlasaUslugowa::getSterowanie() const { return m_symulacja.getSterowanie(); }
 double KlasaUslugowa::getUchyb() const { return m_symulacja.getUchyb(); }
 
-// KlasaUslugowa.cpp
-
 std::vector<double> KlasaUslugowa::getWektorA() const
 {
     return m_symulacja.getModelA();
@@ -174,7 +172,3 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
     // Reset symulacji po wczytaniu
     m_symulacja.resetuj();
 }
-
-//void resetCalki() {
-//    RegulatorPID.resetuj();
-//}

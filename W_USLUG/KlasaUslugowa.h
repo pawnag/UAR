@@ -49,16 +49,15 @@ public:
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
 
-    const RegulatorPID& getRegulator() const { return m_symulacja.getRegulator(); }
+    RegulatorPID& getRegulator() { return m_symulacja.getRegulator(); }
     const GeneratorWartosciZadanej& getGenerator() const { return m_symulacja.getGenerator(); }
 
     double getP() const { return m_symulacja.getRegulator().getLastP(); }
     double getI() const { return m_symulacja.getRegulator().getLastI(); }
     double getD() const { return m_symulacja.getRegulator().getLastD(); }
 
-
-
 signals:
+
 };
 
 

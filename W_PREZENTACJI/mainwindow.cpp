@@ -387,9 +387,7 @@ void MainWindow::aktualizujSymulacje()
 }
 
 void MainWindow::on_pushResetPID_clicked(){
-    KlasaUslugowa.setlastP(0.0);
-    KlasaUslugowa.setlastI(0.0);
-    KlasaUslugowa.setlastD(0.0);
+    m_logika.getRegulator().resetuj();
 }
 
 void MainWindow::on_pushConfigARX_clicked()

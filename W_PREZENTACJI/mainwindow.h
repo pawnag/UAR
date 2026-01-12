@@ -38,6 +38,8 @@ private slots:
     void on_pushSaveConfig_clicked();
     void on_pushLoadConfig_clicked();
 
+    void on_pushResetPID_clicked();
+
 private:
     Ui::MainWindow *ui;
     QTimer *m_timerSymulacji;
@@ -75,10 +77,7 @@ private:
     //JSON
     void zapiszKonfiguracje();
     void wczytajKonfiguracje();
-
     void odswiezGUI();
-
-
 };
 
 #endif // MAINWINDOW_H

@@ -72,8 +72,7 @@ void Symulacja::resetuj()
     m_prostyUAR.reset();
 
     // USUNIĘTO: m_prostyUAR.setTrybOtwarty(true);
-    // Tryb powinien być zmieniany tylko przez konfigurujRegulator()
-    // lub jawnie przez UI.
+    // Tryb powinien być zmieniany tylko przez konfigurujRegulator() lub jawnie przez UI.
 }
 
 void Symulacja::wykonajKrok()
