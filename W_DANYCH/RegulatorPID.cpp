@@ -64,6 +64,11 @@ void RegulatorPID::resetuj()
 {
     m_calka = 0.0;
     m_e_prev = 0.0;
+
+    //dodalem to
+    m_lastP = 0.0;
+    m_lastI = 0.0;
+    m_lastD = 0.0;
 }
 
 void RegulatorPID::setWzmocnienie(double k)

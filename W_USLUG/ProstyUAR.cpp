@@ -57,7 +57,6 @@ void ProstyUAR::setTrybOtwarty(bool tak)
     if (m_trybOtwarty) m_regulator.resetuj();
 }
 
-//stara
 double ProstyUAR::symuluj(double wartoscZadana)
 {
     // 1. Obliczamy uchyb: e(k) = w(k) - y(k-1)

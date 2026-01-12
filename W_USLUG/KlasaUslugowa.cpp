@@ -175,3 +175,6 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
     m_symulacja.resetuj();
 }
 
+//void resetCalki() {
+//    RegulatorPID.resetuj();
+//}

@@ -280,7 +280,9 @@ void MainWindow::on_pushResetSym_clicked()
     m_seriesWyjscie->clear();
     m_seriesUchyb->clear();
     m_seriesSterowanie->clear();
-    // ... i PID jeśli masz
+    m_seriesP->clear();
+    m_seriesI->clear();
+    m_seriesD->clear();
 
     // Przywróć osie X do początku
     auto resetX = [&](QChart* chart) {
@@ -384,6 +386,12 @@ void MainWindow::aktualizujSymulacje()
 
 }
 
+void MainWindow::on_pushResetPID_clicked(){
+    KlasaUslugowa.setlastP(0.0);
+    KlasaUslugowa.setlastI(0.0);
+    KlasaUslugowa.setlastD(0.0);
+}
+
 void MainWindow::on_pushConfigARX_clicked()
 {
     ParametryARX dialog(this);
@@ -427,6 +435,7 @@ void MainWindow::on_pushConfigARX_clicked()
 void MainWindow::on_pushSaveConfig_clicked(){
     zapiszKonfiguracje();
 }
+
 void MainWindow::on_pushLoadConfig_clicked(){
     wczytajKonfiguracje();
 }
@@ -452,6 +461,7 @@ void MainWindow::wczytajKonfiguracje() { QString fileName = QFileDialog::getOpen
     if (!doc.isObject()) return; QJsonObject root = doc.object();
     m_logika.fromJson(root);
     odswiezGUI();
+    on_pushResetSym_clicked();
 }
 
 void MainWindow::odswiezGUI()
