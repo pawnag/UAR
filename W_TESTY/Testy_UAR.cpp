@@ -33,7 +33,6 @@ void raportBleduSekwencji(const std::vector<double>& spodz, const std::vector<do
     for (const auto& el : fakt) std::cerr << el << ", ";
     std::cerr << std::endl << std::endl;
 }
-
 bool porownanieSekwencji(const std::vector<double>& spodz, const std::vector<double>& fakt)
 {
     constexpr double TOL = 1e-3;
@@ -42,7 +41,6 @@ bool porownanieSekwencji(const std::vector<double>& spodz, const std::vector<dou
         if (std::fabs(fakt[i] - spodz[i]) >= TOL) return false;
     return true;
 }
-
 void myAssert(const std::vector<double>& spodz, const std::vector<double>& fakt)
 {
     if (porownanieSekwencji(spodz, fakt))

@@ -4,8 +4,7 @@
 #include <QDebug>
 
 // --- 1. KONSTRUKTORY (Poprawione pod QObject) ---
-ModelARX::ModelARX(QObject *parent)
-    : QObject(parent)
+ModelARX::ModelARX(QObject *parent) : QObject(parent)
 {
     // Ustawienie wartości domyślnych
     m_ot = 1;
@@ -15,8 +14,8 @@ ModelARX::ModelARX(QObject *parent)
     m_ograniczenia = true;
 
     // Inicjalizacja pustych wektorów, żeby nie było błędów przy resize
-    m_A = {0.0, 0.0, 0.0};
-    m_B = {1.0, 1.0, 1.0};
+    m_A = {0.0};
+    m_B = {1.0};
 
     inicjalizujBufory();
 }
@@ -122,6 +121,29 @@ double ModelARX::obliczWyjscie()
     return wyjscie;
 }
 
+// double ModelARX::obliczWyjscie()
+// {
+//     double y = 0.0;
+
+//     // B — wejście z opóźnieniem
+//     for (size_t i = 0; i < m_B.size(); i++)
+//     {
+//         y += m_B[i] * m_u[m_ot + i];
+//     }
+
+//     // A — wyjścia poprzednie
+//     for (size_t i = 0; i < m_A.size(); i++)
+//     {
+//         y -= m_A[i] * m_y[i];
+//     }
+
+//     if (rozklad_szumu)
+//         y += (*rozklad_szumu)(generator_losowy);
+
+//     return y;
+// }
+
+
 double ModelARX::symuluj(double i_wej)
 {
     // 1. Ograniczenie wejścia
@@ -172,7 +194,7 @@ void ModelARX::setA(const std::vector<double>& i_A)
     }
 
     // Diagnostyka: Zobaczysz to w konsoli
-    qDebug() << "ModelARX::setA -> Nowy rozmiar A:" << m_A.size() << "Bufor y:" << m_y.size();
+    //qDebug() << "ModelARX::setA -> Nowy rozmiar A:" << m_A.size() << "Bufor y:" << m_y.size();
 }
 
 void ModelARX::setB(const std::vector<double>& i_B)
@@ -184,7 +206,8 @@ void ModelARX::setB(const std::vector<double>& i_B)
     while (m_u.size() < wymaganyRozmiar) {
         m_u.push_front(0.0);
     }
-    qDebug() << "ModelARX::setB -> Nowy rozmiar B:" << m_B.size() << "Bufor u:" << m_u.size();
+
+    //qDebug() << "ModelARX::setB -> Nowy rozmiar B:" << m_B.size() << "Bufor u:" << m_u.size();
 }
 
 void ModelARX::setOpoznienieTransportowe(int i_ot)

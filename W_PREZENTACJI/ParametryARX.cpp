@@ -23,7 +23,7 @@ void ParametryARX::accept()
     std::vector<double> tempB = stringToVector(ui->editB->text());
 
     // 2. Diagnostyka (zobaczysz to w konsoli Qt Creator)
-    qDebug() << "Próba zapisu. A:" << tempA.size() << "B:" << tempB.size();
+    //qDebug() << "Próba zapisu. A:" << tempA.size() << "B:" << tempB.size();
 
     // 3. Walidacja
     if (tempA.size() < 3) {

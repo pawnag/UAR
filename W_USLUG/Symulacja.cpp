@@ -94,11 +94,11 @@ void Symulacja::wykonajKrok()
     // Pokaż co 10-tą próbkę lub zawsze, jeśli krok jest wolny
     // static int licznik = 0;
     // if (licznik++ % 10 == 0) {
-    qDebug() << "T:" << m_czas
-             << " Zad:" << m_wartoscZadana
-             << " Ster:" << m_sterowanie
-             << " Wyj:" << m_wartoscWyjscie
-             << " TrybOtwarty:" << m_prostyUAR.czyTrybOtwarty();
+    // qDebug() << "T:" << m_czas
+    //          << " Zad:" << m_wartoscZadana
+    //          << " Ster:" << m_sterowanie
+    //          << " Wyj:" << m_wartoscWyjscie
+    //          << " TrybOtwarty:" << m_prostyUAR.czyTrybOtwarty();
     // }
     // -------------------
 

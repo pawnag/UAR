@@ -27,31 +27,42 @@ RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
 
 double RegulatorPID::symuluj(double e)
 {
-    // P
-    m_lastP = m_k * e;
-    // I
-    m_lastI = 0.0;
+    // --- P ---
+    double u_P = m_k * e;
+
+    // --- I ---
+    double u_I = 0.0;
     if (m_TI > 0.0)
     {
         if (m_trybCalk == LiczCalk::Zew)
         {
             m_calka += e;
-            m_lastI = (1.0 / m_TI) * m_calka;
+            u_I = (1.0 / m_TI) * m_calka;
         }
         else
         {
             m_calka += e / m_TI;
-            m_lastI = m_calka;
+            u_I = m_calka;
         }
     }
-    // D
-    m_lastD = 0.0;
+
+    // --- D ---
+    double u_D = 0.0;
     if (m_TD > 0.0)
     {
-        m_lastD = m_TD * (e - m_e_prev);
+        u_D = m_TD * (e - m_e_prev);
     }
+
+    // Zapisujemy e do następnego kroku
     m_e_prev = e;
-    return m_lastP + m_lastI + m_lastD;
+
+    // --- ZAPIS DO ZMIENNYCH KLASOWYCH (dla GUI) ---
+    m_lastP = u_P;
+    m_lastI = u_I;
+    m_lastD = u_D;
+
+    // --- Zwracamy sumę (dla testów i regulatora) ---
+    return u_P + u_I + u_D;
 }
 
 void RegulatorPID::resetuj()

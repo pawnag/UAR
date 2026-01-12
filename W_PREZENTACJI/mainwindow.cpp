@@ -375,7 +375,7 @@ void MainWindow::aktualizujSymulacje()
     if (m_seriesWyjscie->count() > 0 && m_seriesWyjscie->at(0).x() < limitCzasu) {
         m_seriesWyjscie->remove(0);
     }
-    // ... powtórz dla uchybu, sterowania, PID ...
+    // ... powtórz dla uchybu, sterowania
 
     //PID
     m_seriesP->append(t, m_logika.getP());
@@ -411,7 +411,7 @@ void MainWindow::on_pushConfigARX_clicked()
         int op = dialog.getOpoznienie();
         double szum = dialog.getSzum();
 
-        qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
+        //qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
 
         // 4. Wysyłamy do logiki
         m_logika.nowyModelARX(a, b, op, szum);
@@ -420,7 +420,7 @@ void MainWindow::on_pushConfigARX_clicked()
     }
     else
     {
-        qDebug() << "Anulowano okno (nie kliknięto Zapisz)";
+        //qDebug() << "Anulowano okno (nie kliknięto Zapisz)";
     }
 }
 

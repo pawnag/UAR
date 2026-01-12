@@ -57,7 +57,7 @@ void ProstyUAR::setTrybOtwarty(bool tak)
     if (m_trybOtwarty) m_regulator.resetuj();
 }
 
-
+//stara
 double ProstyUAR::symuluj(double wartoscZadana)
 {
     // 1. Obliczamy uchyb: e(k) = w(k) - y(k-1)
@@ -65,17 +65,10 @@ double ProstyUAR::symuluj(double wartoscZadana)
     double sterowanie = 0.0;
 
     if (m_trybOtwarty) {
-        // --- TRYB OTWARTY (RĘCZNY) ---
-        // Wartość zadana z generatora traktowana jest bezpośrednio jako sterowanie
         sterowanie = wartoscZadana;
-
-        // Ważne: Gdy sterujemy ręcznie, regulator musi "odpoczywać".
-        // Resetujemy jego całkę, aby po przełączeniu na automat nie "zwariował".
         m_regulator.resetuj();
 
     } else {
-        // --- TRYB ZAMKNIĘTY (AUTOMAT) ---
-        // Regulator wylicza sterowanie na podstawie uchybu
         sterowanie = m_regulator.symuluj(uchyb);
     }
 
@@ -89,6 +82,7 @@ double ProstyUAR::symuluj(double wartoscZadana)
 
     return noweWyjscie;
 }
+
 void ProstyUAR::aktualizujModel(const std::vector<double>& A,
                                 const std::vector<double>& B,
                                 int opoznienie,
