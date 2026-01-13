@@ -391,7 +391,7 @@ void MainWindow::aktualizujSymulacje()
     m_seriesSterowanie->append(t, u);
 
     // 4. PRZESUWAMY OKNO CZASOWE (Efekt "płynącego" wykresu)
-    double windowSize = 20.0; // Pokaż ostatnie 20 sekund
+    double windowSize = 10.0; // Pokaż ostatnie 20 sekund
 
     auto updateAxisX = [&](QChart* chart) {
         auto axes = chart->axes(Qt::Horizontal);
