@@ -31,6 +31,11 @@ public:
         int opoznienie, 
         double zaklocenie, double umin, double umax, double ymin, double ymax);
 
+    double getUMIN() const;
+    double getUMAX() const;
+    double getYMIN() const;
+    double getYMAX() const;
+
 public slots:
     // --- TUTAJ DODAJEMY NADPISANIE METODY ACCEPT ---
     void accept() override;

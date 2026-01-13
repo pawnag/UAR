@@ -496,10 +496,15 @@ void MainWindow::on_pushConfigARX_clicked()
         int op = dialog.getOpoznienie();
         double szum = dialog.getSzum();
 
+        double umin = dialog.getUMIN();
+        double umax = dialog.getUMAX();
+        double ymin = dialog.getYMIN();
+        double ymax = dialog.getYMAX();
+
         //qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
 
         // 4. Wysyłamy do logiki
-        m_logika.nowyModelARX(a, b, op, szum);
+        m_logika.nowyModelARX(a, b, op, szum, umin, umax, ymin, ymax);
 
         ui->statusbar->showMessage("Zaktualizowano parametry ARX.", 3000);
     }

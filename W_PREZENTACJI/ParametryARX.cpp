@@ -46,6 +46,11 @@ std::vector<double> ParametryARX::getB() const { return stringToVector(ui->editB
 
 int ParametryARX::getOpoznienie() const { return ui->spinOpoznienie->value(); }
 
+double ParametryARX::getUMIN() const { return ui->spinMinU->value(); };
+double ParametryARX::getUMAX() const { return ui->spinMaxU->value(); };
+double ParametryARX::getYMIN() const { return ui->spinMinY->value(); };
+double ParametryARX::getYMAX() const { return ui->spinMaxY->value(); };
+
 double ParametryARX::getSzum() const
 {
     // Zabezpieczenie, gdyby kontrolka nie istniała w UI
