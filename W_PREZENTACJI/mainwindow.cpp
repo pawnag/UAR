@@ -441,17 +441,33 @@ void MainWindow::aktualizujSymulacje()
     autoSkalujOsY(m_chartControl);  // Wykres Sterowania
     autoSkalujOsY(m_chartPID);      // Wykres PID
 
-    // OPTYMALIZACJA: Usuwanie starych punktów, które są już daleko poza ekranem
-    // np. jeśli są starsze niż 2x szerokość okna
+    // OPTYMALIZACJA: Usuwanie starych punktów
     double limitCzasu = t - (windowSize * 2.0);
 
-    if (m_seriesZadana->count() > 0 && m_seriesZadana->at(0).x() < limitCzasu) {
-        m_seriesZadana->remove(0);
-    }
-    if (m_seriesWyjscie->count() > 0 && m_seriesWyjscie->at(0).x() < limitCzasu) {
-        m_seriesWyjscie->remove(0);
-    }
-    // ... powtórz dla uchybu, sterowania
+    // Funkcja pomocnicza lambda, żeby nie kopiować kodu
+    auto czyscStareProbki = [&](QLineSeries* seria) {
+        if (seria && seria->count() > 0 && seria->at(0).x() < limitCzasu) {
+            seria->remove(0);
+            // Jeśli interwał jest bardzo mały, można usunąć więcej próbek naraz:
+            // seria->removePoints(0, seria->count() - ilesTam);
+            // ale remove(0) przy każdym cyklu zazwyczaj wystarcza.
+        }
+    };
+
+    // 1. Wykres główny
+    czyscStareProbki(m_seriesZadana);
+    czyscStareProbki(m_seriesWyjscie);
+
+    // 2. Wykres Uchybu (TEGO BRAKOWAŁO)
+    czyscStareProbki(m_seriesUchyb);
+
+    // 3. Wykres Sterowania (TEGO BRAKOWAŁO)
+    czyscStareProbki(m_seriesSterowanie);
+
+    // 4. Wykres PID (TEGO TEŻ BRAKOWAŁO)
+    czyscStareProbki(m_seriesP);
+    czyscStareProbki(m_seriesI);
+    czyscStareProbki(m_seriesD);
 
     //PID
     m_seriesP->append(t, m_logika.getP());
