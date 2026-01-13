@@ -33,6 +33,23 @@ void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector
     m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
 }
 
+void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum,
+    double u_min, double u_max, double y_min, double y_max)
+{
+    if (A == m_symulacja.getModelA() &&
+        B == m_symulacja.getModelB() &&
+        opoznienie == m_symulacja.getModelOpoznienie() &&
+        szum == m_symulacja.getModelSzum())
+    {
+        return;
+    }
+
+    m_symulacja.konfigurujModel(A, B, opoznienie);
+    m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
+    m_symulacja.getModel().setOgraniczeniaSterowania(u_min, u_max);
+    m_symulacja.getModel().setOgraniczeniaWyjscia(y_min, y_max);
+}
+
 
 void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
 {
@@ -94,6 +111,10 @@ QJsonObject KlasaUslugowa::toJson() const
 
         modelObj["opoznienie"] = m_symulacja.getModelOpoznienie();
         modelObj["szum"] = m_symulacja.getModelSzum();
+        modelObj["u min"] = m_symulacja.getModelUMIN();
+        modelObj["u max"] = m_symulacja.getModelUMAX();
+        modelObj["y min"] = m_symulacja.getModelYMIN();
+        modelObj["y max"] = m_symulacja.getModelYMAX();
     }
     root["modelARX"] = modelObj;
 
@@ -138,7 +159,12 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
         int op = obj["opoznienie"].toInt();
         double szum = obj["szum"].toDouble();
 
-        nowyModelARX(A, B, op, szum);
+        double u_min = obj["u min"].toDouble();
+        double u_max = obj["u max"].toDouble();
+        double y_min = obj["y min"].toDouble();
+        double y_max = obj["y max"].toDouble();
+
+        nowyModelARX(A, B, op, szum, u_min, u_max, y_min, y_max);
     }
 
     // --- PID ---

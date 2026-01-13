@@ -25,6 +25,9 @@ public:
                       int opoznienie = 1,
                       double szum = 0.0);
 
+    void nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum,
+        double u_min, double u_max, double y_min, double y_max);
+
     void nowyRegulator(double k, double TI, double TD);
 
     void start();

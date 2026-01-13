@@ -17,7 +17,6 @@ Symulacja::Symulacja(QObject *parent)
 
 void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie)
 {
-    // Sięgamy do wnętrza ProstyUAR, aby skonfigurować JEGO model
     m_prostyUAR.getModel().setA(A);
     m_prostyUAR.getModel().setB(B);
     m_prostyUAR.getModel().setOpoznienieTransportowe(opoznienie);
