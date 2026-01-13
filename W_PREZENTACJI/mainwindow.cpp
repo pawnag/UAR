@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_chartOutput->addSeries(m_seriesZadana);
     m_chartOutput->addSeries(m_seriesWyjscie);
     m_chartOutput->createDefaultAxes();
-    stylizujWykres(m_chartOutput, true);
+    stylizujWykres(m_chartOutput, true, "Odpowiedź układu");
 
     m_chartViewOutput = new QChartView(m_chartOutput);
     m_chartViewOutput->setRenderHint(QPainter::Antialiasing);
@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_chartError->setTitle("Uchyb regulacji"); // <--- DODANY TYTUŁ
     m_chartError->addSeries(m_seriesUchyb);
     m_chartError->createDefaultAxes();
-    stylizujWykres(m_chartError, true);
+    stylizujWykres(m_chartError, true, "Uchyb");
     m_chartViewError = new QChartView(m_chartError);
     m_chartViewError->setRenderHint(QPainter::Antialiasing);
     layoutDolny->addWidget(m_chartViewError);
@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_chartControl->setTitle("Sygnał sterujący"); // <--- DODANY TYTUŁ
     m_chartControl->addSeries(m_seriesSterowanie);
     m_chartControl->createDefaultAxes();
-    stylizujWykres(m_chartControl, true);
+    stylizujWykres(m_chartControl, true, "Wyjście regulatora");
     m_chartViewControl = new QChartView(m_chartControl);
     m_chartViewControl->setRenderHint(QPainter::Antialiasing);
     layoutDolny->addWidget(m_chartViewControl);
@@ -66,10 +66,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_seriesI = new QLineSeries(); m_seriesI->setName("I"); m_seriesI->setColor(Qt::yellow);
     m_seriesD = new QLineSeries(); m_seriesD->setName("D"); m_seriesD->setColor(QColor(255, 100, 255));
     m_chartPID = new QChart();
-    m_chartPID->setTitle("Składowe PID"); // <--- DODANY TYTUŁ
+    m_chartPID->setTitle("Składowe sterowania"); // <--- DODANY TYTUŁ
     m_chartPID->addSeries(m_seriesP); m_chartPID->addSeries(m_seriesI); m_chartPID->addSeries(m_seriesD);
     m_chartPID->createDefaultAxes();
-    stylizujWykres(m_chartPID, true);
+    stylizujWykres(m_chartPID, true, "Wartość PID");
     m_chartViewPID = new QChartView(m_chartPID);
     m_chartViewPID->setRenderHint(QPainter::Antialiasing);
     layoutDolny->addWidget(m_chartViewPID);
@@ -146,32 +146,26 @@ void MainWindow::setupChart(QLayout* layout, QChart*& chart, QChartView*& view) 
     layout->addWidget(view);
 }
 
-void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
-    // 1. Tło
+void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende, QString tytulOsY) {
+    // 1. Podstawowy wygląd
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
     chart->setPlotAreaBackgroundVisible(false);
+
+    // Resetujemy marginesy layoutu, ale zostawiamy marginesy wykresu dla opisów
     chart->layout()->setContentsMargins(0, 0, 0, 0);
-    chart->setMargins(QMargins(45, 5, 5, 5));
+    // Zwiększamy marginesy: Lewy (dla tytułu Y), Dolny (dla Czas [s]), Prawy (dla estetyki)
+    chart->setMargins(QMargins(10, 0, 0, 10));
     chart->setBackgroundRoundness(0);
 
-    // ===============================================
-    // ZMIANA: Obsługa Tytułu Wykresu
-    // ===============================================
-    // chart->setTitle(""); // <--- USUŃ LUB ZAKOMENTUJ TĘ LINIĘ (ona usuwała napisy)
-
-    // Dodaj to, żeby tytuł był biały i pogrubiony:
     chart->setTitleBrush(QBrush(Qt::white));
-    QFont titleFont("Arial", 10, QFont::Bold);
-    chart->setTitleFont(titleFont);
-    // ===============================================
+    chart->setTitleFont(QFont("Arial", 10, QFont::Bold));
 
-    // 4. Legenda
+    // 2. Legenda PO PRAWEJ STRONIE
     if (pokazLegende) {
         chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignTop);
+        chart->legend()->setAlignment(Qt::AlignTop); // <--- ZMIANA: Prawa strona
         chart->legend()->setLabelBrush(QBrush(Qt::white));
         chart->legend()->setBackgroundVisible(false);
-        chart->legend()->setContentsMargins(0, 0, 0, 0);
         QFont font = chart->legend()->font();
         font.setPointSize(8);
         chart->legend()->setFont(font);
@@ -179,16 +173,47 @@ void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
         chart->legend()->setVisible(false);
     }
 
-    // 5. Osie
+    // 3. Konfiguracja OSI (Opisy)
     auto axes = chart->axes();
-    for (auto axis : axes) {
-        axis->setLabelsBrush(QBrush(Qt::white));
-        axis->setGridLineColor(QColor(60, 60, 60));
-        axis->setTitleText("");
-        axis->setLabelsVisible(true);
-        QFont axisFont = axis->labelsFont();
+
+    // Szukamy osi X i Y
+    QAbstractAxis* axisX = nullptr;
+    QAbstractAxis* axisY = nullptr;
+
+    // Pobieramy osie (zakładając, że createDefaultAxes() je utworzyło)
+    auto axesX = chart->axes(Qt::Horizontal);
+    auto axesY = chart->axes(Qt::Vertical);
+    if (!axesX.isEmpty()) axisX = axesX.first();
+    if (!axesY.isEmpty()) axisY = axesY.first();
+
+    // Stylizacja Osi X (Czas)
+    if (axisX) {
+        axisX->setLabelsBrush(QBrush(Qt::white));
+        axisX->setGridLineColor(QColor(60, 60, 60));
+
+        // Ustawienie napisu "Czas [s]"
+        axisX->setTitleText("Czas [s]");
+        axisX->setTitleBrush(QBrush(Qt::white));
+        axisX->setTitleVisible(true);
+
+        QFont axisFont = axisX->labelsFont();
         axisFont.setPointSize(8);
-        axis->setLabelsFont(axisFont);
+        axisX->setLabelsFont(axisFont);
+    }
+
+    // Stylizacja Osi Y (Wartości)
+    if (axisY) {
+        axisY->setLabelsBrush(QBrush(Qt::white));
+        axisY->setGridLineColor(QColor(60, 60, 60));
+
+        // Ustawienie napisu z parametru (np. "Odpowiedź układu")
+        axisY->setTitleText(tytulOsY);
+        axisY->setTitleBrush(QBrush(Qt::white));
+        axisY->setTitleVisible(true);
+
+        QFont axisFont = axisY->labelsFont();
+        axisFont.setPointSize(8);
+        axisY->setLabelsFont(axisFont);
     }
 }
 

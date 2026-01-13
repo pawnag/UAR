@@ -71,7 +71,7 @@ private:
 
     // Metody pomocnicze
     void setupChart(QLayout* layout, QChart*& chart, QChartView*& view);
-    void stylizujWykres(QChart* chart, bool pokazLegende);
+    void stylizujWykres(QChart* chart, bool pokazLegende , QString tytulOsY);
     void autoSkalujOsY(QChart* chart);
 
     //JSON
