@@ -1,0 +1,30 @@
+{
+    "generator": {
+        "amplituda": 0,
+        "interwal": 200,
+        "okres": 10,
+        "skladowa": 2,
+        "typ": 0,
+        "wypelnienie": 0.5
+    },
+    "modelARX": {
+        "A": [
+            -0.4,
+            0,
+            0
+        ],
+        "B": [
+            0.6,
+            0,
+            0
+        ],
+        "opoznienie": 1,
+        "szum": 0
+    },
+    "regulatorPID": {
+        "TD": 0,
+        "TI": 4,
+        "k": 1,
+        "trybCalk": 0
+    }
+}

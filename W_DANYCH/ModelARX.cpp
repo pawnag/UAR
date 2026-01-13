@@ -14,8 +14,8 @@ ModelARX::ModelARX(QObject *parent) : QObject(parent)
     m_ograniczenia = true;
 
     // Inicjalizacja pustych wektorów, żeby nie było błędów przy resize
-    m_A = {0.0};
-    m_B = {1.0};
+    m_A = {-0.4};
+    m_B = {0.6};
 
     inicjalizujBufory();
 }
@@ -234,6 +234,4 @@ void ModelARX::aktualizuj(const std::vector<double>& A,
     setB(B);
     setOpoznienieTransportowe(opoznienie);
     setOdchylenieStandardoweSzumu(szum);
-
-    resetuj(); // <<< bardzo ważne — czyści pamięć modelu
 }

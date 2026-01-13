@@ -16,76 +16,19 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_Main" stretch="1,0">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_Graphs" stretch="2,1,1,1">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_Plot1">
-        <property name="spacing">
-         <number>6</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="labelTitleOutput">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Wartość Zadana (w) i Regulowana (y)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_Plot2">
-        <item>
-         <widget class="QLabel" name="labelTitleUchyb">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Uchyb regulacji (e)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_Plot3">
-        <item>
-         <widget class="QLabel" name="labelTitleSterowanie">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Sterowanie (u)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_Plot4">
-        <item>
-         <widget class="QLabel" name="labelTitlePID">
-          <property name="font">
-           <font>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Składowe sterowania (P, I, D)</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+     <widget class="QWidget" name="widgetWykresy" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(45, 45, 45);</string>
+      </property>
+     </widget>
     </item>
+
     <item>
      <widget class="QScrollArea" name="scrollArea">
       <property name="minimumSize">

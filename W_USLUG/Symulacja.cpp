@@ -22,7 +22,7 @@ void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<
     m_prostyUAR.getModel().setB(B);
     m_prostyUAR.getModel().setOpoznienieTransportowe(opoznienie);
     m_prostyUAR.setTrybOtwarty(false);
-    m_prostyUAR.getModel().resetuj();
+    //m_prostyUAR.getModel().resetuj();
 }
 
 void Symulacja::konfigurujRegulator(double k, double ti, double td)

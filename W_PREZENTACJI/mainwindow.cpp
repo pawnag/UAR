@@ -2,7 +2,6 @@
 #include "ParametryARX.h"
 #include "ui_mainwindow.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -10,99 +9,99 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // 1. Layout i Marginesy
-    ui->verticalLayout_Plot1->setContentsMargins(0, 5, 0, 0);
-    ui->verticalLayout_Plot2->setContentsMargins(0, 5, 0, 0);
-    ui->verticalLayout_Plot3->setContentsMargins(0, 5, 0, 0);
-    ui->verticalLayout_Plot4->setContentsMargins(0, 5, 0, 0);
+    // ... (początek konstruktora bez zmian)
 
     // ==========================================
-    // KONFIGURACJA WYKRESÓW
+    // KONFIGURACJA WYKRESÓW (POPRAWIONA)
     // ==========================================
+    QVBoxLayout* layoutKontenera = new QVBoxLayout(ui->widgetWykresy);
+    layoutKontenera->setContentsMargins(0, 0, 0, 0);
 
-    // --- Wykres 1: Zadana i Wyjście ---
-    m_seriesZadana = new QLineSeries();
-    m_seriesZadana->setName("Zadana (w)");
-    QPen penRed(Qt::red); penRed.setWidth(2);
-    m_seriesZadana->setPen(penRed);
-
-    m_seriesWyjscie = new QLineSeries();
-    m_seriesWyjscie->setName("Wyjście (y)");
-    QPen penBlue(QColor(0, 150, 255)); penBlue.setWidth(2);
-    m_seriesWyjscie->setPen(penBlue);
+    // --- GÓRA (DUŻY) ---
+    m_seriesZadana = new QLineSeries(); m_seriesZadana->setName("Wartość zadana (w)");
+    m_seriesZadana->setPen(QPen(Qt::red, 2));
+    m_seriesWyjscie = new QLineSeries(); m_seriesWyjscie->setName("Wartość regulowana (y)");
+    m_seriesWyjscie->setPen(QPen(QColor(0, 150, 255), 2));
 
     m_chartOutput = new QChart();
+    m_chartOutput->setTitle("Wartość zadana i regulowana"); // <--- DODANY TYTUŁ
     m_chartOutput->addSeries(m_seriesZadana);
     m_chartOutput->addSeries(m_seriesWyjscie);
     m_chartOutput->createDefaultAxes();
-
-    // Stylizacja z legendą
     stylizujWykres(m_chartOutput, true);
 
     m_chartViewOutput = new QChartView(m_chartOutput);
     m_chartViewOutput->setRenderHint(QPainter::Antialiasing);
-    ui->verticalLayout_Plot1->addWidget(m_chartViewOutput);
 
-    // --- Wykres 2: Uchyb ---
-    m_seriesUchyb = new QLineSeries();
-    m_seriesUchyb->setName("Uchyb (e)");
-    QPen penGreen(Qt::green); penGreen.setWidth(2);
-    m_seriesUchyb->setPen(penGreen);
+    // ZMIANA PROPORCJI: Zamiast 60 dajemy 1
+    layoutKontenera->addWidget(m_chartViewOutput, 1);
 
-    setupChart(ui->verticalLayout_Plot2, m_chartError, m_chartViewError);
+    // --- DÓŁ (3 MNIEJSZE) ---
+    QHBoxLayout* layoutDolny = new QHBoxLayout();
+
+    // Uchyb
+    m_seriesUchyb = new QLineSeries(); m_seriesUchyb->setName("Uchyb (e)"); m_seriesUchyb->setColor(Qt::green);
+    m_chartError = new QChart();
+    m_chartError->setTitle("Uchyb regulacji"); // <--- DODANY TYTUŁ
     m_chartError->addSeries(m_seriesUchyb);
     m_chartError->createDefaultAxes();
-    stylizujWykres(m_chartError, false); // Bez legendy
+    stylizujWykres(m_chartError, true);
+    m_chartViewError = new QChartView(m_chartError);
+    m_chartViewError->setRenderHint(QPainter::Antialiasing);
+    layoutDolny->addWidget(m_chartViewError);
 
-    // --- Wykres 3: Sterowanie ---
-    m_seriesSterowanie = new QLineSeries();
-    m_seriesSterowanie->setName("Sterowanie (u)");
-    QPen penMagenta(Qt::magenta); penMagenta.setWidth(2);
-    m_seriesSterowanie->setPen(penMagenta);
-
-    setupChart(ui->verticalLayout_Plot3, m_chartControl, m_chartViewControl);
+    // Sterowanie
+    m_seriesSterowanie = new QLineSeries(); m_seriesSterowanie->setName("Sterowanie (u)"); m_seriesSterowanie->setColor(Qt::magenta);
+    m_chartControl = new QChart();
+    m_chartControl->setTitle("Sygnał sterujący"); // <--- DODANY TYTUŁ
     m_chartControl->addSeries(m_seriesSterowanie);
     m_chartControl->createDefaultAxes();
-    stylizujWykres(m_chartControl, false); // Bez legendy
+    stylizujWykres(m_chartControl, true);
+    m_chartViewControl = new QChartView(m_chartControl);
+    m_chartViewControl->setRenderHint(QPainter::Antialiasing);
+    layoutDolny->addWidget(m_chartViewControl);
 
-    // --- Wykres 4: Składowe PID ---
+    // PID
     m_seriesP = new QLineSeries(); m_seriesP->setName("P"); m_seriesP->setColor(Qt::cyan);
     m_seriesI = new QLineSeries(); m_seriesI->setName("I"); m_seriesI->setColor(Qt::yellow);
     m_seriesD = new QLineSeries(); m_seriesD->setName("D"); m_seriesD->setColor(QColor(255, 100, 255));
-
-    setupChart(ui->verticalLayout_Plot4, m_chartPID, m_chartViewPID);
-    m_chartPID->addSeries(m_seriesP);
-    m_chartPID->addSeries(m_seriesI);
-    m_chartPID->addSeries(m_seriesD);
+    m_chartPID = new QChart();
+    m_chartPID->setTitle("Składowe PID"); // <--- DODANY TYTUŁ
+    m_chartPID->addSeries(m_seriesP); m_chartPID->addSeries(m_seriesI); m_chartPID->addSeries(m_seriesD);
     m_chartPID->createDefaultAxes();
-
-    // Stylizacja z legendą (PID ma 3 linie, więc legenda się przyda)
     stylizujWykres(m_chartPID, true);
+    m_chartViewPID = new QChartView(m_chartPID);
+    m_chartViewPID->setRenderHint(QPainter::Antialiasing);
+    layoutDolny->addWidget(m_chartViewPID);
+
+    // ZMIANA PROPORCJI: Zamiast 40 dajemy 1
+    // Jeśli góra ma 1 i dół ma 1, to dzielą ekran po połowie (50%/50%)
+    layoutKontenera->addLayout(layoutDolny, 1);
+
+    // ... (reszta konstruktora bez zmian)
 
     // ==========================================
-    // LOGIKA I SYGNAŁY
+    // LOGIKA I SYGNAŁY (Reszta kodu bez zmian)
     // ==========================================
     m_timerSymulacji->setInterval(ui->spinInterwal->value());
     connect(m_timerSymulacji, &QTimer::timeout, this, &MainWindow::aktualizujSymulacje);
 
+    // Sygnały UI - GUI
     connect(ui->pushStart, &QPushButton::clicked, this, &MainWindow::on_pushStart_clicked);
     connect(ui->pushStop, &QPushButton::clicked, this, &MainWindow::on_pushStop_clicked);
     connect(ui->pushResetSym, &QPushButton::clicked, this, &MainWindow::on_pushResetSym_clicked);
+    connect(ui->pushResetPID, &QPushButton::clicked, this, &MainWindow::on_pushResetPID_clicked);
 
     // Generator
     connect(ui->comboTypSygnalu, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
 
-    // POPRAWIONE LINIE: Zamiast pushZapisz jest QDoubleSpinBox
     connect(ui->spinAmplituda, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
-
     connect(ui->spinOkres, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
-
     connect(ui->spinSkladowaStala, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
-
     connect(ui->spinWypelnienie, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryGeneratora);
 
@@ -114,12 +113,19 @@ MainWindow::MainWindow(QWidget *parent)
     // PID
     connect(ui->spinPidKp, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
-
     connect(ui->spinPidTi, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
-
     connect(ui->spinPidTd, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::aktualizujParametryPID);
+    connect(ui->comboMetCalk, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::aktualizujParametryPID);
+
+    // ARX i Pliki
+    connect(ui->pushConfigARX, &QPushButton::clicked, this, &MainWindow::on_pushConfigARX_clicked);
+    connect(ui->pushSaveConfig, &QPushButton::clicked, this, &MainWindow::on_pushSaveConfig_clicked);
+    connect(ui->pushLoadConfig, &QPushButton::clicked, this, &MainWindow::on_pushLoadConfig_clicked);
+
+    // Inicjalizacja początkowa
     aktualizujParametryGeneratora();
     aktualizujParametryPID();
 }
@@ -141,37 +147,31 @@ void MainWindow::setupChart(QLayout* layout, QChart*& chart, QChartView*& view) 
 }
 
 void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
-    // 1. Ciemne tło
+    // 1. Tło
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
     chart->setPlotAreaBackgroundVisible(false);
-
-    // 2. Marginesy wewnętrzne layoutu na 0
     chart->layout()->setContentsMargins(0, 0, 0, 0);
-
-    // 3. INTELIGENTNE MARGINESY (To jest kluczowa zmiana)
-    if (pokazLegende) {
-        // Jeśli jest legenda po lewej, ustawiamy margines lewy na 0.
-        // Legenda sama zadba o odstęp, a my nie chcemy dodatkowej dziury.
-        chart->setMargins(QMargins(0, 5, 5, 5));
-    } else {
-        // Jeśli nie ma legendy, musimy zostawić trochę miejsca na cyferki osi Y (np. 1.00).
-        // 40 pikseli powinno wystarczyć, żeby liczby nie ucięło.
-        chart->setMargins(QMargins(40, 5, 5, 5));
-    }
-
+    chart->setMargins(QMargins(45, 5, 5, 5));
     chart->setBackgroundRoundness(0);
-    chart->setTitle("");
+
+    // ===============================================
+    // ZMIANA: Obsługa Tytułu Wykresu
+    // ===============================================
+    // chart->setTitle(""); // <--- USUŃ LUB ZAKOMENTUJ TĘ LINIĘ (ona usuwała napisy)
+
+    // Dodaj to, żeby tytuł był biały i pogrubiony:
+    chart->setTitleBrush(QBrush(Qt::white));
+    QFont titleFont("Arial", 10, QFont::Bold);
+    chart->setTitleFont(titleFont);
+    // ===============================================
 
     // 4. Legenda
     if (pokazLegende) {
         chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignLeft); // Legenda po lewej
+        chart->legend()->setAlignment(Qt::AlignTop);
         chart->legend()->setLabelBrush(QBrush(Qt::white));
         chart->legend()->setBackgroundVisible(false);
-
-        // Zmniejszenie marginesów samej legendy, żeby "przykleiła się" bardziej do krawędzi
         chart->legend()->setContentsMargins(0, 0, 0, 0);
-
         QFont font = chart->legend()->font();
         font.setPointSize(8);
         chart->legend()->setFont(font);
@@ -186,7 +186,6 @@ void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende) {
         axis->setGridLineColor(QColor(60, 60, 60));
         axis->setTitleText("");
         axis->setLabelsVisible(true);
-
         QFont axisFont = axis->labelsFont();
         axisFont.setPointSize(8);
         axis->setLabelsFont(axisFont);
@@ -314,6 +313,35 @@ void MainWindow::aktualizujParametryGeneratora()
     double stala = ui->spinSkladowaStala->value();
     double wypelnienie = ui->spinWypelnienie->value();
 
+    bool czyStala = (typ == GeneratorWartosciZadanej::SYGNAL_STALY);
+    bool czyProstokat = (typ == GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
+
+    if (czyStala) {
+        // --- Ustawienia dla WARTOŚCI STAŁEJ ---
+
+        // Blokujemy Okres (bo sygnał stały nie ma okresu)
+        ui->spinOkres->setEnabled(false);
+
+        // Blokujemy Amplitudę (zgodnie z Twoją prośbą)
+        ui->spinAmplituda->setEnabled(false);
+
+        // Blokujemy Wypełnienie (nie dotyczy stałej)
+        ui->spinWypelnienie->setEnabled(false);
+
+        // Zostawiamy Składową Stałą OD BLOKOWANĄ - żebyś miał gdzie wpisać wartość!
+        ui->spinSkladowaStala->setEnabled(true);
+
+    } else {
+        // --- Ustawienia dla POZOSTAŁYCH (Sinus, Prostokąt) ---
+
+        ui->spinOkres->setEnabled(true);
+        ui->spinAmplituda->setEnabled(true);
+        ui->spinSkladowaStala->setEnabled(true); // Offset zazwyczaj dostępny zawsze
+
+        // Wypełnienie aktywne zazwyczaj tylko dla prostokąta
+        ui->spinWypelnienie->setEnabled(czyProstokat);
+    }
+
     // Wysłanie do logiki
     m_logika.nowyGenerator(ampl, okres, interwal, typ, stala, wypelnienie);
 }
@@ -340,8 +368,21 @@ void MainWindow::aktualizujSymulacje()
     double e = m_logika.getUchyb();
     double u = m_logika.getSterowanie();
 
-    // (Opcjonalnie: pobierz P, I, D jeśli masz do nich dostęp w KlasaUslugowa)
-    // double p = ...
+    // Wykres 1: Zadana i Wyjście
+    // Formatuje liczbę do 2 miejsc po przecinku (f, 2)
+    m_seriesZadana->setName(QString("Wartość zadana (w): %1").arg(w, 0, 'f', 2));
+    m_seriesWyjscie->setName(QString("Wartość regulowana (y): %1").arg(y, 0, 'f', 2));
+
+    // Wykres 2: Uchyb (UWAGA: musisz włączyć legendę dla tego wykresu, patrz Krok 2)
+    m_seriesUchyb->setName(QString("Uchyb (e): %1").arg(e, 0, 'f', 3));
+
+    // Wykres 3: Sterowanie (UWAGA: musisz włączyć legendę dla tego wykresu)
+    m_seriesSterowanie->setName(QString("Sterowanie (u): %1").arg(u, 0, 'f', 2));
+
+    // Wykres 4: PID (opcjonalnie)
+    m_seriesP->setName(QString("P: %1").arg(m_logika.getP(), 0, 'f', 2));
+    m_seriesI->setName(QString("I: %1").arg(m_logika.getI(), 0, 'f', 2));
+    m_seriesD->setName(QString("D: %1").arg(m_logika.getD(), 0, 'f', 2));
 
     // 3. AKTUALIZUJEMY WYKRESY (Dodajemy punkty)
     m_seriesZadana->append(t, w);
