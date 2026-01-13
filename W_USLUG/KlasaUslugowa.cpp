@@ -36,13 +36,17 @@ void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector
 void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum,
     double u_min, double u_max, double y_min, double y_max)
 {
-    if (A == m_symulacja.getModelA() &&
-        B == m_symulacja.getModelB() &&
-        opoznienie == m_symulacja.getModelOpoznienie() &&
-        szum == m_symulacja.getModelSzum())
-    {
-        return;
-    }
+    //if (A == m_symulacja.getModelA() &&
+    //    B == m_symulacja.getModelB() &&
+    //    opoznienie == m_symulacja.getModelOpoznienie() &&
+    //    szum == m_symulacja.getModelSzum() &&
+    //    u_min == m_symulacja.getModelUMIN() &&
+    //    u_max == m_symulacja.getModelUMAX()&&
+    //    y_min == m_symulacja.getModelYMIN()&&
+    //    y_max == m_symulacja.getModelYMAX())
+    //{
+    //    return;
+    //}
 
     m_symulacja.konfigurujModel(A, B, opoznienie);
     m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
@@ -61,6 +65,12 @@ double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZa
 double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
 double KlasaUslugowa::getSterowanie() const { return m_symulacja.getSterowanie(); }
 double KlasaUslugowa::getUchyb() const { return m_symulacja.getUchyb(); }
+
+double KlasaUslugowa::getModelUMIN() const { return m_symulacja.getModelUMIN(); };
+double KlasaUslugowa::getModelUMAX() const { return m_symulacja.getModelUMAX(); };
+double KlasaUslugowa::getModelYMIN() const { return m_symulacja.getModelYMIN(); };
+double KlasaUslugowa::getModelYMAX() const { return m_symulacja.getModelYMAX(); };
+
 
 std::vector<double> KlasaUslugowa::getWektorA() const
 {
@@ -111,10 +121,10 @@ QJsonObject KlasaUslugowa::toJson() const
 
         modelObj["opoznienie"] = m_symulacja.getModelOpoznienie();
         modelObj["szum"] = m_symulacja.getModelSzum();
-        modelObj["u min"] = m_symulacja.getModelUMIN();
-        modelObj["u max"] = m_symulacja.getModelUMAX();
-        modelObj["y min"] = m_symulacja.getModelYMIN();
-        modelObj["y max"] = m_symulacja.getModelYMAX();
+        modelObj["u min"] = getModelUMIN();
+        modelObj["u max"] = getModelUMAX();
+        modelObj["y min"] = getModelYMIN();
+        modelObj["y max"] = getModelYMAX();
     }
     root["modelARX"] = modelObj;
 

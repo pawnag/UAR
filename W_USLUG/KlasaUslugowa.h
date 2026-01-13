@@ -40,6 +40,10 @@ public:
     double getSterowanie() const;
     double getUchyb() const;
 
+    double getModelUMIN() const;
+    double getModelUMAX() const;
+    double getModelYMIN() const;
+    double getModelYMAX() const;
 
     // Gettery potrzebne aby wyświetlić w oknie ParametryARX.ui
     std::vector<double> getWektorA() const;

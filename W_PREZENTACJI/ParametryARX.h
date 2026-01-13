@@ -21,10 +21,15 @@ public:
     double getSzum() const;
 
     // ZMIANA: Dodajemy 'double zaklocenie'
+    //void ustawAktualne(const std::vector<double>& a,
+    //                   const std::vector<double>& b,
+    //                   int opoznienie,
+    //                   double zaklocenie);
+
     void ustawAktualne(const std::vector<double>& a,
-                       const std::vector<double>& b,
-                       int opoznienie,
-                       double zaklocenie);
+        const std::vector<double>& b,
+        int opoznienie, 
+        double zaklocenie, double umin, double umax, double ymin, double ymax);
 
 public slots:
     // --- TUTAJ DODAJEMY NADPISANIE METODY ACCEPT ---

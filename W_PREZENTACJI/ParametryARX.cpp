@@ -54,11 +54,34 @@ double ParametryARX::getSzum() const
 }
 
 // --- INICJALIZACJA OKNA ---
+//void ParametryARX::ustawAktualne(const std::vector<double>& a,
+//                                 const std::vector<double>& b,
+//                                 int opoznienie,
+//                                 double zaklocenie)
+//{
+//    QString strA = vectorToString(a);
+//    QString strB = vectorToString(b);
+//
+//    ui->editA->setText(strA);
+//    ui->editB->setText(strB);
+//    ui->spinOpoznienie->setValue(opoznienie);
+//
+//    if(ui->spinZaklocenie) {
+//        ui->spinZaklocenie->setValue(zaklocenie);
+//    }
+//
+//    // Aktualizacja etykiety informacyjnej
+//    QString info = QString("A: [%1]\nB: [%2]\nk: %3, Szum: %4")
+//                       .arg(strA).arg(strB).arg(opoznienie).arg(zaklocenie);
+//
+//    // Upewnij się, że masz labelCurrentSummary w pliku .ui
+//    if(ui->labelCurrentSummary) ui->labelCurrentSummary->setText(info);
+//}
+
 void ParametryARX::ustawAktualne(const std::vector<double>& a,
-                                 const std::vector<double>& b,
-                                 int opoznienie,
-                                 double zaklocenie)
-{
+    const std::vector<double>& b,
+    int opoznienie,
+    double zaklocenie, double umin, double umax, double ymin, double ymax) {
     QString strA = vectorToString(a);
     QString strB = vectorToString(b);
 
@@ -66,17 +89,25 @@ void ParametryARX::ustawAktualne(const std::vector<double>& a,
     ui->editB->setText(strB);
     ui->spinOpoznienie->setValue(opoznienie);
 
-    if(ui->spinZaklocenie) {
+    if (ui->spinZaklocenie) {
         ui->spinZaklocenie->setValue(zaklocenie);
     }
 
+    ui->spinMinU->setValue(umin);
+    ui->spinMaxU->setValue(umax);
+    ui->spinMinY->setValue(ymin);
+    ui->spinMaxY->setValue(ymax);
+
     // Aktualizacja etykiety informacyjnej
     QString info = QString("A: [%1]\nB: [%2]\nk: %3, Szum: %4")
-                       .arg(strA).arg(strB).arg(opoznienie).arg(zaklocenie);
+        .arg(strA).arg(strB).arg(opoznienie).arg(zaklocenie);
 
     // Upewnij się, że masz labelCurrentSummary w pliku .ui
-    if(ui->labelCurrentSummary) ui->labelCurrentSummary->setText(info);
-}
+    if (ui->labelCurrentSummary) ui->labelCurrentSummary->setText(info);
+
+
+};
+
 
 // --- OBSŁUGA PRZYCISKÓW (To trzeba było uzupełnić) ---
 
