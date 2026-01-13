@@ -32,6 +32,12 @@ public:
     int getModelOpoznienie() const { return m_prostyUAR.getModel().getOpoznienieTransportowe(); }
     double getModelSzum() const { return m_prostyUAR.getModel().getOdchylenieStandardoweSzumu(); }
 
+    double getModelUMIN() const { return m_prostyUAR.getModel().getUMIN(); };
+    double getModelUMAX() const { return m_prostyUAR.getModel().getUMAX(); };
+    double getModelYMIN() const { return m_prostyUAR.getModel().getYMIN(); };
+    double getModelYMAX() const { return m_prostyUAR.getModel().getYMAX(); };
+
+
     // Dane procesowe
     double getWartoscZadana() const { return m_wartoscZadana; }
     double getWartoscWyjscie() const { return m_wartoscWyjscie; }

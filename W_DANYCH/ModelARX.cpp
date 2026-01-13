@@ -222,8 +222,15 @@ void ModelARX::setOgraniczenia(bool i_ograniczenia)
 
 std::vector<double> ModelARX::getA() const { return m_A; }
 std::vector<double> ModelARX::getB() const { return m_B; }
+
 int ModelARX::getOpoznienieTransportowe() const { return m_ot; }
 double ModelARX::getOdchylenieStandardoweSzumu() const { return m_oss; }
+
+double ModelARX::getUMIN() const { return u_min; };
+double ModelARX::getUMAX() const { return u_max; };
+double ModelARX::getYMIN() const { return y_min; };
+double ModelARX::getYMAX() const { return y_max; };
+
 
 void ModelARX::aktualizuj(const std::vector<double>& A,
                           const std::vector<double>& B,

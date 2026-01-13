@@ -49,6 +49,11 @@ public:
     int getOpoznienieTransportowe() const;
     double getOdchylenieStandardoweSzumu() const;
 
+    double getUMIN() const;
+    double getUMAX() const;
+    double getYMIN() const;
+    double getYMAX() const;
+
     void aktualizuj(const std::vector<double>& A,
                const std::vector<double>& B,
                int opoznienie,

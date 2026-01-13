@@ -2,6 +2,7 @@
 #include "ParametryARX.h"
 #include "ui_mainwindow.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -121,9 +122,9 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::aktualizujParametryPID);
 
     // ARX i Pliki
-    connect(ui->pushConfigARX, &QPushButton::clicked, this, &MainWindow::on_pushConfigARX_clicked);
-    connect(ui->pushSaveConfig, &QPushButton::clicked, this, &MainWindow::on_pushSaveConfig_clicked);
-    connect(ui->pushLoadConfig, &QPushButton::clicked, this, &MainWindow::on_pushLoadConfig_clicked);
+    //connect(ui->pushConfigARX, &QPushButton::clicked, this, &MainWindow::on_pushConfigARX_clicked);
+    //connect(ui->pushSaveConfig, &QPushButton::clicked, this, &MainWindow::on_pushSaveConfig_clicked);
+    //connect(ui->pushLoadConfig, &QPushButton::clicked, this, &MainWindow::on_pushLoadConfig_clicked);
 
     // Inicjalizacja początkowa
     aktualizujParametryGeneratora();
@@ -489,7 +490,11 @@ void MainWindow::on_pushConfigARX_clicked()
         m_logika.getWektorA(),
         m_logika.getWektorB(),
         m_logika.getOpoznienie(),
-        m_logika.getSzum()
+        m_logika.getSzum(),
+        m_logika.getModelUMIN(),
+        m_logika.getModelUMAX(),
+        m_logika.getModelYMIN(),
+        m_logika.getModelYMAX()
         );
 
     // 2. Otwieramy okno i czekamy na wynik
@@ -507,10 +512,15 @@ void MainWindow::on_pushConfigARX_clicked()
         int op = dialog.getOpoznienie();
         double szum = dialog.getSzum();
 
+        double umin = dialog.getUMIN();
+        double umax = dialog.getUMAX();
+        double ymin = dialog.getYMIN();
+        double ymax = dialog.getYMAX();
+
         //qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
 
         // 4. Wysyłamy do logiki
-        m_logika.nowyModelARX(a, b, op, szum);
+        m_logika.nowyModelARX(a, b, op, szum, umin, umax, ymin, ymax);
 
         ui->statusbar->showMessage("Zaktualizowano parametry ARX.", 3000);
     }
