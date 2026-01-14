@@ -1,36 +1,20 @@
-#include "W_DANYCH/RegulatorPID.h" // Upewnij się, że ten include działa (ew. "W_DANYCH/RegulatorPID.h")
+#include "W_DANYCH/RegulatorPID.h"
 #include <stdexcept>
 
-// ZMIANA: Implementacja jednego, scalonego konstruktora
 RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
-    : QObject(parent), // Inicjalizacja QObject
+    : QObject(parent),
     m_k(k),
     m_TI(TI),
     m_TD(TD),
     m_trybCalk(LiczCalk::Zew),
     m_calka(0.0),
     m_e_prev(0.0)
-{
-    if (k < 0.0)
-    {
-        throw std::invalid_argument("Wzmocnienie musi być nieujemne");
-    }
-    if (TI < 0.0)
-    {
-        throw std::invalid_argument("Stała całkowania musi być nieujemna");
-    }
-    if (TD < 0.0)
-    {
-        throw std::invalid_argument("Stała różniczkowania musi być nieujemna");
-    }
-}
+{}
 
 double RegulatorPID::symuluj(double e)
 {
-    // --- P ---
     m_lastP = m_k * e;
 
-    // --- I ---
     m_lastI = 0.0;
     if (m_TI > 0.0)
     {
@@ -46,17 +30,14 @@ double RegulatorPID::symuluj(double e)
         }
     }
 
-    // --- D ---
     m_lastD = 0.0;
     if (m_TD > 0.0)
     {
         m_lastD = m_TD * (e - m_e_prev);
     }
 
-    // Zapisujemy e do następnego kroku
     m_e_prev = e;
 
-    // --- Zwracamy sumę (dla testów i regulatora) ---
     return m_lastP + m_lastI + m_lastD;
 }
 
@@ -68,33 +49,6 @@ void RegulatorPID::resetuj()
     //m_lastP = 0.0;
     m_lastI = 0.0;
     //m_lastD = 0.0;
-}
-
-void RegulatorPID::setWzmocnienie(double k)
-{
-    if (k < 0.0)
-    {
-        throw std::invalid_argument("Wzmocnienie musi być nieujemne");
-    }
-    m_k = k;
-}
-
-void RegulatorPID::setStalaCalk(double TI)
-{
-    if (TI < 0.0)
-    {
-        throw std::invalid_argument("Stała całkowania musi być nieujemna");
-    }
-    m_TI = TI;
-}
-
-void RegulatorPID::setStalaRozn(double TD)
-{
-    if (TD < 0.0)
-    {
-        throw std::invalid_argument("Stała różniczkowania musi być nieujemna");
-    }
-    m_TD = TD;
 }
 
 void RegulatorPID::setLiczCalk(LiczCalk tryb)
@@ -120,3 +74,14 @@ void RegulatorPID::setLiczCalk(LiczCalk tryb)
     }
     m_trybCalk = tryb;
 }
+void RegulatorPID::setWzmocnienie(double k) { m_k = std::max(0.0, k); }
+void RegulatorPID::setStalaCalk(double TI)  { m_TI = std::max(0.0, TI); }
+void RegulatorPID::setStalaRozn(double TD)  { m_TD = std::max(0.0, TD); }
+
+RegulatorPID::LiczCalk RegulatorPID::getLiczCalk() const { return m_trybCalk; }
+double RegulatorPID::getWzmocnienie() const { return m_k; }
+double RegulatorPID::getStalaCalk() const { return m_TI; }
+double RegulatorPID::getStalaRozn() const { return m_TD; }
+double RegulatorPID::getLastP() const { return m_lastP; }
+double RegulatorPID::getLastI() const { return m_lastI; }
+double RegulatorPID::getLastD() const { return m_lastD; }

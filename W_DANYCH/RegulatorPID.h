@@ -22,7 +22,6 @@ private:
     double m_lastD = 0.0;
 
 public:
-    // KONSTRUKTOR DLA TESTU: Test podaje 3 double, parent jest opcjonalny
     explicit RegulatorPID(double k = 1.0,
                           double TI = 0.0,
                           double TD = 0.0,
@@ -31,20 +30,18 @@ public:
     double symuluj(double e);
     void resetuj();
 
-    // Gettery potrzebne do przepisania wartości w ProstyUAR
-    double getWzmocnienie() const { return m_k; }
-    double getStalaCalk() const { return m_TI; }
-    double getStalaRozn() const { return m_TD; }
-    LiczCalk getLiczCalk() const { return m_trybCalk; }
-
     void setWzmocnienie(double k);
     void setStalaCalk(double TI);
     void setStalaRozn(double TD);
     void setLiczCalk(LiczCalk tryb);
 
-    double getLastP() const { return m_lastP; }
-    double getLastI() const { return m_lastI; }
-    double getLastD() const { return m_lastD; }
+    LiczCalk getLiczCalk() const;
+    double getWzmocnienie() const;
+    double getStalaCalk() const;
+    double getStalaRozn() const;
+    double getLastP() const;
+    double getLastI() const;
+    double getLastD() const;
 
 
 };

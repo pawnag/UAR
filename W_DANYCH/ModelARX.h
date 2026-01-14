@@ -13,10 +13,10 @@ class ModelARX : public QObject
 private:
     std::vector<double> m_A;
     std::vector<double> m_B;
-    std::deque<double> m_u;
-    std::deque<double> m_y;
-    int m_ot;
-    double m_oss;
+    std::deque<double> m_u; // Bufor wejścia
+    std::deque<double> m_y; // Bufor wyjścia
+    int m_ot;               // Opóźnienie
+    double m_oss;           // Szum
 
     double u_min, u_max;
     double y_min, y_max;
@@ -26,40 +26,21 @@ private:
     std::unique_ptr<std::normal_distribution<double>> rozklad_szumu;
 
     void inicjalizujBufory();
-    double zastosujOgraniczenia(double i_wart, double i_min, double i_max);
     double obliczWyjscie();
     void ustawRozkladSzumu(double odchylenie);
 
 public:
     explicit ModelARX(QObject *parent = nullptr);
-
-    // KONSTRUKTOR DLA TESTU: Dzięki wartościom domyślnym test może podać tylko A i B
-    ModelARX(const std::vector<double>& i_A,
+    ModelARX(const std::vector<double>& i_A, // !!! Trzeba wymyśleć jak to połączyć
              const std::vector<double>& i_B,
-             int i_op = 1,              // Domyślne opóźnienie
-             double i_oss = 0.0,        // Domyślny brak szumu
-             QObject *parent = nullptr); // Domyślny rodzic
+             int i_op = 1,
+             double i_oss = 0.0,
+             QObject *parent = nullptr);
 
     double symuluj(double i_u);
     void resetuj();
+    void aktualizuj(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum);
 
-    // Gettery potrzebne do przepisania wartości w ProstyUAR
-    std::vector<double> getA() const;
-    std::vector<double> getB() const;
-    int getOpoznienieTransportowe() const;
-    double getOdchylenieStandardoweSzumu() const;
-
-    double getUMIN() const;
-    double getUMAX() const;
-    double getYMIN() const;
-    double getYMAX() const;
-
-    void aktualizuj(const std::vector<double>& A,
-               const std::vector<double>& B,
-               int opoznienie,
-                    double szum);
-
-    // Settery...
     void setA(const std::vector<double>& i_A);
     void setB(const std::vector<double>& i_B);
     void setOpoznienieTransportowe(int i_ot);
@@ -68,6 +49,14 @@ public:
     void setOgraniczeniaWyjscia(double i_ymin, double i_ymax);
     void setOgraniczenia(bool i_ograniczenia);
 
+    std::vector<double> getA() const;
+    std::vector<double> getB() const;
+    int getOpoznienieTransportowe() const;
+    double getOdchylenieStandardoweSzumu() const;
+    double getUMIN() const;
+    double getUMAX() const;
+    double getYMIN() const;
+    double getYMAX() const;
 };
 
 #endif // MODELARX_H
