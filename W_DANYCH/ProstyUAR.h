@@ -14,34 +14,20 @@ private:
     double m_ostatniUchyb;
     double m_ostatnieSterowanie;
     double m_ostatnieWyjscie;
-
-    // Helper kopiujący ustawienia (przyjmuje referencje)
-    // UWAGA: Skoro w .cpp usunęliśmy tę metodę na rzecz listy inicjalizacyjnej,
-    // to tutaj też powinna zniknąć. Ale jeśli chcesz ją trzymać, musi mieć ciało.
-    // Sugeruję usunąć, jeśli używasz mojego kodu z poprzedniego kroku.
-    // void kopiujUstawienia(const ModelARX& model, const RegulatorPID& reg);
-
 public:
-   // 1. Konstruktor domyślny (ODKOMENTOWANY!)
-    ProstyUAR();
-
-    // 2. Konstruktor parametryczny
-    ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora);
+    ProstyUAR(ModelARX wzorzecModelu = ModelARX(), RegulatorPID wzorzecRegulatora = RegulatorPID());
 
     double symuluj(double wartoscZadana);
     void reset();
 
-    // Dostęp do podzespołów
+    void aktualizujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum);
+    void setTrybOtwarty(bool tak);
+
+    bool czyTrybOtwarty() const;
     ModelARX& getModel();
     RegulatorPID& getRegulator();
     const ModelARX& getModel() const;
     const RegulatorPID& getRegulator() const;
-
-    void aktualizujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum);
-
-    // Settery/Gettery
-    void setTrybOtwarty(bool tak);
-    bool czyTrybOtwarty() const;
     double getOstatniUchyb() const;
     double getOstatnieSterowanie() const;
     double getOstatnieWyjscie() const;

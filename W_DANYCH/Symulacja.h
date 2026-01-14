@@ -7,7 +7,7 @@
 class Symulacja
 {
 public:
-    Symulacja();
+    Symulacja(GeneratorWartosciZadanej i_generator = GeneratorWartosciZadanej(), ProstyUAR i_prostyUAR = ProstyUAR());
 
     // --- Konfiguracja ---
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie);

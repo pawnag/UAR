@@ -3,7 +3,7 @@
 #include <QDebug>
 
 
-Symulacja::Symulacja()
+Symulacja::Symulacja(GeneratorWartosciZadanej i_generator, ProstyUAR i_prostyUAR)
     : m_generator(),
     m_prostyUAR(),
     m_czyDziala(false),

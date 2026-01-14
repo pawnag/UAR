@@ -29,9 +29,9 @@ private:
 
 public:
     ModelARX(const std::vector<double>& i_A = {-0.4},
-                      const std::vector<double>& i_B = {0.6},
-                      int i_op = 1,
-                      double i_oss = 0.0);
+             const std::vector<double>& i_B = {0.6},
+             int i_op = 1,
+             double i_oss = 0.0);
 
     double symuluj(double i_u);
     void resetuj();

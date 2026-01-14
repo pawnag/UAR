@@ -1,17 +1,5 @@
 #include "ProstyUAR.h" // Sprawdź ścieżkę
 
-// 1. IMPLEMENTACJA KONSTRUKTORA DOMYŚLNEGO (Musi być!)
-ProstyUAR::ProstyUAR()
-    : m_model(),        // Tworzy domyślny model
-    m_regulator(),    // Tworzy domyślny regulator
-    m_trybOtwarty(true),
-    m_ostatniUchyb(0.0),
-    m_ostatnieSterowanie(0.0),
-    m_ostatnieWyjscie(0.0)
-{
-}
-
-// 2. IMPLEMENTACJA KONSTRUKTORA PARAMETRYCZNEGO
 ProstyUAR::ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora)
     : m_model(wzorzecModelu),       // Kopiuje model
     m_regulator(wzorzecRegulatora), // Kopiuje regulator
@@ -23,7 +11,6 @@ ProstyUAR::ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora)
     reset(); // Resetuje historię po skopiowaniu
 }
 
-// ... Reszta metod (symuluj, reset itp.) bez zmian ...
 double ProstyUAR::symuluj(double wartoscZadana)
 {
     double uchyb = wartoscZadana - m_ostatnieWyjscie;
