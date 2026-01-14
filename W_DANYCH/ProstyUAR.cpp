@@ -1,4 +1,4 @@
-#include "W_USLUG/ProstyUAR.h"
+#include "ProstyUAR.h"
 
 ProstyUAR::ProstyUAR(QObject *parent)
     : QObject(parent),

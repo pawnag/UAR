@@ -2,6 +2,11 @@
 #include "ParametryARX.h"
 #include "ui_mainwindow.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
+#include <QSignalBlocker>
+
+// Stałe konfiguracyjne (KISS)
+static constexpr double OKNO_CZASOWE_S = 10.0;
+static constexpr double MARGINES_Y = 0.1;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,524 +15,292 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // ... (początek konstruktora bez zmian)
+    // --- KONFIGURACJA WYKRESÓW (DRY) ---
+    QVBoxLayout* layoutMain = new QVBoxLayout(ui->widgetWykresy);
+    layoutMain->setContentsMargins(0, 0, 0, 0);
 
-    // ==========================================
-    // KONFIGURACJA WYKRESÓW (POPRAWIONA)
-    // ==========================================
-    QVBoxLayout* layoutKontenera = new QVBoxLayout(ui->widgetWykresy);
-    layoutKontenera->setContentsMargins(0, 0, 0, 0);
+    // 1. Wykres główny (Góra)
+    auto paraGlowna = stworzWykres("Wartość zadana i regulowana", "Odpowiedź układu");
+    m_chartOutput = paraGlowna.first;
+    layoutMain->addWidget(paraGlowna.second, 1);
 
-    // --- GÓRA (DUŻY) ---
-    m_seriesZadana = new QLineSeries(); m_seriesZadana->setName("Wartość zadana (w)");
-    m_seriesZadana->setPen(QPen(Qt::red, 2));
-    m_seriesWyjscie = new QLineSeries(); m_seriesWyjscie->setName("Wartość regulowana (y)");
-    m_seriesWyjscie->setPen(QPen(QColor(0, 150, 255), 2));
+    m_seriesZadana = dodajSerie(m_chartOutput, "Wartość zadana (w)", Qt::red);
+    m_seriesWyjscie = dodajSerie(m_chartOutput, "Wartość regulowana (y)", QColor(0, 150, 255));
 
-    m_chartOutput = new QChart();
-    m_chartOutput->setTitle("Wartość zadana i regulowana"); // <--- DODANY TYTUŁ
-    m_chartOutput->addSeries(m_seriesZadana);
-    m_chartOutput->addSeries(m_seriesWyjscie);
-    m_chartOutput->createDefaultAxes();
-    stylizujWykres(m_chartOutput, true, "Odpowiedź układu");
-
-    m_chartViewOutput = new QChartView(m_chartOutput);
-    m_chartViewOutput->setRenderHint(QPainter::Antialiasing);
-
-    // ZMIANA PROPORCJI: Zamiast 60 dajemy 1
-    layoutKontenera->addWidget(m_chartViewOutput, 1);
-
-    // --- DÓŁ (3 MNIEJSZE) ---
+    // 2. Wykresy dolne (Kontener)
     QHBoxLayout* layoutDolny = new QHBoxLayout();
+    layoutMain->addLayout(layoutDolny, 1);
 
-    // Uchyb
-    m_seriesUchyb = new QLineSeries(); m_seriesUchyb->setName("Uchyb (e)"); m_seriesUchyb->setColor(Qt::green);
-    m_chartError = new QChart();
-    m_chartError->setTitle("Uchyb regulacji"); // <--- DODANY TYTUŁ
-    m_chartError->addSeries(m_seriesUchyb);
-    m_chartError->createDefaultAxes();
-    stylizujWykres(m_chartError, true, "Uchyb");
-    m_chartViewError = new QChartView(m_chartError);
-    m_chartViewError->setRenderHint(QPainter::Antialiasing);
-    layoutDolny->addWidget(m_chartViewError);
+    auto setupMalyWykres = [&](QString tytul, QString osY, QColor kol, QLineSeries** ptr) {
+        auto para = stworzWykres(tytul, osY);
+        *ptr = dodajSerie(para.first, tytul, kol);
+        layoutDolny->addWidget(para.second);
+        return para.first;
+    };
 
-    // Sterowanie
-    m_seriesSterowanie = new QLineSeries(); m_seriesSterowanie->setName("Sterowanie (u)"); m_seriesSterowanie->setColor(Qt::magenta);
-    m_chartControl = new QChart();
-    m_chartControl->setTitle("Sygnał sterujący"); // <--- DODANY TYTUŁ
-    m_chartControl->addSeries(m_seriesSterowanie);
-    m_chartControl->createDefaultAxes();
-    stylizujWykres(m_chartControl, true, "Wyjście regulatora");
-    m_chartViewControl = new QChartView(m_chartControl);
-    m_chartViewControl->setRenderHint(QPainter::Antialiasing);
-    layoutDolny->addWidget(m_chartViewControl);
+    m_chartError = setupMalyWykres("Uchyb regulacji", "Uchyb", Qt::green, &m_seriesUchyb);
+    m_chartControl = setupMalyWykres("Sygnał sterujący", "Sterowanie", Qt::magenta, &m_seriesSterowanie);
 
-    // PID
-    m_seriesP = new QLineSeries(); m_seriesP->setName("P"); m_seriesP->setColor(Qt::cyan);
-    m_seriesI = new QLineSeries(); m_seriesI->setName("I"); m_seriesI->setColor(Qt::yellow);
-    m_seriesD = new QLineSeries(); m_seriesD->setName("D"); m_seriesD->setColor(QColor(255, 100, 255));
-    m_chartPID = new QChart();
-    m_chartPID->setTitle("Składowe sterowania"); // <--- DODANY TYTUŁ
-    m_chartPID->addSeries(m_seriesP); m_chartPID->addSeries(m_seriesI); m_chartPID->addSeries(m_seriesD);
-    m_chartPID->createDefaultAxes();
-    stylizujWykres(m_chartPID, true, "Wartość PID");
-    m_chartViewPID = new QChartView(m_chartPID);
-    m_chartViewPID->setRenderHint(QPainter::Antialiasing);
-    layoutDolny->addWidget(m_chartViewPID);
+    // 3. Wykres PID
+    auto paraPID = stworzWykres("Składowe sterowania", "Wartość PID");
+    m_chartPID = paraPID.first;
+    m_seriesP = dodajSerie(m_chartPID, "P", Qt::cyan);
+    m_seriesI = dodajSerie(m_chartPID, "I", Qt::yellow);
+    m_seriesD = dodajSerie(m_chartPID, "D", QColor(255, 100, 255));
+    layoutDolny->addWidget(paraPID.second);
 
-    // ZMIANA PROPORCJI: Zamiast 40 dajemy 1
-    // Jeśli góra ma 1 i dół ma 1, to dzielą ekran po połowie (50%/50%)
-    layoutKontenera->addLayout(layoutDolny, 1);
-
-    // ... (reszta konstruktora bez zmian)
-
-    // ==========================================
-    // LOGIKA I SYGNAŁY (Reszta kodu bez zmian)
-    // ==========================================
+    // --- SYGNAŁY ---
     m_timerSymulacji->setInterval(ui->spinInterwal->value());
     connect(m_timerSymulacji, &QTimer::timeout, this, &MainWindow::aktualizujSymulacje);
 
-    // Sygnały UI - GUI
     connect(ui->pushStart, &QPushButton::clicked, this, &MainWindow::on_pushStart_clicked);
     connect(ui->pushStop, &QPushButton::clicked, this, &MainWindow::on_pushStop_clicked);
     connect(ui->pushResetSym, &QPushButton::clicked, this, &MainWindow::on_pushResetSym_clicked);
-    connect(ui->pushResetPID, &QPushButton::clicked, this, &MainWindow::on_pushResetPID_clicked);
+    connect(ui->pushResetPID, &QPushButton::clicked, this, [this](){ m_logika.getRegulator().resetuj(); });
 
-    // Generator
-    connect(ui->comboTypSygnalu, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MainWindow::aktualizujParametryGeneratora);
-
-    connect(ui->spinAmplituda, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryGeneratora);
-    connect(ui->spinOkres, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryGeneratora);
-    connect(ui->spinSkladowaStala, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryGeneratora);
-    connect(ui->spinWypelnienie, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryGeneratora);
+    // Generator & PID (grupowe podpięcie slotów)
+    const auto updateGen = qOverload<double>(&QDoubleSpinBox::valueChanged);
+    connect(ui->comboTypSygnalu, &QComboBox::currentIndexChanged, this, &MainWindow::aktualizujParametryGeneratora);
+    connect(ui->spinAmplituda, updateGen, this, &MainWindow::aktualizujParametryGeneratora);
+    connect(ui->spinOkres, updateGen, this, &MainWindow::aktualizujParametryGeneratora);
+    connect(ui->spinSkladowaStala, updateGen, this, &MainWindow::aktualizujParametryGeneratora);
+    connect(ui->spinWypelnienie, updateGen, this, &MainWindow::aktualizujParametryGeneratora);
 
     connect(ui->spinInterwal, QOverload<int>::of(&QSpinBox::valueChanged), this, [this](int val){
         m_timerSymulacji->setInterval(val);
         aktualizujParametryGeneratora();
     });
 
-    // PID
-    connect(ui->spinPidKp, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryPID);
-    connect(ui->spinPidTi, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryPID);
-    connect(ui->spinPidTd, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::aktualizujParametryPID);
-    connect(ui->comboMetCalk, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MainWindow::aktualizujParametryPID);
+    const auto updatePID = qOverload<double>(&QDoubleSpinBox::valueChanged);
+    connect(ui->spinPidKp, updatePID, this, &MainWindow::aktualizujParametryPID);
+    connect(ui->spinPidTi, updatePID, this, &MainWindow::aktualizujParametryPID);
+    connect(ui->spinPidTd, updatePID, this, &MainWindow::aktualizujParametryPID);
+    connect(ui->comboMetCalk, &QComboBox::currentIndexChanged, this, &MainWindow::aktualizujParametryPID);
 
-    // ARX i Pliki
-    //connect(ui->pushConfigARX, &QPushButton::clicked, this, &MainWindow::on_pushConfigARX_clicked);
-    //connect(ui->pushSaveConfig, &QPushButton::clicked, this, &MainWindow::on_pushSaveConfig_clicked);
-    //connect(ui->pushLoadConfig, &QPushButton::clicked, this, &MainWindow::on_pushLoadConfig_clicked);
-
-    // Inicjalizacja początkowa
+    // Init
     aktualizujParametryGeneratora();
     aktualizujParametryPID();
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
+MainWindow::~MainWindow() { delete ui; }
 
 // ==========================================
-// METODY POMOCNICZE
+// LOGIKA WYKRESÓW (DRY & KISS)
 // ==========================================
 
-void MainWindow::setupChart(QLayout* layout, QChart*& chart, QChartView*& view) {
-    chart = new QChart();
-    view = new QChartView(chart);
-    view->setRenderHint(QPainter::Antialiasing);
-    layout->addWidget(view);
-}
-
-void MainWindow::stylizujWykres(QChart* chart, bool pokazLegende, QString tytulOsY) {
-    // 1. Podstawowy wygląd
+std::pair<QChart*, QChartView*> MainWindow::stworzWykres(QString tytul, QString osY) {
+    QChart* chart = new QChart();
+    chart->setTitle(tytul);
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
-    chart->setPlotAreaBackgroundVisible(false);
+    chart->setTitleBrush(Qt::white);
+    chart->legend()->setAlignment(Qt::AlignTop);
+    chart->legend()->setLabelBrush(Qt::white);
+    chart->createDefaultAxes(); // Placeholder
 
-    // Resetujemy marginesy layoutu, ale zostawiamy marginesy wykresu dla opisów
-    chart->layout()->setContentsMargins(0, 0, 0, 0);
-    // Zwiększamy marginesy: Lewy (dla tytułu Y), Dolny (dla Czas [s]), Prawy (dla estetyki)
-    chart->setMargins(QMargins(10, 0, 0, 10));
-    chart->setBackgroundRoundness(0);
+    QChartView* view = new QChartView(chart);
+    view->setRenderHint(QPainter::Antialiasing);
 
-    chart->setTitleBrush(QBrush(Qt::white));
-    chart->setTitleFont(QFont("Arial", 10, QFont::Bold));
+    // Hack: Wymuszenie osi przed dodaniem serii, by móc je stylować od razu
+    QValueAxis *axisX = new QValueAxis;
+    axisX->setTitleText("Czas [s]");
+    axisX->setLabelsBrush(Qt::white);
+    axisX->setTitleBrush(Qt::white);
+    chart->addAxis(axisX, Qt::AlignBottom);
 
-    // 2. Legenda PO PRAWEJ STRONIE
-    if (pokazLegende) {
-        chart->legend()->setVisible(true);
-        chart->legend()->setAlignment(Qt::AlignTop); // <--- ZMIANA: Prawa strona
-        chart->legend()->setLabelBrush(QBrush(Qt::white));
-        chart->legend()->setBackgroundVisible(false);
-        QFont font = chart->legend()->font();
-        font.setPointSize(8);
-        chart->legend()->setFont(font);
-    } else {
-        chart->legend()->setVisible(false);
-    }
+    QValueAxis *axisY = new QValueAxis;
+    axisY->setTitleText(osY);
+    axisY->setLabelsBrush(Qt::white);
+    axisY->setTitleBrush(Qt::white);
+    chart->addAxis(axisY, Qt::AlignLeft);
 
-    // 3. Konfiguracja OSI (Opisy)
-    auto axes = chart->axes();
-
-    // Szukamy osi X i Y
-    QAbstractAxis* axisX = nullptr;
-    QAbstractAxis* axisY = nullptr;
-
-    // Pobieramy osie (zakładając, że createDefaultAxes() je utworzyło)
-    auto axesX = chart->axes(Qt::Horizontal);
-    auto axesY = chart->axes(Qt::Vertical);
-    if (!axesX.isEmpty()) axisX = axesX.first();
-    if (!axesY.isEmpty()) axisY = axesY.first();
-
-    // Stylizacja Osi X (Czas)
-    if (axisX) {
-        axisX->setLabelsBrush(QBrush(Qt::white));
-        axisX->setGridLineColor(QColor(60, 60, 60));
-
-        // Ustawienie napisu "Czas [s]"
-        axisX->setTitleText("Czas [s]");
-        axisX->setTitleBrush(QBrush(Qt::white));
-        axisX->setTitleVisible(true);
-
-        QFont axisFont = axisX->labelsFont();
-        axisFont.setPointSize(8);
-        axisX->setLabelsFont(axisFont);
-    }
-
-    // Stylizacja Osi Y (Wartości)
-    if (axisY) {
-        axisY->setLabelsBrush(QBrush(Qt::white));
-        axisY->setGridLineColor(QColor(60, 60, 60));
-
-        // Ustawienie napisu z parametru (np. "Odpowiedź układu")
-        axisY->setTitleText(tytulOsY);
-        axisY->setTitleBrush(QBrush(Qt::white));
-        axisY->setTitleVisible(true);
-
-        QFont axisFont = axisY->labelsFont();
-        axisFont.setPointSize(8);
-        axisY->setLabelsFont(axisFont);
-    }
+    return {chart, view};
 }
 
-void MainWindow::autoSkalujOsY(QChart* chart)
-{
+QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) {
+    QLineSeries* s = new QLineSeries();
+    s->setName(nazwa);
+    s->setPen(QPen(kolor, 2));
+    chart->addSeries(s);
+    // Podpięcie pod osie utworzone w stworzWykres
+    chart->setAxisX(chart->axes(Qt::Horizontal).first(), s);
+    chart->setAxisY(chart->axes(Qt::Vertical).first(), s);
+    return s;
+}
+
+void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     if (!chart) return;
 
-    // 1. Pobierz aktualny zakres osi X (czasu), żeby wiedzieć co jest widoczne
-    double minX = 0;
-    double maxX = 0;
-    auto axesX = chart->axes(Qt::Horizontal);
-    if (axesX.isEmpty()) return;
+    // 1. Skalowanie X (Scroll)
+    auto axisX = static_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
+    if (t > OKNO_CZASOWE_S)
+        axisX->setRange(t - OKNO_CZASOWE_S, t);
+    else
+        axisX->setRange(0, OKNO_CZASOWE_S);
 
-    // Zakładamy, że oś X to QValueAxis
-    if (auto axisX = qobject_cast<QValueAxis*>(axesX.first())) {
-        minX = axisX->min();
-        maxX = axisX->max();
-    }
-
-    double minVal = 1e9;
-    double maxVal = -1e9;
+    // 2. Czyszczenie i Autoskalowanie Y (tylko widoczne punkty)
+    double minVal = 1e9, maxVal = -1e9;
+    double limitCzasu = t - OKNO_CZASOWE_S;
     bool hasData = false;
 
-    // 2. Przeszukaj serie, ALE bierz tylko punkty z widocznego okna czasowego
-    for (QAbstractSeries* series : chart->series()) {
-        QLineSeries* lineSeries = qobject_cast<QLineSeries*>(series);
-        if (!lineSeries || !lineSeries->isVisible()) continue;
+    for (auto series : chart->series()) {
+        auto line = static_cast<QLineSeries*>(series);
+        if (line->count() > 0 && line->at(0).x() < limitCzasu)
+            line->remove(0); // Usuń stare
 
-        for (const QPointF& p : lineSeries->points()) {
-            // KLUCZOWA ZMIANA: Ignoruj stare punkty, które wyjechały z lewej strony
-            if (p.x() < minX || p.x() > maxX) continue;
-
-            if (p.y() < minVal) minVal = p.y();
-            if (p.y() > maxVal) maxVal = p.y();
-            hasData = true;
+        // Szukaj min/max w widocznym oknie
+        for(const auto& p : line->points()) {
+            if(p.x() >= limitCzasu) {
+                if (p.y() < minVal) minVal = p.y();
+                if (p.y() > maxVal) maxVal = p.y();
+                hasData = true;
+            }
         }
     }
 
-    // Jeśli w aktualnym oknie nie ma danych (np. dopiero zaczęliśmy)
-    if (!hasData) {
-        minVal = -1.0;
-        maxVal = 1.0;
-    }
+    if (!hasData) { minVal = -1.0; maxVal = 1.0; }
 
-    // 3. Oblicz margines i ustaw oś
+    // Margines Y
     double diff = maxVal - minVal;
-    if (diff < 0.01) diff = 1.0; // Zabezpieczenie dla linii prostej
-    double margin = diff * 0.1;  // 10% marginesu
-
-    QList<QAbstractAxis*> axesY = chart->axes(Qt::Vertical);
-    if (!axesY.isEmpty()) {
-        QValueAxis* axisY = qobject_cast<QValueAxis*>(axesY.first());
-        if (axisY) {
-            axisY->setRange(minVal - margin, maxVal + margin);
-            axisY->setLabelFormat("%.2f");
-            axisY->setTickCount(6);
-        }
-    }
+    if (diff < 0.001) diff = 1.0;
+    auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+    axisY->setRange(minVal - diff * MARGINES_Y, maxVal + diff * MARGINES_Y);
 }
+
+void MainWindow::aktualizujSymulacje()
+{
+    m_logika.wykonajKrokSymulacji();
+
+    double t = m_logika.getCzas();
+
+    // Helper lambda do aktualizacji serii i legendy
+    auto updateS = [&](QLineSeries* s, double val, QString prefix, int prec) {
+        s->append(t, val);
+        s->setName(QString("%1: %2").arg(prefix).arg(val, 0, 'f', prec));
+    };
+
+    updateS(m_seriesZadana, m_logika.getWartoscZadana(), "Zadana", 2);
+    updateS(m_seriesWyjscie, m_logika.getWartoscWyjscie(), "Wyjście", 2);
+    updateS(m_seriesUchyb, m_logika.getUchyb(), "Uchyb", 3);
+    updateS(m_seriesSterowanie, m_logika.getSterowanie(), "Sterowanie", 2);
+
+    updateS(m_seriesP, m_logika.getP(), "P", 2);
+    updateS(m_seriesI, m_logika.getI(), "I", 2);
+    updateS(m_seriesD, m_logika.getD(), "D", 2);
+
+    // Zarządzanie osiami (Scroll + AutoScale)
+    zarzadzajWykresem(m_chartOutput, t);
+    zarzadzajWykresem(m_chartError, t);
+    zarzadzajWykresem(m_chartControl, t);
+    zarzadzajWykresem(m_chartPID, t);
+}
+
 // ==========================================
-// SLOTY
+// SLOTY UI
 // ==========================================
 
-void MainWindow::on_pushStart_clicked()
-{
-    // Startujemy timer GUI (odświeżanie)
+void MainWindow::on_pushStart_clicked() {
     m_timerSymulacji->start();
-    // Startujemy logikę (flaga m_czyDziala = true)
     m_logika.start();
     ui->statusbar->showMessage("Symulacja TRWA...");
 }
 
-void MainWindow::on_pushStop_clicked()
-{
+void MainWindow::on_pushStop_clicked() {
     m_timerSymulacji->stop();
     m_logika.stop();
     ui->statusbar->showMessage("Symulacja ZATRZYMANA.");
 }
 
-void MainWindow::on_pushResetSym_clicked()
-{
-    on_pushStop_clicked(); // Najpierw zatrzymaj
+void MainWindow::on_pushResetSym_clicked() {
+    on_pushStop_clicked();
+    m_logika.reset();
 
-    m_logika.reset(); // Wyzeruj zmienne w logice (czas=0, y=0)
+    auto clearS = [](QLineSeries* s){ s->clear(); };
+    clearS(m_seriesZadana); clearS(m_seriesWyjscie);
+    clearS(m_seriesUchyb); clearS(m_seriesSterowanie);
+    clearS(m_seriesP); clearS(m_seriesI); clearS(m_seriesD);
 
-    // Wyzeruj wykresy
-    m_seriesZadana->clear();
-    m_seriesWyjscie->clear();
-    m_seriesUchyb->clear();
-    m_seriesSterowanie->clear();
-    m_seriesP->clear();
-    m_seriesI->clear();
-    m_seriesD->clear();
-
-    // Przywróć osie X do początku
-    auto resetX = [&](QChart* chart) {
-        if(!chart->axes(Qt::Horizontal).isEmpty())
-            chart->axes(Qt::Horizontal).first()->setRange(0, 10);
-    };
-    resetX(m_chartOutput);
-    resetX(m_chartError);
-    resetX(m_chartControl);
-
-    ui->statusbar->showMessage("Symulacja ZRESETOWANA.");
-    
-    //zerowanie wartosci
-
-    //delete m_logika.getRegulator();
-    //delete m_logika.getGenerator();
-    //delete m_logika.get();
+    // Reset osi X
+    auto resetX = [](QChart* c) { c->axes(Qt::Horizontal).first()->setRange(0, OKNO_CZASOWE_S); };
+    resetX(m_chartOutput); resetX(m_chartError);
+    resetX(m_chartControl); resetX(m_chartPID);
 
     odswiezGUI();
+    ui->statusbar->showMessage("Symulacja ZRESETOWANA.");
 }
 
-void MainWindow::aktualizujParametryGeneratora()
-{
-    // Pobranie wartości z kontrolek
+void MainWindow::aktualizujParametryGeneratora() {
     auto typ = static_cast<GeneratorWartosciZadanej::TypSygnalu>(ui->comboTypSygnalu->currentIndex());
-    double ampl = ui->spinAmplituda->value();
-    double okres = ui->spinOkres->value();
-    int interwal = ui->spinInterwal->value();
-    double stala = ui->spinSkladowaStala->value();
-    double wypelnienie = ui->spinWypelnienie->value();
+    bool fixed = (typ == GeneratorWartosciZadanej::SYGNAL_STALY);
 
-    bool czyStala = (typ == GeneratorWartosciZadanej::SYGNAL_STALY);
-    bool czyProstokat = (typ == GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
+    ui->spinOkres->setEnabled(!fixed);
+    ui->spinAmplituda->setEnabled(!fixed); // Zgodnie z logiką, stała nie ma amplitudy w sensie generatora fal
+    ui->spinWypelnienie->setEnabled(typ == GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
 
-    if (czyStala) {
-        // --- Ustawienia dla WARTOŚCI STAŁEJ ---
-
-        // Blokujemy Okres (bo sygnał stały nie ma okresu)
-        ui->spinOkres->setEnabled(false);
-
-        // Blokujemy Amplitudę (zgodnie z Twoją prośbą)
-        ui->spinAmplituda->setEnabled(false);
-
-        // Blokujemy Wypełnienie (nie dotyczy stałej)
-        ui->spinWypelnienie->setEnabled(false);
-
-        // Zostawiamy Składową Stałą OD BLOKOWANĄ - żebyś miał gdzie wpisać wartość!
-        ui->spinSkladowaStala->setEnabled(true);
-
-    } else {
-        // --- Ustawienia dla POZOSTAŁYCH (Sinus, Prostokąt) ---
-
-        ui->spinOkres->setEnabled(true);
-        ui->spinAmplituda->setEnabled(true);
-        ui->spinSkladowaStala->setEnabled(true); // Offset zazwyczaj dostępny zawsze
-
-        // Wypełnienie aktywne zazwyczaj tylko dla prostokąta
-        ui->spinWypelnienie->setEnabled(czyProstokat);
-    }
-
-    // Wysłanie do logiki
-    m_logika.nowyGenerator(ampl, okres, interwal, typ, stala, wypelnienie);
+    m_logika.nowyGenerator(ui->spinAmplituda->value(), ui->spinOkres->value(),
+                           ui->spinInterwal->value(), typ,
+                           ui->spinSkladowaStala->value(), ui->spinWypelnienie->value());
 }
 
-void MainWindow::aktualizujParametryPID()
-{
-    double kp = ui->spinPidKp->value();
-    double ti = ui->spinPidTi->value();
-    double td = ui->spinPidTd->value();
-
-    // Wysłanie do logiki
-    m_logika.nowyRegulator(kp, ti, td);
+void MainWindow::aktualizujParametryPID() {
+    m_logika.nowyRegulator(ui->spinPidKp->value(), ui->spinPidTi->value(), ui->spinPidTd->value());
+    // Jeśli potrzeba wysłać metodę całkowania:
+    m_logika.getRegulator().setLiczCalk((RegulatorPID::LiczCalk)ui->comboMetCalk->currentIndex());
 }
 
-void MainWindow::aktualizujSymulacje()
-{
-    // 1. ZLECAMY OBLICZENIA (GUI -> Fasada -> Symulacja)
-    m_logika.wykonajKrokSymulacji();
-
-    // 2. POBIERAMY WYNIKI (Fasada -> GUI)
-    double t = m_logika.getCzas();
-    double w = m_logika.getWartoscZadana();
-    double y = m_logika.getWartoscWyjscie();
-    double e = m_logika.getUchyb();
-    double u = m_logika.getSterowanie();
-
-    // Wykres 1: Zadana i Wyjście
-    // Formatuje liczbę do 2 miejsc po przecinku (f, 2)
-    m_seriesZadana->setName(QString("Wartość zadana (w): %1").arg(w, 0, 'f', 2));
-    m_seriesWyjscie->setName(QString("Wartość regulowana (y): %1").arg(y, 0, 'f', 2));
-
-    // Wykres 2: Uchyb (UWAGA: musisz włączyć legendę dla tego wykresu, patrz Krok 2)
-    m_seriesUchyb->setName(QString("Uchyb (e): %1").arg(e, 0, 'f', 3));
-
-    // Wykres 3: Sterowanie (UWAGA: musisz włączyć legendę dla tego wykresu)
-    m_seriesSterowanie->setName(QString("Sterowanie (u): %1").arg(u, 0, 'f', 2));
-
-    // Wykres 4: PID (opcjonalnie)
-    m_seriesP->setName(QString("P: %1").arg(m_logika.getP(), 0, 'f', 2));
-    m_seriesI->setName(QString("I: %1").arg(m_logika.getI(), 0, 'f', 2));
-    m_seriesD->setName(QString("D: %1").arg(m_logika.getD(), 0, 'f', 2));
-
-    // 3. AKTUALIZUJEMY WYKRESY (Dodajemy punkty)
-    m_seriesZadana->append(t, w);
-    m_seriesWyjscie->append(t, y);
-    m_seriesUchyb->append(t, e);
-    m_seriesSterowanie->append(t, u);
-
-    // 4. PRZESUWAMY OKNO CZASOWE (Efekt "płynącego" wykresu)
-    double windowSize = 10.0; // Pokaż ostatnie 20 sekund
-
-    auto updateAxisX = [&](QChart* chart) {
-        auto axes = chart->axes(Qt::Horizontal);
-        if (axes.isEmpty()) return;
-        QAbstractAxis* axis = axes.first();
-
-        if (t > windowSize) {
-            axis->setRange(t - windowSize, t);
-        } else {
-            axis->setRange(0, windowSize);
-        }
-    };
-
-    updateAxisX(m_chartOutput);
-    updateAxisX(m_chartError);
-    updateAxisX(m_chartControl);
-    updateAxisX(m_chartPID); // Jeśli używasz
-
-    // 3. >>> NOWE: AUTO-SKALOWANIE OSI Y <<<
-    autoSkalujOsY(m_chartOutput);   // Wykres Wyjścia i Zadanej
-    autoSkalujOsY(m_chartError);    // Wykres Uchybu
-    autoSkalujOsY(m_chartControl);  // Wykres Sterowania
-    autoSkalujOsY(m_chartPID);      // Wykres PID
-
-    // OPTYMALIZACJA: Usuwanie starych punktów
-    double limitCzasu = t - (windowSize * 2.0);
-
-    // Funkcja pomocnicza lambda, żeby nie kopiować kodu
-    auto czyscStareProbki = [&](QLineSeries* seria) {
-        if (seria && seria->count() > 0 && seria->at(0).x() < limitCzasu) {
-            seria->remove(0);
-            // Jeśli interwał jest bardzo mały, można usunąć więcej próbek naraz:
-            // seria->removePoints(0, seria->count() - ilesTam);
-            // ale remove(0) przy każdym cyklu zazwyczaj wystarcza.
-        }
-    };
-
-    // 1. Wykres główny
-    czyscStareProbki(m_seriesZadana);
-    czyscStareProbki(m_seriesWyjscie);
-
-    // 2. Wykres Uchybu (TEGO BRAKOWAŁO)
-    czyscStareProbki(m_seriesUchyb);
-
-    // 3. Wykres Sterowania (TEGO BRAKOWAŁO)
-    czyscStareProbki(m_seriesSterowanie);
-
-    // 4. Wykres PID (TEGO TEŻ BRAKOWAŁO)
-    czyscStareProbki(m_seriesP);
-    czyscStareProbki(m_seriesI);
-    czyscStareProbki(m_seriesD);
-
-    //PID
-    m_seriesP->append(t, m_logika.getP());
-    m_seriesI->append(t, m_logika.getI());
-    m_seriesD->append(t, m_logika.getD());
-
-}
-
-void MainWindow::on_pushResetPID_clicked(){
-    m_logika.getRegulator().resetuj();
-}
-
-void MainWindow::on_pushConfigARX_clicked()
-{
+void MainWindow::on_pushConfigARX_clicked() {
     ParametryARX dialog(this);
+    dialog.ustawAktualne(m_logika.getWektorA(), m_logika.getWektorB(),
+                         m_logika.getOpoznienie(), m_logika.getSzum(),
+                         m_logika.getModelUMIN(), m_logika.getModelUMAX(),
+                         m_logika.getModelYMIN(), m_logika.getModelYMAX());
 
-    // 1. Ustawiamy aktualne wartości (żeby nie było pusto)
-    dialog.ustawAktualne(
-        m_logika.getWektorA(),
-        m_logika.getWektorB(),
-        m_logika.getOpoznienie(),
-        m_logika.getSzum(),
-        m_logika.getModelUMIN(),
-        m_logika.getModelUMAX(),
-        m_logika.getModelYMIN(),
-        m_logika.getModelYMAX()
-        );
-
-    // 2. Otwieramy okno i czekamy na wynik
-    // exec() zatrzymuje kod w tym miejscu, dopóki okno się nie zamknie.
-    // Jeśli klikniesz "Zapisz" -> zwróci Accepted.
-    // Jeśli klikniesz "Anuluj" lub "X" -> zwróci Rejected.
-
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        // === TUTAJ WCHODZIMY TYLKO JAK KLIKNIESZ ZAPISZ ===
-
-        // 3. Pobieramy dane PRZED zniszczeniem obiektu dialog
-        auto a = dialog.getA();
-        auto b = dialog.getB();
-        int op = dialog.getOpoznienie();
-        double szum = dialog.getSzum();
-
-        double umin = dialog.getUMIN();
-        double umax = dialog.getUMAX();
-        double ymin = dialog.getYMIN();
-        double ymax = dialog.getYMAX();
-
-        //qDebug() << "Odebrano dane w MainWindow! A[0]:" << (a.empty() ? 0 : a[0]);
-
-        // 4. Wysyłamy do logiki
-        m_logika.nowyModelARX(a, b, op, szum, umin, umax, ymin, ymax);
-
-        ui->statusbar->showMessage("Zaktualizowano parametry ARX.", 3000);
+    if (dialog.exec() == QDialog::Accepted) {
+        m_logika.nowyModelARX(dialog.getA(), dialog.getB(), dialog.getOpoznienie(),
+                              dialog.getSzum(), dialog.getUMIN(), dialog.getUMAX(),
+                              dialog.getYMIN(), dialog.getYMAX());
+        ui->statusbar->showMessage("ARX Zaktualizowany.");
     }
-    else
-    {
-        //qDebug() << "Anulowano okno (nie kliknięto Zapisz)";
-    }
+}
+
+void MainWindow::odswiezGUI() {
+    // === 1. BLOKADA SYGNAŁÓW ===
+    const QSignalBlocker bGen1(ui->comboTypSygnalu);
+    const QSignalBlocker bGen2(ui->spinAmplituda);
+    const QSignalBlocker bGen3(ui->spinOkres);
+    const QSignalBlocker bGen4(ui->spinInterwal);
+    const QSignalBlocker bGen5(ui->spinSkladowaStala);
+    const QSignalBlocker bGen6(ui->spinWypelnienie);
+
+    const QSignalBlocker bPid1(ui->spinPidKp);
+    const QSignalBlocker bPid2(ui->spinPidTi);
+    const QSignalBlocker bPid3(ui->spinPidTd);
+    const QSignalBlocker bPid4(ui->comboMetCalk);
+
+    // === 2. USTAWIENIE WARTOŚCI (Z LOGIKI DO GUI) ===
+    const auto& gen = m_logika.getGenerator();
+    ui->comboTypSygnalu->setCurrentIndex((int)gen.getTypSygnalu());
+    ui->spinAmplituda->setValue(gen.getAmplituda());
+    ui->spinOkres->setValue(gen.getOkresRzeczywisty());
+    ui->spinInterwal->setValue(gen.getInterwal());
+    ui->spinSkladowaStala->setValue(gen.getSkladowaStala());
+    ui->spinWypelnienie->setValue(gen.getWypelnienie());
+
+    const auto& pid = m_logika.getRegulator();
+    ui->spinPidKp->setValue(pid.getWzmocnienie());
+    ui->spinPidTi->setValue(pid.getStalaCalk());
+    ui->spinPidTd->setValue(pid.getStalaRozn());
+    ui->comboMetCalk->setCurrentIndex((int)pid.getLiczCalk());
+
+    // === 3. NAPRAWA BLOKAD (Zarządzanie stanem UI) ===
+    // Skoro zablokowaliśmy sygnały, musimy ręcznie odświeżyć
+    // stan aktywności pól (Enabled/Disabled), bo slot się nie wykonał.
+
+    bool fixed = (gen.getTypSygnalu() == GeneratorWartosciZadanej::SYGNAL_STALY);
+    bool isRect = (gen.getTypSygnalu() == GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
+
+    ui->spinOkres->setEnabled(!fixed);
+    ui->spinAmplituda->setEnabled(!fixed);
+    ui->spinWypelnienie->setEnabled(isRect);
 }
 
 void MainWindow::on_pushSaveConfig_clicked(){
@@ -549,64 +322,29 @@ void MainWindow::zapiszKonfiguracje() {
     file.close();
 }
 
-void MainWindow::wczytajKonfiguracje() { QString fileName = QFileDialog::getOpenFileName( this, tr("Wczytaj konfigurację"), "", tr("Pliki JSON (*.json)") );
+void MainWindow::wczytajKonfiguracje() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Wczytaj konfigurację"), "", tr("Pliki JSON (*.json)"));
     if (fileName.isEmpty()) return;
+
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) return;
     QByteArray data = file.readAll();
     file.close();
+
     QJsonDocument doc = QJsonDocument::fromJson(data);
     if (!doc.isObject()) return;
+
+    // 1. Wczytaj dane do logiki (tu dane są poprawne)
     QJsonObject root = doc.object();
     m_logika.fromJson(root);
-    ui->spinInterwal->setValue(m_logika.getGenerator().getInterwal());
+
+    // 2. Zaktualizuj timer (bezpośrednio z logiki, nie przez GUI!)
     m_timerSymulacji->setInterval(m_logika.getGenerator().getInterwal());
+
+    // 3. Odśwież GUI (To ustawi spinInterwal i inne kontrolki BEZ wyzwalania sygnałów)
     odswiezGUI();
+
+    // 4. Reset symulacji
     on_pushResetSym_clicked();
 }
 
-void MainWindow::odswiezGUI()
-{
-    // === GENERATOR ===
-    const auto& gen = m_logika.getGenerator();
-
-    ui->comboTypSygnalu->blockSignals(true);
-    ui->spinAmplituda->blockSignals(true);
-    ui->spinOkres->blockSignals(true);
-    ui->spinInterwal->blockSignals(true);
-    ui->spinSkladowaStala->blockSignals(true);
-    ui->spinWypelnienie->blockSignals(true);
-
-    ui->comboTypSygnalu->setCurrentIndex(static_cast<int>(gen.getTypSygnalu()));
-    ui->spinAmplituda->setValue(gen.getAmplituda());
-    ui->spinOkres->setValue(gen.getOkresRzeczywisty());
-    ui->spinInterwal->setValue(gen.getInterwal());
-    ui->spinSkladowaStala->setValue(gen.getSkladowaStala());
-    ui->spinWypelnienie->setValue(gen.getWypelnienie());
-
-    ui->comboTypSygnalu->blockSignals(false);
-    ui->spinAmplituda->blockSignals(false);
-    ui->spinOkres->blockSignals(false);
-    ui->spinInterwal->blockSignals(false);
-    ui->spinSkladowaStala->blockSignals(false);
-    ui->spinWypelnienie->blockSignals(false);
-
-
-    // === PID ===
-    const auto& pid = m_logika.getRegulator();
-
-    ui->spinPidKp->blockSignals(true);
-    ui->spinPidTi->blockSignals(true);
-    ui->spinPidTd->blockSignals(true);
-    ui->comboMetCalk->blockSignals(true);
-
-    ui->spinPidKp->setValue(pid.getWzmocnienie());
-    ui->spinPidTi->setValue(pid.getStalaCalk());
-    ui->spinPidTd->setValue(pid.getStalaRozn());
-    ui->comboMetCalk->setCurrentIndex(static_cast<int>(pid.getLiczCalk()));
-
-    ui->spinPidKp->blockSignals(false);
-    ui->spinPidTi->blockSignals(false);
-    ui->spinPidTd->blockSignals(false);
-    ui->comboMetCalk->blockSignals(false);
-}

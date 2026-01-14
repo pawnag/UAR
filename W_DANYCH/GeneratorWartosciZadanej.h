@@ -1,7 +1,7 @@
 #ifndef GENERATORWARTOSCIZADANEJ_H
 #define GENERATORWARTOSCIZADANEJ_H
 
-#include <QObject> // ZMIANA: QObject zamiast QMainWindow
+#include <QObject>
 
 class GeneratorWartosciZadanej : public QObject
 {
@@ -23,7 +23,6 @@ private:
     double m_okresRzeczywisty; // T_RZ - w sekundach
     int m_interwal; // T_T - w milisekundach
 public:
-    // ZMIANA: Jeden, uniwersalny konstruktor
     explicit GeneratorWartosciZadanej(QObject *parent = nullptr);
 
     void setTypSygnalu(TypSygnalu typ) { m_typ = typ; }

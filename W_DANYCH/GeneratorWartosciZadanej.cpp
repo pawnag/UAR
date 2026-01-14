@@ -1,16 +1,14 @@
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
 
-
-// ZMIANA: Scalony konstruktor inicjalizujący QObject i zmienne
 GeneratorWartosciZadanej::GeneratorWartosciZadanej(QObject *parent)
-    : QObject(parent), // Inicjalizacja rodzica
+    : QObject(parent),
     m_typ(SYGNAL_STALY),
     m_amplituda(1.0),
     m_okresDyskretny(5),
     m_skladowaStala(0.0),
     m_wypelnienie(0.5),
     m_licznikKrokow(0),
-    m_okresRzeczywisty(1.0),
+    m_okresRzeczywisty(10.0),
     m_interwal(200)
 {}
 

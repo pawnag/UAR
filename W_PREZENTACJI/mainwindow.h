@@ -4,13 +4,9 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QtCharts>
+#include <vector>
+#include <utility> // dla std::pair
 #include "W_USLUG/KlasaUslugowa.h"
-
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QFileDialog>
-#include <QFile>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,62 +17,64 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
+    // Obsługa przycisków
     void on_pushStart_clicked();
     void on_pushStop_clicked();
     void on_pushResetSym_clicked();
+    void on_pushConfigARX_clicked();
 
+    // Logika i aktualizacja
     void aktualizujSymulacje();
     void aktualizujParametryGeneratora();
     void aktualizujParametryPID();
 
-    void on_pushConfigARX_clicked();
+    // JSON
+    void zapiszKonfiguracje();
+    void wczytajKonfiguracje();
 
     void on_pushSaveConfig_clicked();
     void on_pushLoadConfig_clicked();
 
-    void on_pushResetPID_clicked();
-
 private:
     Ui::MainWindow *ui;
     QTimer *m_timerSymulacji;
-
     KlasaUslugowa m_logika;
 
-    // --- Wykres 1: Regulacja ---
+    // --- WYKRESY (Zredukowana liczba wskaźników) ---
+    // 1. Wykres Główny (Zadana + Wyjście)
+    QChart *m_chartOutput;
     QLineSeries *m_seriesZadana;
     QLineSeries *m_seriesWyjscie;
-    QChart *m_chartOutput;
-    QChartView *m_chartViewOutput;
 
-    // --- Wykres 2: Uchyb ---
-    QLineSeries *m_seriesUchyb;
+    // 2. Wykres Uchybu
     QChart *m_chartError;
-    QChartView *m_chartViewError;
+    QLineSeries *m_seriesUchyb;
 
-    // --- Wykres 3: Sterowanie ---
-    QLineSeries *m_seriesSterowanie;
+    // 3. Wykres Sterowania
     QChart *m_chartControl;
-    QChartView *m_chartViewControl;
+    QLineSeries *m_seriesSterowanie;
 
-    // --- Wykres 4: Składowe PID ---
+    // 4. Wykres PID
+    QChart *m_chartPID;
     QLineSeries *m_seriesP;
     QLineSeries *m_seriesI;
     QLineSeries *m_seriesD;
-    QChart *m_chartPID;
-    QChartView *m_chartViewPID;
 
-    // Metody pomocnicze
-    void setupChart(QLayout* layout, QChart*& chart, QChartView*& view);
-    void stylizujWykres(QChart* chart, bool pokazLegende , QString tytulOsY);
-    void autoSkalujOsY(QChart* chart);
+    // --- HELPERY (DRY & Composition) ---
+    // Tworzy wykres i widok, zwraca parę wskaźników
+    std::pair<QChart*, QChartView*> stworzWykres(QString tytul, QString osY);
 
-    //JSON
-    void zapiszKonfiguracje();
-    void wczytajKonfiguracje();
+    // Dodaje serię danych do wykresu i zwraca wskaźnik do niej
+    QLineSeries* dodajSerie(QChart* chart, QString nazwa, QColor kolor);
+
+    // Odpowiada za przesuwanie okna czasowego (scroll) i autoskalowanie Y
+    void zarzadzajWykresem(QChart* chart, double t);
+
+    // Pomocnicza do odświeżania kontrolek GUI po wczytaniu pliku/resecie
     void odswiezGUI();
 };
 
