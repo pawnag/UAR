@@ -12,9 +12,7 @@ GeneratorWartosciZadanej::GeneratorWartosciZadanej(QObject *parent)
     m_licznikKrokow(0),
     m_okresRzeczywisty(1.0),
     m_interwal(200)
-{
-    // Konstruktor jest pusty, bo wszystko jest na liście inicjalizacyjnej
-}
+{}
 
 void GeneratorWartosciZadanej::setOkresRzeczywisty(double T_RZ)
 {

@@ -556,7 +556,8 @@ void MainWindow::wczytajKonfiguracje() { QString fileName = QFileDialog::getOpen
     QByteArray data = file.readAll();
     file.close();
     QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (!doc.isObject()) return; QJsonObject root = doc.object();
+    if (!doc.isObject()) return;
+    QJsonObject root = doc.object();
     m_logika.fromJson(root);
     ui->spinInterwal->setValue(m_logika.getGenerator().getInterwal());
     m_timerSymulacji->setInterval(m_logika.getGenerator().getInterwal());

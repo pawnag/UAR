@@ -2,7 +2,7 @@
 #define TESTYDODATKOWE_H
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
 #include "W_DANYCH/RegulatorPID.h"
-#include "W_USLUG/Symulacja.h"
+#include "W_DANYCH/Symulacja.h"
 #include <vector>
 #include <string>
 

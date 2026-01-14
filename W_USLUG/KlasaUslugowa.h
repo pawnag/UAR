@@ -2,7 +2,7 @@
 #define KLASAUSLUGOWA_H
 
 #include <QObject>
-#include "W_USLUG/Symulacja.h"
+#include "W_DANYCH/Symulacja.h"
 
 class KlasaUslugowa : public QObject
 {

@@ -11,8 +11,8 @@
 #include "W_DANYCH/ModelARX.h"
 #include "W_DANYCH/RegulatorPID.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
-#include "W_USLUG/ProstyUAR.h"
-#include "W_USLUG/Symulacja.h" // Odkomentuj jeśli chcesz testować klasę Symulacja
+#include "W_DANYCH/ProstyUAR.h"
+#include "W_DANYCH/Symulacja.h" // Odkomentuj jeśli chcesz testować klasę Symulacja
 #include "W_TESTY/TestyDodatkowe.h"      // Odkomentuj jeśli masz ten plik
 
 // --- KONFIGURACJA TRYBU ---

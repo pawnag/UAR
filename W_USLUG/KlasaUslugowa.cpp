@@ -156,6 +156,8 @@ QJsonObject KlasaUslugowa::toJson() const
 
 void KlasaUslugowa::fromJson(const QJsonObject& root)
 {
+    //dodac assercje przed nieprawidlowymi warosciami np szum<0
+
     // --- MODEL ARX ---
     if (root.contains("modelARX"))
     {
