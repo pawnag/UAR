@@ -210,7 +210,7 @@ public:
     void retranslateUi(QDialog *ParametryARX)
     {
         ParametryARX->setWindowTitle(QCoreApplication::translate("ParametryARX", "Konfiguracja Modelu ARX", nullptr));
-        groupCurrentValues->setTitle(QCoreApplication::translate("ParametryARX", "Aktualnie aktywne parametry obiektu:", nullptr));
+        groupCurrentValues->setTitle(QCoreApplication::translate("ParametryARX", "Aktualnie aktywne parametry modelu:", nullptr));
         labelCurrentSummary->setText(QCoreApplication::translate("ParametryARX", "A: [1.0, -0.4]\n"
 "B: [0.6]\n"
 "k: 1, Zak\305\202\303\263cenia: 0.00", nullptr));
@@ -221,7 +221,7 @@ public:
         editB->setPlaceholderText(QCoreApplication::translate("ParametryARX", "Wpisz wsp\303\263\305\202czynniki po spacji", nullptr));
         labelD->setText(QCoreApplication::translate("ParametryARX", "Op\303\263\305\272nienie (k):", nullptr));
         labelZaklocenie->setText(QCoreApplication::translate("ParametryARX", "Odchylenie szumu:", nullptr));
-        groupOgraniczenia->setTitle(QCoreApplication::translate("ParametryARX", "Ograniczenia Sygna\305\202\303\263w:", nullptr));
+        groupOgraniczenia->setTitle(QCoreApplication::translate("ParametryARX", "Ograniczenia sygna\305\202\303\263w:", nullptr));
         checkOgraniczenia->setText(QCoreApplication::translate("ParametryARX", "W\305\202\304\205cz ograniczenia", nullptr));
         labelU->setText(QCoreApplication::translate("ParametryARX", "Sterowanie (u):", nullptr));
         spinMinU->setPrefix(QCoreApplication::translate("ParametryARX", "Min: ", nullptr));

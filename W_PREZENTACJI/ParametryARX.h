@@ -1,6 +1,7 @@
 #ifndef PARAMETRYARX_H
 #define PARAMETRYARX_H
 
+#include "ModelARX.h"
 #include <QDialog>
 #include <vector>
 
@@ -14,36 +15,20 @@ public:
     explicit ParametryARX(QWidget *parent = nullptr);
     ~ParametryARX();
 
-    // Metody do pobierania danych
-    std::vector<double> getA() const;
-    std::vector<double> getB() const;
-    int getOpoznienie() const;
-    double getSzum() const;
+    // Metoda do wyświetlenia aktualnych danych
+    void ustawAktualne(ModelARX model);
+signals:
+    // Sygnał wysyłający dane do MainWindow
+    void zglosNoweParametry(std::vector<double> a, std::vector<double> b,
+                            int opoznienie, double szum,
+                            double umin, double umax, double ymin, double ymax);
 
-    // ZMIANA: Dodajemy 'double zaklocenie'
-    //void ustawAktualne(const std::vector<double>& a,
-    //                   const std::vector<double>& b,
-    //                   int opoznienie,
-    //                   double zaklocenie);
-
-    void ustawAktualne(const std::vector<double>& a,
-        const std::vector<double>& b,
-        int opoznienie, 
-        double zaklocenie, double umin, double umax, double ymin, double ymax);
-
-    double getUMIN() const;
-    double getUMAX() const;
-    double getYMIN() const;
-    double getYMAX() const;
-
-public slots:
-    // --- TUTAJ DODAJEMY NADPISANIE METODY ACCEPT ---
-    void accept() override;
+    // UWAGA: Usunęliśmy public slots: void accept() override;
 
 private slots:
-    void on_pushAnuluj_clicked();
-
+    // Logika będzie teraz tutaj:
     void on_pushZapisz_clicked();
+    void on_pushAnuluj_clicked();
 
 private:
     Ui::ParametryARX *ui;

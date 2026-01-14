@@ -1,11 +1,9 @@
 #include "Symulacja.h"
-
 #include <QDebug>
 
-
 Symulacja::Symulacja(GeneratorWartosciZadanej i_generator, ProstyUAR i_prostyUAR)
-    : m_generator(),
-    m_prostyUAR(),
+    : m_generator(i_generator),
+    m_prostyUAR(i_prostyUAR),
     m_czyDziala(false),
     m_czas(0.0),
     m_wartoscZadana(0.0),
@@ -14,20 +12,35 @@ Symulacja::Symulacja(GeneratorWartosciZadanej i_generator, ProstyUAR i_prostyUAR
     m_uchyb(0.0)
 {}
 
-void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie)
+void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
 {
-    m_prostyUAR.getModel().resetuj();
-    m_prostyUAR.getModel().setA(A);
-    m_prostyUAR.getModel().setB(B);
-    m_prostyUAR.getModel().setOpoznienieTransportowe(opoznienie);
+    // Aby skorzystać z grupowej metody konfigurujModel w ProstyUAR,
+    // musimy pobrać aktualne limity (żeby ich niechcący nie wyzerować)
+    ModelARX temp = m_prostyUAR.pobierzModel();
+
+    m_prostyUAR.konfigurujModel(A, B, opoznienie, szum,
+                                temp.getUMIN(), temp.getUMAX(),
+                                temp.getYMIN(), temp.getYMAX());
 }
 
 void Symulacja::konfigurujRegulator(double k, double ti, double td)
 {
-    // Sięgamy do wnętrza ProstyUAR, aby skonfigurować JEGO regulator
-    m_prostyUAR.getRegulator().setWzmocnienie(k);
-    m_prostyUAR.getRegulator().setStalaCalk(ti);
-    m_prostyUAR.getRegulator().setStalaRozn(td);
+    // Podobnie dla regulatora - musimy zachować obecną metodę całkowania
+    RegulatorPID temp = m_prostyUAR.pobierzRegulator();
+
+    m_prostyUAR.konfigurujRegulator(k, ti, td, (int)temp.getLiczCalk());
+}
+
+void Symulacja::konfigurujMetodePID(int indeksMetody)
+{
+    RegulatorPID pid = m_prostyUAR.pobierzRegulator();
+
+    m_prostyUAR.konfigurujRegulator(
+        pid.getWzmocnienie(),
+        pid.getStalaCalk(),
+        pid.getStalaRozn(),
+        indeksMetody // To jest jedyna zmieniona wartość
+        );
 }
 
 void Symulacja::konfigurujGenerator(double ampl, double okres, int interwal,
@@ -57,48 +70,29 @@ void Symulacja::resetuj()
 {
     zatrzymaj();
     m_czas = 0.0;
-
     m_wartoscZadana = 0.0;
     m_wartoscWyjscie = 0.0;
     m_sterowanie = 0.0;
     m_uchyb = 0.0;
 
     m_generator.reset();
-
-    // Resetujemy stan wewnętrzny obiektów, ale NIE zmieniamy trybu pracy!
     m_prostyUAR.reset();
-
-    // USUNIĘTO: m_prostyUAR.setTrybOtwarty(true);
-    // Tryb powinien być zmieniany tylko przez konfigurujRegulator() lub jawnie przez UI.
 }
 
 void Symulacja::wykonajKrok()
 {
-    // 1. Generator
+    // 1. Generacja Wartości Zadanej
     m_wartoscZadana = m_generator.generuj();
     m_generator.krokSymulacji();
 
-    // 2. UAR (wszystko dzieje się w środku)
+    // 2. Symulacja Pętli UAR
     m_wartoscWyjscie = m_prostyUAR.symuluj(m_wartoscZadana);
 
-    // 3. Pobranie danych do wykresów
+    // 3. Pobranie wyników
     m_uchyb = m_prostyUAR.getOstatniUchyb();
     m_sterowanie = m_prostyUAR.getOstatnieSterowanie();
 
-
-    // --- DEBUGOWANIE ---
-    // Pokaż co 10-tą próbkę lub zawsze, jeśli krok jest wolny
-    // static int licznik = 0;
-    // if (licznik++ % 10 == 0) {
-    // qDebug() << "T:" << m_czas
-    //          << " Zad:" << m_wartoscZadana
-    //          << " Ster:" << m_sterowanie
-    //          << " Wyj:" << m_wartoscWyjscie
-    //          << " TrybOtwarty:" << m_prostyUAR.czyTrybOtwarty();
-    // }
-    // -------------------
-
-    // 4. Czas
+    // 4. Aktualizacja Czasu
     double dt_sec = m_generator.getInterwal() / 1000.0;
     m_czas += dt_sec;
 }
@@ -106,4 +100,42 @@ void Symulacja::wykonajKrok()
 void Symulacja::resetUAR()
 {
     m_prostyUAR.reset();
+}
+
+// --- Gettery Fasadowe (Pobierają kopię modelu i zwracają wartość) ---
+
+std::vector<double> Symulacja::getModelA() const { return m_prostyUAR.pobierzModel().getA(); }
+std::vector<double> Symulacja::getModelB() const { return m_prostyUAR.pobierzModel().getB(); }
+int Symulacja::getModelOpoznienie() const { return m_prostyUAR.pobierzModel().getOpoznienieTransportowe(); }
+double Symulacja::getModelSzum() const { return m_prostyUAR.pobierzModel().getOdchylenieStandardoweSzumu(); }
+
+double Symulacja::getModelUMIN() const { return m_prostyUAR.pobierzModel().getUMIN(); }
+double Symulacja::getModelUMAX() const { return m_prostyUAR.pobierzModel().getUMAX(); }
+double Symulacja::getModelYMIN() const { return m_prostyUAR.pobierzModel().getYMIN(); }
+double Symulacja::getModelYMAX() const { return m_prostyUAR.pobierzModel().getYMAX(); }
+
+// --- Gettery Procesowe ---
+double Symulacja::getWartoscZadana() const { return m_wartoscZadana; }
+double Symulacja::getWartoscWyjscie() const { return m_wartoscWyjscie; }
+double Symulacja::getSterowanie() const { return m_sterowanie; }
+double Symulacja::getUchyb() const { return m_uchyb; }
+double Symulacja::getCzas() const { return m_czas; }
+bool Symulacja::czyDziala() const { return m_czyDziala; }
+int Symulacja::getInterwalMs() const { return m_generator.getInterwal(); }
+
+// --- Pobieranie Kopii Obiektów ---
+
+GeneratorWartosciZadanej Symulacja::pobierzGenerator() const
+{
+    return m_generator;
+}
+
+ModelARX Symulacja::pobierzModel() const
+{
+    return m_prostyUAR.pobierzModel();
+}
+
+RegulatorPID Symulacja::pobierzRegulator() const
+{
+    return m_prostyUAR.pobierzRegulator();
 }

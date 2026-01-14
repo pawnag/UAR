@@ -1,75 +1,77 @@
 #ifndef SYMULACJA_H
 #define SYMULACJA_H
 
+#include <vector>
 #include "GeneratorWartosciZadanej.h"
 #include "ProstyUAR.h"
 
 class Symulacja
 {
-public:
-    Symulacja(GeneratorWartosciZadanej i_generator = GeneratorWartosciZadanej(), ProstyUAR i_prostyUAR = ProstyUAR());
-
-    // --- Konfiguracja ---
-    void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie);
-    void konfigurujRegulator(double k, double ti, double td);
-    void konfigurujGenerator(double ampl, double okres, int interwal,
-                             GeneratorWartosciZadanej::TypSygnalu typ,
-                             double skladowa, double wypelnienie);
-
-    // --- Sterowanie ---
-    void uruchom();
-    void zatrzymaj();
-    void resetuj();
-    void wykonajKrok();
-
-    // --- Gettery ---
-    // Te metody teraz muszą "sięgać" głębiej do ProstyUAR
-    std::vector<double> getModelA() const { return m_prostyUAR.getModel().getA(); }
-    std::vector<double> getModelB() const { return m_prostyUAR.getModel().getB(); }
-    int getModelOpoznienie() const { return m_prostyUAR.getModel().getOpoznienieTransportowe(); }
-    double getModelSzum() const { return m_prostyUAR.getModel().getOdchylenieStandardoweSzumu(); }
-
-    double getModelUMIN() const { return m_prostyUAR.getModel().getUMIN(); };
-    double getModelUMAX() const { return m_prostyUAR.getModel().getUMAX(); };
-    double getModelYMIN() const { return m_prostyUAR.getModel().getYMIN(); };
-    double getModelYMAX() const { return m_prostyUAR.getModel().getYMAX(); };
-
-
-    // Dane procesowe
-    double getWartoscZadana() const { return m_wartoscZadana; }
-    double getWartoscWyjscie() const { return m_wartoscWyjscie; }
-    double getSterowanie() const { return m_sterowanie; }
-    double getUchyb() const { return m_uchyb; }
-
-    double getCzas() const { return m_czas; }
-    bool czyDziala() const { return m_czyDziala; }
-    int getInterwalMs() const { return m_generator.getInterwal(); }
-
-    //
-    GeneratorWartosciZadanej& getGenerator() { return m_generator; }
-    const GeneratorWartosciZadanej& getGenerator() const { return m_generator; }
-
-    ModelARX& getModel() { return m_prostyUAR.getModel(); }
-    const ModelARX& getModel() const { return m_prostyUAR.getModel(); }
-
-    RegulatorPID& getRegulator() { return m_prostyUAR.getRegulator(); }
-    const RegulatorPID& getRegulator() const { return m_prostyUAR.getRegulator(); }
-
-    void resetUAR();
-
 private:
     GeneratorWartosciZadanej m_generator;
     ProstyUAR m_prostyUAR;
 
-    // Stan
+    // Stan symulacji
     bool m_czyDziala;
     double m_czas;
 
-    // Bufory do wizualizacji
+    // Bufory chwilowe
     double m_wartoscZadana;
     double m_wartoscWyjscie;
     double m_sterowanie;
     double m_uchyb;
+
+public:
+    Symulacja(GeneratorWartosciZadanej i_generator = GeneratorWartosciZadanej(),
+              ProstyUAR i_prostyUAR = ProstyUAR());
+
+    // --- Konfiguracja (Delegacja do obiektów wewnętrznych) ---
+    void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum = 0.0);
+
+    // Konfiguracja PID
+    void konfigurujRegulator(double k, double ti, double td);
+    void konfigurujMetodePID(int indeksMetody);
+
+
+    // Konfiguracja Generatora
+    void konfigurujGenerator(double ampl, double okres, int interwal,
+                             GeneratorWartosciZadanej::TypSygnalu typ,
+                             double skladowa, double wypelnienie);
+
+    // --- Sterowanie symulacją ---
+    void uruchom();
+    void zatrzymaj();
+    void resetuj();       // Reset wszystkiego (czas, gener, uar)
+    void wykonajKrok();
+    void resetUAR();      // Reset tylko UAR (np. po zmianie nastaw)
+
+    // --- Gettery Danych (Fasada dla ProstyUAR) ---
+    std::vector<double> getModelA() const;
+    std::vector<double> getModelB() const;
+    int getModelOpoznienie() const;
+    double getModelSzum() const;
+
+    double getModelUMIN() const;
+    double getModelUMAX() const;
+    double getModelYMIN() const;
+    double getModelYMAX() const;
+
+    // Dane procesowe (Wyniki symulacji)
+    double getWartoscZadana() const;
+    double getWartoscWyjscie() const;
+    double getSterowanie() const;
+    double getUchyb() const;
+
+    double getCzas() const;
+    bool czyDziala() const;
+    int getInterwalMs() const; // Z generatora
+
+    // --- DOSTĘP DO OBIEKTÓW (Zwracamy KOPIE - bezpieczna kompozycja) ---
+    // Zastępuje stare getModel() i getRegulator() zwracające referencje
+
+    GeneratorWartosciZadanej pobierzGenerator() const;
+    ModelARX pobierzModel() const;
+    RegulatorPID pobierzRegulator() const;
 };
 
 #endif // SYMULACJA_H

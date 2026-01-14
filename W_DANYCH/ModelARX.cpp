@@ -6,8 +6,8 @@ ModelARX::ModelARX(const std::vector<double>& i_A, const std::vector<double>& i_
     : m_A(i_A), m_B(i_B),
     u_min(-10.0), u_max(10.0), y_min(-10.0), y_max(10.0), m_ograniczenia(true), rozklad_szumu(0.0, 1.0)
 {
-    if (m_A.empty()) m_A = {-0.4};
-    if (m_B.empty()) m_B = {0.6};
+    if (m_A.empty()) m_A = {-0.4, 0.0, 0.0};
+    if (m_B.empty()) m_B = {0.6, 0.0, 0.0};
     m_ot = std::max(1, i_op);
     generator_losowy.seed(std::random_device{}());
     ustawRozkladSzumu(std::max(0.0, i_oss));

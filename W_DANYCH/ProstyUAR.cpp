@@ -1,4 +1,4 @@
-#include "ProstyUAR.h" // Sprawdź ścieżkę
+#include "ProstyUAR.h"
 
 ProstyUAR::ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora)
     : m_model(wzorzecModelu),       // Kopiuje model
@@ -7,7 +7,7 @@ ProstyUAR::ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora)
     m_ostatnieSterowanie(0.0),
     m_ostatnieWyjscie(0.0)
 {
-    reset(); // Resetuje historię po skopiowaniu
+    reset();
 }
 
 double ProstyUAR::symuluj(double wartoscZadana)
@@ -39,15 +39,35 @@ void ProstyUAR::reset()
     m_ostatnieWyjscie = 0.0;
 }
 
-void ProstyUAR::aktualizujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
+void ProstyUAR::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B,
+                                int opoznienie, double szum,
+                                double umin, double umax, double ymin, double ymax)
 {
-    m_model.aktualizuj(A, B, opoznienie, szum);
+    m_model.setA(A);
+    m_model.setB(B);
+    m_model.setOpoznienieTransportowe(opoznienie);
+    m_model.setOdchylenieStandardoweSzumu(szum);
+    m_model.setOgraniczeniaSterowania(umin, umax);
+    m_model.setOgraniczeniaWyjscia(ymin, ymax);
 }
 
-ModelARX& ProstyUAR::getModel() { return m_model; }
-RegulatorPID& ProstyUAR::getRegulator() { return m_regulator; }
-const ModelARX& ProstyUAR::getModel() const { return m_model; }
-const RegulatorPID& ProstyUAR::getRegulator() const { return m_regulator; }
+ModelARX ProstyUAR::pobierzModel() const
+{
+    return m_model;
+}
+
+void ProstyUAR::konfigurujRegulator(double k, double ti, double td, int metodaCalkowania)
+{
+    m_regulator.setWzmocnienie(k);
+    m_regulator.setStalaCalk(ti);
+    m_regulator.setStalaRozn(td);
+    m_regulator.setLiczCalk(static_cast<RegulatorPID::LiczCalk>(metodaCalkowania));
+}
+
+RegulatorPID ProstyUAR::pobierzRegulator() const
+{
+    return m_regulator;
+}
 
 double ProstyUAR::getOstatniUchyb() const { return m_ostatniUchyb; }
 double ProstyUAR::getOstatnieSterowanie() const { return m_ostatnieSterowanie; }

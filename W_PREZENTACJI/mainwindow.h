@@ -39,6 +39,28 @@ private slots:
     void on_pushSaveConfig_clicked();
     void on_pushLoadConfig_clicked();
 
+    void on_spinAmplituda_valueChanged(double arg1);
+
+    void on_comboTypSygnalu_currentIndexChanged(int index);
+
+    void on_spinOkres_valueChanged(double arg1);
+
+    void on_spinSkladowaStala_valueChanged(double arg1);
+
+    void on_spinWypelnienie_valueChanged(double arg1);
+
+    void on_spinPidKp_valueChanged(double arg1);
+
+    void on_spinPidTi_valueChanged(double arg1);
+
+    void on_spinPidTd_valueChanged(double arg1);
+
+    void on_comboMetCalk_currentIndexChanged(int index);
+
+    void on_pushResetPID_clicked();
+
+    void on_spinInterwal_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     QTimer *m_timerSymulacji;

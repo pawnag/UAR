@@ -1,7 +1,7 @@
 #include "W_PREZENTACJI/mainwindow.h"
 #include <QApplication>
 
-#define TRYB_TESTOWY
+//#define TRYB_TESTOWY
 
 extern void uruchomWszystkieTesty();
 
@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     uruchomWszystkieTesty();
     return 0;
 #else
+    uruchomWszystkieTesty();
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

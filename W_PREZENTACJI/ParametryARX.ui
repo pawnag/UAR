@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="groupCurrentValues">
      <property name="title">
-      <string>Aktualnie aktywne parametry obiektu:</string>
+      <string>Aktualnie aktywne parametry modelu:</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_Current">
       <item>
@@ -112,7 +112,7 @@ k: 1, Zakłócenia: 0.00</string>
    <item>
     <widget class="QGroupBox" name="groupOgraniczenia">
      <property name="title">
-      <string>Ograniczenia Sygnałów:</string>
+      <string>Ograniczenia sygnałów:</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0" colspan="3">

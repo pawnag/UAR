@@ -17,9 +17,8 @@ private:
     double m_lastP = 0.0;
     double m_lastI = 0.0;
     double m_lastD = 0.0;
-
 public:
-    RegulatorPID(double k = 1.0, double TI = 0.0, double TD = 0.0);
+    RegulatorPID(double k = 0.0, double TI = 0.0, double TD = 0.0);
 
     double symuluj(double e);
     void resetuj();

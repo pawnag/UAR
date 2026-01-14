@@ -1,143 +1,102 @@
 #include "ParametryARX.h"
 #include "ui_ParametryARX.h"
 #include <QMessageBox>
+#include <QStringList>
 
 ParametryARX::ParametryARX(QWidget *parent) :
-    QDialog(parent), ui(new Ui::ParametryARX)
+    QDialog(parent),
+    ui(new Ui::ParametryARX)
 {
     ui->setupUi(this);
-    setWindowTitle("Konfiguracja Modelu ARX");
-
-    // Opcjonalnie: ukrycie znaku zapytania na pasku tytułu
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    //setWindowTitle("Konfiguracja Modelu ARX");
 }
 
-ParametryARX::~ParametryARX() { delete ui; }
-
-// --- METODA WALIDUJĄCA (Twoja implementacja) ---
-// Jest wywoływana automatycznie przy wciśnięciu Enter lub przez on_pushZapisz_clicked
-void ParametryARX::accept()
+ParametryARX::~ParametryARX()
 {
-    // 1. Pobieramy dane z UI
-    std::vector<double> tempA = stringToVector(ui->editA->text());
-    std::vector<double> tempB = stringToVector(ui->editB->text());
-
-    // 2. Diagnostyka (zobaczysz to w konsoli Qt Creator)
-    //qDebug() << "Próba zapisu. A:" << tempA.size() << "B:" << tempB.size();
-
-    // 3. Walidacja
-    if (tempA.size() < 3) {
-        QMessageBox::warning(this, "Błąd", "Wielomian A za krótki!");
-        return; // PRZERYWAMY, okno zostaje otwarte
-    }
-    if (tempB.size() < 3) {
-        QMessageBox::warning(this, "Błąd", "Wielomian B za krótki!");
-        return; // PRZERYWAMY
-    }
-
-    // 4. KLUCZOWE: Jeśli wszystko OK, mówimy Qt "Zaakceptowano"
-    QDialog::accept();
+    delete ui;
 }
 
-// --- POBIERANIE DANYCH Z OKNA (Gettery) ---
-std::vector<double> ParametryARX::getA() const { return stringToVector(ui->editA->text()); }
-
-std::vector<double> ParametryARX::getB() const { return stringToVector(ui->editB->text()); }
-
-int ParametryARX::getOpoznienie() const { return ui->spinOpoznienie->value(); }
-
-double ParametryARX::getUMIN() const { return ui->spinMinU->value(); };
-double ParametryARX::getUMAX() const { return ui->spinMaxU->value(); };
-double ParametryARX::getYMIN() const { return ui->spinMinY->value(); };
-double ParametryARX::getYMAX() const { return ui->spinMaxY->value(); };
-
-double ParametryARX::getSzum() const
+void ParametryARX::ustawAktualne(ModelARX model)
 {
-    // Zabezpieczenie, gdyby kontrolka nie istniała w UI
-    if(ui->spinZaklocenie) return ui->spinZaklocenie->value();
-    return 0.0;
-}
-
-// --- INICJALIZACJA OKNA ---
-//void ParametryARX::ustawAktualne(const std::vector<double>& a,
-//                                 const std::vector<double>& b,
-//                                 int opoznienie,
-//                                 double zaklocenie)
-//{
-//    QString strA = vectorToString(a);
-//    QString strB = vectorToString(b);
-//
-//    ui->editA->setText(strA);
-//    ui->editB->setText(strB);
-//    ui->spinOpoznienie->setValue(opoznienie);
-//
-//    if(ui->spinZaklocenie) {
-//        ui->spinZaklocenie->setValue(zaklocenie);
-//    }
-//
-//    // Aktualizacja etykiety informacyjnej
-//    QString info = QString("A: [%1]\nB: [%2]\nk: %3, Szum: %4")
-//                       .arg(strA).arg(strB).arg(opoznienie).arg(zaklocenie);
-//
-//    // Upewnij się, że masz labelCurrentSummary w pliku .ui
-//    if(ui->labelCurrentSummary) ui->labelCurrentSummary->setText(info);
-//}
-
-void ParametryARX::ustawAktualne(const std::vector<double>& a,
-    const std::vector<double>& b,
-    int opoznienie,
-    double zaklocenie, double umin, double umax, double ymin, double ymax) {
-    QString strA = vectorToString(a);
-    QString strB = vectorToString(b);
+    // Pobieramy dane bezpośrednio z obiektu modelu
+    QString strA = vectorToString(model.getA());
+    QString strB = vectorToString(model.getB());
 
     ui->editA->setText(strA);
     ui->editB->setText(strB);
-    ui->spinOpoznienie->setValue(opoznienie);
+    ui->spinOpoznienie->setValue(model.getOpoznienieTransportowe());
 
     if (ui->spinZaklocenie) {
-        ui->spinZaklocenie->setValue(zaklocenie);
+        ui->spinZaklocenie->setValue(model.getOdchylenieStandardoweSzumu());
     }
 
-    ui->spinMinU->setValue(umin);
-    ui->spinMaxU->setValue(umax);
-    ui->spinMinY->setValue(ymin);
-    ui->spinMaxY->setValue(ymax);
+    ui->spinMinU->setValue(model.getUMIN());
+    ui->spinMaxU->setValue(model.getUMAX());
+    ui->spinMinY->setValue(model.getYMIN());
+    ui->spinMaxY->setValue(model.getYMAX());
 
     // Aktualizacja etykiety informacyjnej
-    QString info = QString("A: [%1]\nB: [%2]\nk: %3, Szum: %4")
-        .arg(strA).arg(strB).arg(opoznienie).arg(zaklocenie);
+    if (ui->labelCurrentSummary) {
+        QString info = QString("Obecne parametry:\nA: [%1]\nB: [%2]\nk: %3, Szum: %4")
+        .arg(strA)
+            .arg(strB)
+            .arg(model.getOpoznienieTransportowe())
+            .arg(model.getOdchylenieStandardoweSzumu());
+        ui->labelCurrentSummary->setText(info);
+    }
+}
 
-    // Upewnij się, że masz labelCurrentSummary w pliku .ui
-    if (ui->labelCurrentSummary) ui->labelCurrentSummary->setText(info);
-
-
-};
-
-
-// --- OBSŁUGA PRZYCISKÓW (To trzeba było uzupełnić) ---
-
+// --- ZMODYFIKOWANA METODA ---
 void ParametryARX::on_pushZapisz_clicked()
 {
-    // Wywołujemy accept(), który uruchamia Twoją walidację napisaną wyżej.
-    // Jeśli walidacja przejdzie, okno się zamknie i zwróci QDialog::Accepted.
-    accept();
+    // 1. Pobieranie danych
+    std::vector<double> tempA = stringToVector(ui->editA->text());
+    std::vector<double> tempB = stringToVector(ui->editB->text());
+
+    // 2. AUTOMATYCZNA KOREKTA (zamiast błędu)
+    // Jeśli wektor ma mniej niż 3 elementy, dopychamy zerami do 3.
+    while (tempA.size() < 3) {
+        tempA.push_back(0.0);
+    }
+
+    while (tempB.size() < 3) {
+        tempB.push_back(0.0);
+    }
+
+    // Pobranie reszty wartości
+    int opoznienie = ui->spinOpoznienie->value();
+    double szum = (ui->spinZaklocenie) ? ui->spinZaklocenie->value() : 0.0;
+    double uMin = ui->spinMinU->value();
+    double uMax = ui->spinMaxU->value();
+    double yMin = ui->spinMinY->value();
+    double yMax = ui->spinMaxY->value();
+
+    // Walidację logiczną (min < max) zostawiamy, bo to błąd krytyczny dla wykresu
+    if (uMin >= uMax) {
+        QMessageBox::warning(this, "Błąd", "Min U musi być mniejsze od Max U!");
+        return;
+    }
+
+    // 3. Emisja sygnału ze skorygowanymi wektorami (tempA/tempB mają teraz min. 3 el.)
+    emit zglosNoweParametry(tempA, tempB, opoznienie, szum, uMin, uMax, yMin, yMax);
+
+    // 4. Zamknięcie okna
+    this->accept();
 }
 
 void ParametryARX::on_pushAnuluj_clicked()
 {
-    // Zamykamy okno i zwracamy QDialog::Rejected.
-    // Zmiany zostaną zignorowane w MainWindow.
-    reject();
+    this->reject();
 }
 
-// --- FUNKCJE POMOCNICZE ---
+// --- POMOCNICZE ---
 std::vector<double> ParametryARX::stringToVector(const QString& str) const
 {
     std::vector<double> vec;
     QStringList list = str.split(' ', Qt::SkipEmptyParts);
     for(const QString& s : list) {
         QString tempS = s;
-        tempS.replace(",", "."); // Zamiana przecinka na kropkę
+        tempS.replace(",", ".");
         bool ok;
         double val = tempS.toDouble(&ok);
         if(ok) vec.push_back(val);

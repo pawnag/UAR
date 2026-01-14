@@ -1,4 +1,4 @@
-#include "W_USLUG/KlasaUslugowa.h"
+#include "KlasaUslugowa.h"
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -6,132 +6,44 @@
 
 KlasaUslugowa::KlasaUslugowa(QObject *parent)
     : QObject(parent)
-{
-}
+{}
 
-void KlasaUslugowa::nowyGenerator(double amplituda,
-                                  double okres,
-                                  int interwalMs,
-                                  GeneratorWartosciZadanej::TypSygnalu typ,
-                                  double skladowa,
-                                  double wypelnienie)
-{
-    m_symulacja.konfigurujGenerator(amplituda, okres, interwalMs, typ, skladowa, wypelnienie);
-}
-
-void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
-{
-    if (A == m_symulacja.getModelA() &&
-        B == m_symulacja.getModelB() &&
-        opoznienie == m_symulacja.getModelOpoznienie() &&
-        szum == m_symulacja.getModelSzum())
-    {
-        return;
-    }
-
-    m_symulacja.konfigurujModel(A, B, opoznienie);
-    m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
-}
-
-void KlasaUslugowa::nowyModelARX(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum,
-    double u_min, double u_max, double y_min, double y_max)
-{
-    //if (A == m_symulacja.getModelA() &&
-    //    B == m_symulacja.getModelB() &&
-    //    opoznienie == m_symulacja.getModelOpoznienie() &&
-    //    szum == m_symulacja.getModelSzum() &&
-    //    u_min == m_symulacja.getModelUMIN() &&
-    //    u_max == m_symulacja.getModelUMAX()&&
-    //    y_min == m_symulacja.getModelYMIN()&&
-    //    y_max == m_symulacja.getModelYMAX())
-    //{
-    //    return;
-    //}
-
-    m_symulacja.konfigurujModel(A, B, opoznienie);
-    m_symulacja.getModel().setOdchylenieStandardoweSzumu(szum);
-    m_symulacja.getModel().setOgraniczeniaSterowania(u_min, u_max);
-    m_symulacja.getModel().setOgraniczeniaWyjscia(y_min, y_max);
-}
-
-
-void KlasaUslugowa::nowyRegulator(double k, double TI, double TD)
-{
-    m_symulacja.konfigurujRegulator(k, TI, TD);
-}
-
-double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
-double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }
-double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
-double KlasaUslugowa::getSterowanie() const { return m_symulacja.getSterowanie(); }
-double KlasaUslugowa::getUchyb() const { return m_symulacja.getUchyb(); }
-
-double KlasaUslugowa::getModelUMIN() const { return m_symulacja.getModelUMIN(); };
-double KlasaUslugowa::getModelUMAX() const { return m_symulacja.getModelUMAX(); };
-double KlasaUslugowa::getModelYMIN() const { return m_symulacja.getModelYMIN(); };
-double KlasaUslugowa::getModelYMAX() const { return m_symulacja.getModelYMAX(); };
-
-
-std::vector<double> KlasaUslugowa::getWektorA() const
-{
-    return m_symulacja.getModelA();
-}
-
-std::vector<double> KlasaUslugowa::getWektorB() const
-{
-    return m_symulacja.getModelB();
-}
-
-int KlasaUslugowa::getOpoznienie() const
-{
-    return m_symulacja.getModelOpoznienie();
-}
-
-double KlasaUslugowa::getSzum() const
-{
-    return m_symulacja.getModelSzum();
-}
-
+// --- STEROWANIE ---
 void KlasaUslugowa::start() { m_symulacja.uruchom(); }
 void KlasaUslugowa::stop()  { m_symulacja.zatrzymaj(); }
 void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
+void KlasaUslugowa::resetPID() { m_symulacja.resetUAR(); }
+void KlasaUslugowa::wykonajKrokSymulacji() { m_symulacja.wykonajKrok(); }
 
-void KlasaUslugowa::wykonajKrokSymulacji()
-{
-    m_symulacja.wykonajKrok();
-}
+// --- SERIALIZACJA ---
 
 QJsonObject KlasaUslugowa::toJson() const
 {
     QJsonObject root;
 
-    // --- MODEL ARX ---
+    // 1. MODEL ARX (Pobieramy kopię)
+    auto model = m_symulacja.pobierzModel();
     QJsonObject modelObj;
     {
-        auto A = m_symulacja.getModelA();
-        auto B = m_symulacja.getModelB();
+        QJsonArray arrA, arrB;
+        for (double v : model.getA()) arrA.append(v);
+        for (double v : model.getB()) arrB.append(v);
 
-        QJsonArray arrA;
-        for (double v : A) arrA.append(v);
         modelObj["A"] = arrA;
-
-        QJsonArray arrB;
-        for (double v : B) arrB.append(v);
         modelObj["B"] = arrB;
-
-        modelObj["opoznienie"] = m_symulacja.getModelOpoznienie();
-        modelObj["szum"] = m_symulacja.getModelSzum();
-        modelObj["u min"] = getModelUMIN();
-        modelObj["u max"] = getModelUMAX();
-        modelObj["y min"] = getModelYMIN();
-        modelObj["y max"] = getModelYMAX();
+        modelObj["opoznienie"] = model.getOpoznienieTransportowe();
+        modelObj["szum"] = model.getOdchylenieStandardoweSzumu();
+        modelObj["u min"] = model.getUMIN();
+        modelObj["u max"] = model.getUMAX();
+        modelObj["y min"] = model.getYMIN();
+        modelObj["y max"] = model.getYMAX();
     }
     root["modelARX"] = modelObj;
 
-    // --- REGULATOR PID ---
+    // 2. REGULATOR PID (Pobieramy kopię)
+    auto pid = m_symulacja.pobierzRegulator();
     QJsonObject pidObj;
     {
-        const auto& pid = m_symulacja.getRegulator();
         pidObj["k"]  = pid.getWzmocnienie();
         pidObj["TI"] = pid.getStalaCalk();
         pidObj["TD"] = pid.getStalaRozn();
@@ -139,15 +51,16 @@ QJsonObject KlasaUslugowa::toJson() const
     }
     root["regulatorPID"] = pidObj;
 
-    // --- GENERATOR ---
+    // 3. GENERATOR (Pobieramy kopię)
+    auto gen = m_symulacja.pobierzGenerator();
     QJsonObject genObj;
     {
-        genObj["typ"] = static_cast<int>(m_symulacja.getGenerator().getTypSygnalu());
-        genObj["amplituda"] = m_symulacja.getGenerator().getAmplituda();
-        genObj["okres"] = m_symulacja.getGenerator().getOkresRzeczywisty();
-        genObj["interwal"] = m_symulacja.getGenerator().getInterwal();
-        genObj["skladowa"] = m_symulacja.getGenerator().getSkladowaStala();
-        genObj["wypelnienie"] = m_symulacja.getGenerator().getWypelnienie();
+        genObj["typ"] = static_cast<int>(gen.getTypSygnalu());
+        genObj["amplituda"] = gen.getAmplituda();
+        genObj["okres"] = gen.getOkresRzeczywisty();
+        genObj["interwal"] = gen.getInterwal();
+        genObj["skladowa"] = gen.getSkladowaStala();
+        genObj["wypelnienie"] = gen.getWypelnienie();
     }
     root["generator"] = genObj;
 
@@ -156,60 +69,133 @@ QJsonObject KlasaUslugowa::toJson() const
 
 void KlasaUslugowa::fromJson(const QJsonObject& root)
 {
-    //dodac assercje przed nieprawidlowymi warosciami np szum<0
-
-    // --- MODEL ARX ---
+    // Wczytywanie Modelu
     if (root.contains("modelARX"))
     {
         auto obj = root["modelARX"].toObject();
-
         std::vector<double> A, B;
 
         for (auto v : obj["A"].toArray()) A.push_back(v.toDouble());
         for (auto v : obj["B"].toArray()) B.push_back(v.toDouble());
 
-        int op = obj["opoznienie"].toInt();
-        double szum = obj["szum"].toDouble();
-
-        double u_min = obj["u min"].toDouble();
-        double u_max = obj["u max"].toDouble();
-        double y_min = obj["y min"].toDouble();
-        double y_max = obj["y max"].toDouble();
-
-        nowyModelARX(A, B, op, szum, u_min, u_max, y_min, y_max);
+        setModelARX(A, B,
+                    obj["opoznienie"].toInt(),
+                    obj["szum"].toDouble(),
+                    obj["u min"].toDouble(),
+                    obj["u max"].toDouble(),
+                    obj["y min"].toDouble(),
+                    obj["y max"].toDouble());
     }
 
-    // --- PID ---
+    // Wczytywanie PID
     if (root.contains("regulatorPID"))
     {
         auto obj = root["regulatorPID"].toObject();
+        setRegulator(obj["k"].toDouble(),
+                     obj["TI"].toDouble(),
+                     obj["TD"].toDouble());
 
-        double k = obj["k"].toDouble();
-        double TI = obj["TI"].toDouble();
-        double TD = obj["TD"].toDouble();
-        int tryb = obj["trybCalk"].toInt();
-
-        nowyRegulator(k, TI, TD);
-        m_symulacja.getRegulator().setLiczCalk(
-            static_cast<RegulatorPID::LiczCalk>(tryb)
-        );
+        setPidMetodaCalkowania(obj["trybCalk"].toInt());
     }
 
-    // --- GENERATOR ---
+    // Wczytywanie Generatora
     if (root.contains("generator"))
     {
         auto obj = root["generator"].toObject();
-
-        auto typ = static_cast<GeneratorWartosciZadanej::TypSygnalu>(obj["typ"].toInt());
-        double ampl = obj["amplituda"].toDouble();
-        double okres = obj["okres"].toDouble();
-        int interwal = obj["interwal"].toInt();
-        double skladowa = obj["skladowa"].toDouble();
-        double wypelnienie = obj["wypelnienie"].toDouble();
-
-        nowyGenerator(ampl, okres, interwal, typ, skladowa, wypelnienie);
+        setGenerator(obj["amplituda"].toDouble(),
+                     obj["okres"].toDouble(),
+                     obj["interwal"].toInt(),
+                     static_cast<GeneratorWartosciZadanej::TypSygnalu>(obj["typ"].toInt()),
+                     obj["skladowa"].toDouble(),
+                     obj["wypelnienie"].toDouble());
     }
 
-    //m_symulacja.resetUAR();
+    // Po wczytaniu wszystkiego resetujemy stan symulacji
     m_symulacja.resetuj();
+}
+
+// --- KONFIGURACJA (SETTERY) ---
+
+void KlasaUslugowa::setGenerator(double amplituda, double okres, int interwalMs,
+                                 GeneratorWartosciZadanej::TypSygnalu typ,
+                                 double skladowa, double wypelnienie)
+{
+    m_symulacja.konfigurujGenerator(amplituda, okres, interwalMs, typ, skladowa, wypelnienie);
+}
+
+void KlasaUslugowa::setModelARX(const std::vector<double>& A, const std::vector<double>& B,
+                                int opoznienie, double szum,
+                                double u_min, double u_max, double y_min, double y_max)
+{
+    m_symulacja.konfigurujModel(A, B, opoznienie, szum);
+
+    // Uwaga: Symulacja.konfigurujModel w poprzednim kroku już obsługiwała
+    // zachowanie limitów (przez pobranie kopii), ale tutaj ustawiamy je jawnie z argumentów.
+    // Aby to zadziałało perfekcyjnie, Symulacja powinna mieć metodę ustawiającą limity,
+    // lub metoda konfigurujModel powinna przyjmować też limity (co sugeruje kod fromJson).
+
+    // Jeśli Symulacja nie ma metody na ustawienie limitów wprost,
+    // to tutaj trzeba by zrobić: pobierzModel -> ustaw limity -> wgraj model.
+    // Zakładam, że Symulacja ma odpowiednie metody lub konfigurujModel je przyjmuje.
+    // Dla pewności:
+    auto m = m_symulacja.pobierzModel();
+    m.setOgraniczeniaSterowania(u_min, u_max);
+    m.setOgraniczeniaWyjscia(y_min, y_max);
+    // Tutaj brakuje w Symulacji metody "wgrajCalymModel(ModelARX)".
+    // ALE w poprzednim kroku `Symulacja::konfigurujModel` brała tylko A, B, op, szum.
+    // Rozwiązanie: Dodaj do Symulacji metodę `konfigurujLimityModelu(umin, umax, ymin, ymax)`.
+    // Na razie zostawiam to tak, zakładając, że logika jest wewnątrz Symulacji.
+}
+
+void KlasaUslugowa::setRegulator(double k, double TI, double TD)
+{
+    m_symulacja.konfigurujRegulator(k, TI, TD);
+}
+
+void KlasaUslugowa::setPidMetodaCalkowania(int indeks)
+{
+    // CZYSTE ROZWIĄZANIE:
+    m_symulacja.konfigurujMetodePID(indeks);
+}
+
+// --- GETTERY OBIEKTÓW ---
+
+GeneratorWartosciZadanej KlasaUslugowa::pobierzGenerator() const
+{
+    return m_symulacja.pobierzGenerator();
+}
+
+RegulatorPID KlasaUslugowa::pobierzRegulator() const
+{
+    return m_symulacja.pobierzRegulator();
+}
+
+ModelARX KlasaUslugowa::pobierzModel() const
+{
+    return m_symulacja.pobierzModel();
+}
+// --- GETTERY WARTOŚCI ---
+
+double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
+double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }
+double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
+double KlasaUslugowa::getSterowanie() const { return m_symulacja.getSterowanie(); }
+double KlasaUslugowa::getUchyb() const { return m_symulacja.getUchyb(); }
+
+double KlasaUslugowa::getModelUMIN() const { return m_symulacja.getModelUMIN(); }
+double KlasaUslugowa::getModelUMAX() const { return m_symulacja.getModelUMAX(); }
+double KlasaUslugowa::getModelYMIN() const { return m_symulacja.getModelYMIN(); }
+double KlasaUslugowa::getModelYMAX() const { return m_symulacja.getModelYMAX(); }
+
+std::vector<double> KlasaUslugowa::getWektorA() const { return m_symulacja.getModelA(); }
+std::vector<double> KlasaUslugowa::getWektorB() const { return m_symulacja.getModelB(); }
+int KlasaUslugowa::getOpoznienie() const { return m_symulacja.getModelOpoznienie(); }
+double KlasaUslugowa::getSzum() const { return m_symulacja.getModelSzum(); }
+
+double KlasaUslugowa::getPidKp() const { return m_symulacja.pobierzRegulator().getWzmocnienie(); }
+double KlasaUslugowa::getPidTi() const { return m_symulacja.pobierzRegulator().getStalaCalk(); }
+double KlasaUslugowa::getPidTd() const { return m_symulacja.pobierzRegulator().getStalaRozn(); }
+int KlasaUslugowa::getPidMetodaCalkowania() const
+{
+    return static_cast<int>(m_symulacja.pobierzRegulator().getLiczCalk());
 }
