@@ -10,7 +10,6 @@ private:
     ModelARX m_model;
     RegulatorPID m_regulator;
 
-    bool m_trybOtwarty;
     double m_ostatniUchyb;
     double m_ostatnieSterowanie;
     double m_ostatnieWyjscie;
@@ -21,9 +20,7 @@ public:
     void reset();
 
     void aktualizujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum);
-    void setTrybOtwarty(bool tak);
 
-    bool czyTrybOtwarty() const;
     ModelARX& getModel();
     RegulatorPID& getRegulator();
     const ModelARX& getModel() const;

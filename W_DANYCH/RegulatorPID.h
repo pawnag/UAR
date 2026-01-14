@@ -36,8 +36,6 @@ public:
     double getLastP() const;
     double getLastI() const;
     double getLastD() const;
-
-
 };
 
 #endif // REGULATORPID_H
