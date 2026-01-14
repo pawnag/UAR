@@ -1,19 +1,18 @@
 #include "Symulacja.h"
+
 #include <QDebug>
 
 
-Symulacja::Symulacja(QObject *parent)
-    : QObject(parent),
-    m_generator(),
-    m_prostyUAR(this), // ProstyUAR tworzy sobie ARX i PID w środku
+Symulacja::Symulacja()
+    : m_generator(),
+    m_prostyUAR(),
     m_czyDziala(false),
     m_czas(0.0),
     m_wartoscZadana(0.0),
     m_wartoscWyjscie(0.0),
     m_sterowanie(0.0),
     m_uchyb(0.0)
-{
-}
+{}
 
 void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie)
 {

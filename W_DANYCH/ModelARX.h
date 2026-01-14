@@ -1,15 +1,13 @@
 #ifndef MODELARX_H
 #define MODELARX_H
 
-#include <QObject>
 #include <deque>
 #include <vector>
 #include <random>
 #include <memory>
 
-class ModelARX : public QObject
+class ModelARX
 {
-    Q_OBJECT
 private:
     std::vector<double> m_A;
     std::vector<double> m_B;
@@ -23,19 +21,17 @@ private:
     bool m_ograniczenia;
 
     std::default_random_engine generator_losowy;
-    std::unique_ptr<std::normal_distribution<double>> rozklad_szumu;
+    std::normal_distribution<double> rozklad_szumu;
 
     void inicjalizujBufory();
     double obliczWyjscie();
     void ustawRozkladSzumu(double odchylenie);
 
 public:
-    explicit ModelARX(QObject *parent = nullptr);
-    ModelARX(const std::vector<double>& i_A, // !!! Trzeba wymyśleć jak to połączyć
-             const std::vector<double>& i_B,
-             int i_op = 1,
-             double i_oss = 0.0,
-             QObject *parent = nullptr);
+    ModelARX(const std::vector<double>& i_A = {-0.4},
+                      const std::vector<double>& i_B = {0.6},
+                      int i_op = 1,
+                      double i_oss = 0.0);
 
     double symuluj(double i_u);
     void resetuj();

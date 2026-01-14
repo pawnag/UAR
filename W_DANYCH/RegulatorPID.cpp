@@ -1,8 +1,8 @@
-#include "W_DANYCH/RegulatorPID.h"
+#include "RegulatorPID.h"
 #include <stdexcept>
 
-RegulatorPID::RegulatorPID(double k, double TI, double TD, QObject *parent)
-    : QObject(parent),
+RegulatorPID::RegulatorPID(double k, double TI, double TD)
+    :
     m_k(k),
     m_TI(TI),
     m_TD(TD),

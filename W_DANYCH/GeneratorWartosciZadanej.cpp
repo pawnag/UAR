@@ -1,9 +1,9 @@
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
+#include "qmath.h"
 #include <cmath>
 #include <algorithm>
 
-GeneratorWartosciZadanej::GeneratorWartosciZadanej(QObject *parent)
-    : QObject(parent),
+GeneratorWartosciZadanej::GeneratorWartosciZadanej() :
     m_typ(SYGNAL_STALY),
     m_amplituda(1.0),
     m_skladowaStala(0.0),

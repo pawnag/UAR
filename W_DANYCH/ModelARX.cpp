@@ -1,31 +1,26 @@
-#include "W_DANYCH/ModelARX.h"
+#include "ModelARX.h"
 #include <stdexcept>
 #include <algorithm> // std::clamp, std::max
 
-// --- KONSTRUKTORY ---
-
-ModelARX::ModelARX(QObject *parent)
-    : ModelARX({-0.4}, {0.6}, 1, 0.0, parent) // Delegacja
-{}
-
-ModelARX::ModelARX(const std::vector<double>& i_A, const std::vector<double>& i_B, int i_op, double i_oss, QObject *parent)
-    : QObject(parent), m_A(i_A), m_B(i_B), m_ot(i_op),
-    u_min(-10.0), u_max(10.0), y_min(-10.0), y_max(10.0), m_ograniczenia(true)
+ModelARX::ModelARX(const std::vector<double>& i_A, const std::vector<double>& i_B, int i_op, double i_oss)
+    : m_A(i_A), m_B(i_B),
+    u_min(-10.0), u_max(10.0), y_min(-10.0), y_max(10.0), m_ograniczenia(true), rozklad_szumu(0.0, 1.0)
 {
-    if (m_A.empty() || m_B.empty()) throw std::invalid_argument("Wektory A i B nie moga byc puste");
-    if (m_ot < 1) throw std::invalid_argument("Opoznienie musi byc >= 1");
-
-    ustawRozkladSzumu(i_oss);
-    inicjalizujBufory();
+    if (m_A.empty()) m_A = {-0.4};
+    if (m_B.empty()) m_B = {0.6};
+    m_ot = std::max(1, i_op);
     generator_losowy.seed(std::random_device{}());
+    ustawRozkladSzumu(std::max(0.0, i_oss));
+    inicjalizujBufory();
 }
 
 void ModelARX::ustawRozkladSzumu(double odchylenie)
 {
-    if (odchylenie < 0) throw std::invalid_argument("Odchylenie musi byc >= 0");
-    m_oss = odchylenie;
-    if (m_oss > 0) rozklad_szumu = std::make_unique<std::normal_distribution<double>>(0.0, m_oss);
-    else rozklad_szumu.reset();
+    m_oss = std::max(0.0, odchylenie);
+    if (m_oss > 0.0)
+        rozklad_szumu = std::normal_distribution<double>(0.0, m_oss);
+    else
+        rozklad_szumu.reset();
 }
 
 void ModelARX::inicjalizujBufory()
@@ -52,13 +47,12 @@ double ModelARX::obliczWyjscie()
         if (idx >= 0) wyjscie -= m_A[i] * m_y[idx];
     }
 
-    if (rozklad_szumu) wyjscie += (*rozklad_szumu)(generator_losowy);
+    if (m_oss > 0.000001) {
+        wyjscie += rozklad_szumu(generator_losowy);
+    }
 
     return wyjscie;
 }
-
-// --- LOGIKA PUBLICZNA ---
-
 double ModelARX::symuluj(double i_u)
 {
     double u_in = m_ograniczenia ? std::clamp(i_u, u_min, u_max) : i_u;
@@ -76,14 +70,11 @@ double ModelARX::symuluj(double i_u)
 
     return y_out;
 }
-
 void ModelARX::resetuj() { inicjalizujBufory(); }
-
 void ModelARX::aktualizuj(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
 {
     setA(A); setB(B); setOpoznienieTransportowe(opoznienie); setOdchylenieStandardoweSzumu(szum);
 }
-
 // Helper do dopychania zer na początek bufora (zachowanie historii)
 void dopasujBufor(std::deque<double>& buf, size_t minSize) {
     if (buf.size() < minSize) buf.insert(buf.begin(), minSize - buf.size(), 0.0);

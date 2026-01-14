@@ -1,11 +1,8 @@
 #ifndef GENERATORWARTOSCIZADANEJ_H
 #define GENERATORWARTOSCIZADANEJ_H
 
-#include <QObject>
-
-class GeneratorWartosciZadanej : public QObject
+class GeneratorWartosciZadanej
 {
-    Q_OBJECT
 public:
     enum TypSygnalu {
         SYGNAL_STALY,
@@ -24,7 +21,7 @@ private:
     int m_okresDyskretny;      // T - liczba próbek na okres
 
 public:
-    explicit GeneratorWartosciZadanej(QObject *parent = nullptr);
+    GeneratorWartosciZadanej();
 
     double generuj();
     void krokSymulacji();
@@ -46,7 +43,6 @@ public:
     int getOkresDyskretny() const;
     int getInterwal() const;
 
-signals:
 };
 
 #endif // GENERATORWARTOSCIZADANEJ_H

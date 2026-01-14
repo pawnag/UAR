@@ -1,16 +1,13 @@
 #ifndef SYMULACJA_H
 #define SYMULACJA_H
 
-#include <QObject>
-#include "../W_DANYCH/GeneratorWartosciZadanej.h"
+#include "GeneratorWartosciZadanej.h"
 #include "ProstyUAR.h"
 
-class Symulacja : public QObject
+class Symulacja
 {
-    Q_OBJECT
-
 public:
-    explicit Symulacja(QObject *parent = nullptr);
+    Symulacja();
 
     // --- Konfiguracja ---
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie);
