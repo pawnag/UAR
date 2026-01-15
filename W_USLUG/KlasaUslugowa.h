@@ -17,24 +17,19 @@ private:
 public:
     explicit KlasaUslugowa(QObject *parent = nullptr);
 
-    // --- DOSTĘP DO OBIEKTÓW (KOPIE) ---
-    // Służą do pobrania całego stanu obiektu (np. do GUI lub zapisu JSON)
     GeneratorWartosciZadanej pobierzGenerator() const;
     RegulatorPID pobierzRegulator() const;
-    ModelARX pobierzModel() const; // Jeśli potrzebujesz całego modelu
+    ModelARX pobierzModel() const;
 
-    // --- STEROWANIE ---
     void start();
     void stop();
     void reset();
     void resetPID(); // Resetuje tylko całkę w regulatorze
     void wykonajKrokSymulacji();
 
-    // --- SERIALIZACJA (JSON) ---
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
 
-    // --- KONFIGURACJA (SETTERY) ---
     void setGenerator(double amplituda, double okres, int interwalMs,
                       GeneratorWartosciZadanej::TypSygnalu typ,
                       double skladowa = 0.0, double wypelnienie = 0.5);
@@ -46,7 +41,6 @@ public:
     void setRegulator(double k, double TI, double TD);
     void setPidMetodaCalkowania(int indeks);
 
-    // --- ODCZYT DANYCH BIEŻĄCYCH (GETTERY WARTOŚCI) ---
 
     // Symulacja
     double getCzas() const;
@@ -55,7 +49,7 @@ public:
     double getSterowanie() const;
     double getUchyb() const;
 
-    // Parametry Modelu (pomocnicze)
+    // Parametry Modelu
     double getModelUMIN() const;
     double getModelUMAX() const;
     double getModelYMIN() const;
@@ -65,7 +59,7 @@ public:
     int getOpoznienie() const;
     double getSzum() const;
 
-    // Parametry PID (pomocnicze)
+    // Parametry PID
     double getPidKp() const;
     double getPidTi() const;
     double getPidTd() const;

@@ -33,21 +33,20 @@ double ModelARX::obliczWyjscie()
 {
     double wyjscie = 0.0;
 
-    // 1. Część sterująca (B) z uwzględnieniem opóźnienia
-    // m_u.size() - 1 to najnowsza próbka (u_i)
-    // Musimy się cofnąć o m_ot (opóźnienie) oraz o i (kolejne elementy wielomianu)
-    for (size_t i = 0; i < m_B.size(); ++i) {
+    for (size_t i = 0; i < m_B.size(); ++i)
+    {
         int idx = (int)m_u.size() - 1 - m_ot - (int)i;
         if (idx >= 0) wyjscie += m_B[i] * m_u[idx];
     }
 
-    // 2. Część autoregresyjna (A)
-    for (size_t i = 0; i < m_A.size(); ++i) {
+    for (size_t i = 0; i < m_A.size(); ++i)
+    {
         int idx = (int)m_y.size() - 1 - (int)i;
         if (idx >= 0) wyjscie -= m_A[i] * m_y[idx];
     }
 
-    if (m_oss > 0.000001) {
+    if (m_oss > 0.000001)
+    {
         wyjscie += rozklad_szumu(generator_losowy);
     }
 
@@ -58,7 +57,6 @@ double ModelARX::symuluj(double i_u)
     double u_in = m_ograniczenia ? std::clamp(i_u, u_min, u_max) : i_u;
 
     m_u.push_back(u_in);
-    // Utrzymuj bufor wystarczająco duży dla najstarszego wymaganego elementu
     if (m_u.size() > (size_t)(m_ot + m_B.size() + 10)) m_u.pop_front();
 
     double y_out = obliczWyjscie();
@@ -75,8 +73,10 @@ void ModelARX::aktualizuj(const std::vector<double>& A, const std::vector<double
 {
     setA(A); setB(B); setOpoznienieTransportowe(opoznienie); setOdchylenieStandardoweSzumu(szum);
 }
+
 // Helper do dopychania zer na początek bufora (zachowanie historii)
-void dopasujBufor(std::deque<double>& buf, size_t minSize) {
+void dopasujBufor(std::deque<double>& buf, size_t minSize)
+{
     if (buf.size() < minSize) buf.insert(buf.begin(), minSize - buf.size(), 0.0);
 }
 

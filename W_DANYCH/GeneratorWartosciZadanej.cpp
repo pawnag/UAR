@@ -20,9 +20,7 @@ void GeneratorWartosciZadanej::przeliczOkresDyskretny() {
     if (m_interwal <= 0) m_interwal = 100;
 
     double interwalSekundy = m_interwal / 1000.0;
-    // Zabezpieczenie przed dzieleniem przez 0 jest wyżej (if m_interwal <= 0)
     m_okresDyskretny = static_cast<int>(std::round(m_okresRzeczywisty / interwalSekundy));
-
     if (m_okresDyskretny < 1) m_okresDyskretny = 1;
 }
 

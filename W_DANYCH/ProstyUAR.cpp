@@ -1,8 +1,8 @@
 #include "ProstyUAR.h"
 
 ProstyUAR::ProstyUAR(ModelARX wzorzecModelu, RegulatorPID wzorzecRegulatora)
-    : m_model(wzorzecModelu),       // Kopiuje model
-    m_regulator(wzorzecRegulatora), // Kopiuje regulator
+    : m_model(wzorzecModelu),
+    m_regulator(wzorzecRegulatora),
     m_ostatniUchyb(0.0),
     m_ostatnieSterowanie(0.0),
     m_ostatnieWyjscie(0.0)

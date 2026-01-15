@@ -13,14 +13,11 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_timerSymulacji(new QTimer(this))
 {
-    // Magiczna linika: tutaj Qt parsuje plik .ui i podłącza sloty "on_..."
     ui->setupUi(this);
 
-    // --- KONFIGURACJA WYKRESÓW ---
     QVBoxLayout* layoutMain = new QVBoxLayout(ui->widgetWykresy);
     layoutMain->setContentsMargins(0, 0, 0, 0);
 
-    // 1. Wykres główny
     auto paraGlowna = stworzWykres("Wartość zadana i regulowana", "Odpowiedź układu");
     m_chartOutput = paraGlowna.first;
     layoutMain->addWidget(paraGlowna.second, 1);
@@ -28,21 +25,22 @@ MainWindow::MainWindow(QWidget *parent)
     m_seriesZadana = dodajSerie(m_chartOutput, "Wartość zadana (w)", Qt::red);
     m_seriesWyjscie = dodajSerie(m_chartOutput, "Wartość regulowana (y)", QColor(0, 150, 255));
 
-    // 2. Wykresy dolne
     QHBoxLayout* layoutDolny = new QHBoxLayout();
     layoutMain->addLayout(layoutDolny, 1);
 
-    auto setupMalyWykres = [&](QString tytul, QString osY, QColor kol, QLineSeries** ptr) {
-        auto para = stworzWykres(tytul, osY);
-        *ptr = dodajSerie(para.first, tytul, kol);
-        layoutDolny->addWidget(para.second);
-        return para.first;
-    };
+    auto paraUchyb = stworzWykres("Uchyb regulacji", "Uchyb");
+    m_seriesUchyb = dodajSerie(paraUchyb.first, "Uchyb", Qt::green);
 
-    m_chartError = setupMalyWykres("Uchyb regulacji", "Uchyb", Qt::green, &m_seriesUchyb);
-    m_chartControl = setupMalyWykres("Sygnał sterujący", "Sterowanie", Qt::magenta, &m_seriesSterowanie);
+    layoutDolny->addWidget(paraUchyb.second);
+    m_chartError = paraUchyb.first;
 
-    // 3. Wykres PID
+    auto paraSterowanie = stworzWykres("Sygnał sterujący", "Sterowanie");
+    m_seriesSterowanie = dodajSerie(paraSterowanie.first, "Sterowanie", Qt::magenta);
+
+    layoutDolny->addWidget(paraSterowanie.second);
+
+    m_chartControl = paraSterowanie.first;
+
     auto paraPID = stworzWykres("Składowe sterowania", "Wartość PID");
     m_chartPID = paraPID.first;
     m_seriesP = dodajSerie(m_chartPID, "P", Qt::cyan);
@@ -50,36 +48,28 @@ MainWindow::MainWindow(QWidget *parent)
     m_seriesD = dodajSerie(m_chartPID, "D", QColor(255, 100, 255));
     layoutDolny->addWidget(paraPID.second);
 
-    // --- SYGNAŁY ---
-
-    // Timer nadal musi być ręcznie, bo nie jest widgetem z UI
     m_timerSymulacji->setInterval(ui->spinInterwal->value());
     connect(m_timerSymulacji, &QTimer::timeout, this, &MainWindow::aktualizujSymulacje);
 
-    // ZMIANA: Usunięto ręczne connecty dla przycisków (Start/Stop/Reset).
-    // Qt podłączy je samo, bo metody nazywają się on_pushStart_clicked itd.
-
-    // Init
     aktualizujParametryGeneratora();
     aktualizujParametryPID();
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-// ==========================================
-// LOGIKA WYKRESÓW
-// ==========================================
-
 std::pair<QChart*, QChartView*> MainWindow::stworzWykres(QString tytul, QString osY) {
     QChart* chart = new QChart();
     chart->setTitle(tytul);
+
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
     chart->setTitleBrush(Qt::white);
+
     chart->legend()->setAlignment(Qt::AlignTop);
     chart->legend()->setLabelBrush(Qt::white);
-    chart->createDefaultAxes();
 
+    chart->createDefaultAxes();
     QChartView* view = new QChartView(chart);
+
     view->setRenderHint(QPainter::Antialiasing);
 
     QValueAxis *axisX = new QValueAxis;
@@ -120,13 +110,17 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     double limitCzasu = t - OKNO_CZASOWE_S;
     bool hasData = false;
 
-    for (auto series : chart->series()) {
+    for (auto series : chart->series())
+    {
         auto line = static_cast<QLineSeries*>(series);
         if (line->count() > 0 && line->at(0).x() < limitCzasu)
+        {
             line->remove(0);
-
-        for(const auto& p : line->points()) {
-            if(p.x() >= limitCzasu) {
+        }
+        for(const auto& p : line->points())
+        {
+            if(p.x() >= limitCzasu)
+            {
                 if (p.y() < minVal) minVal = p.y();
                 if (p.y() > maxVal) maxVal = p.y();
                 hasData = true;
@@ -144,35 +138,42 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
 void MainWindow::aktualizujSymulacje()
 {
     m_logika.wykonajKrokSymulacji();
-
     double t = m_logika.getCzas();
 
-    auto updateS = [&](QLineSeries* s, double val, QString prefix, int prec) {
-        s->append(t, val);
-        s->setName(QString("%1: %2").arg(prefix).arg(val, 0, 'f', prec));
-    };
+    double valZadana = m_logika.getWartoscZadana();
+    m_seriesZadana->append(t, valZadana);
+    m_seriesZadana->setName(QString("Wartość zadana: %1").arg(valZadana, 0, 'f', 2));
 
-    updateS(m_seriesZadana, m_logika.getWartoscZadana(), "Zadana", 2);
-    updateS(m_seriesWyjscie, m_logika.getWartoscWyjscie(), "Wyjście", 2);
-    updateS(m_seriesUchyb, m_logika.getUchyb(), "Uchyb", 3);
-    updateS(m_seriesSterowanie, m_logika.getSterowanie(), "Sterowanie", 2);
+    double valWyjscie = m_logika.getWartoscWyjscie();
+    m_seriesWyjscie->append(t, valWyjscie);
+    m_seriesWyjscie->setName(QString("Wartość regulowana: %1").arg(valWyjscie, 0, 'f', 2));
 
-    // Opcjonalne pobieranie PID (jeśli dodano metody do KlasyUslugowej)
-    // auto pid = m_logika.pobierzRegulator();
-    // updateS(m_seriesP, pid.getLastP(), "P", 2);
-    // updateS(m_seriesI, pid.getLastI(), "I", 2);
-    // updateS(m_seriesD, pid.getLastD(), "D", 2);
+    double valUchyb = m_logika.getUchyb();
+    m_seriesUchyb->append(t, valUchyb);
+    m_seriesUchyb->setName(QString("Uchyb: %1").arg(valUchyb, 0, 'f', 3));
+
+    double valSter = m_logika.getSterowanie();
+    m_seriesSterowanie->append(t, valSter);
+    m_seriesSterowanie->setName(QString("Sterowanie: %1").arg(valSter, 0, 'f', 2));
+
+    auto pid = m_logika.pobierzRegulator();
+    double valP = pid.getLastP();
+    m_seriesP->append(t, valP);
+    m_seriesP->setName(QString("P: %1").arg(valP, 0, 'f', 2));
+
+    double valI = pid.getLastI();
+    m_seriesI->append(t, valI);
+    m_seriesI->setName(QString("I: %1").arg(valI, 0, 'f', 2));
+
+    double valD = pid.getLastD();
+    m_seriesD->append(t, valD);
+    m_seriesD->setName(QString("D: %1").arg(valD, 0, 'f', 2));
 
     zarzadzajWykresem(m_chartOutput, t);
     zarzadzajWykresem(m_chartError, t);
     zarzadzajWykresem(m_chartControl, t);
     zarzadzajWykresem(m_chartPID, t);
 }
-
-// ==========================================
-// SLOTY AUTO-CONNECT (Główne przyciski)
-// Qt połączy je samo dzięki nazwom funkcji!
-// ==========================================
 
 void MainWindow::on_pushStart_clicked() {
     m_timerSymulacji->start();
@@ -203,10 +204,6 @@ void MainWindow::on_pushResetSym_clicked() {
     ui->statusbar->showMessage("Symulacja ZRESETOWANA.");
 }
 
-// ==========================================
-// METODY POMOCNICZE (SETTERY)
-// ==========================================
-
 void MainWindow::aktualizujParametryGeneratora() {
     auto typ = static_cast<GeneratorWartosciZadanej::TypSygnalu>(ui->comboTypSygnalu->currentIndex());
 
@@ -235,29 +232,22 @@ void MainWindow::aktualizujParametryPID() {
 }
 
 void MainWindow::on_pushConfigARX_clicked() {
-    ParametryARX dialog(this);
-
-    // 1. Pobieramy kopię modelu z logiki
+    ParametryARX okno(this);
     auto model = m_logika.pobierzModel();
+    okno.ustawAktualne(model);
+    connect(&okno, &ParametryARX::zglosNoweParametry, this, &MainWindow::odbierzParametryARX);
+    okno.exec();
+}
 
-    // 2. Przekazujemy cały obiekt do okna (CZYSTO!)
-    dialog.ustawAktualne(model);
-
-    // 3. Odbieramy sygnał (tutaj nadal odbieramy rozbite wartości,
-    // co jest OK, bo setter w KlasaUslugowa wymaga rozbicia)
-    connect(&dialog, &ParametryARX::zglosNoweParametry,
-            this, [this](std::vector<double> a, std::vector<double> b,
-                   int k, double szum, double umin, double umax, double ymin, double ymax)
-            {
-                m_logika.setModelARX(a, b, k, szum, umin, umax, ymin, ymax);
-                ui->statusbar->showMessage("Zaktualizowano parametry ARX.");
-            });
-
-    dialog.exec();
+void MainWindow::odbierzParametryARX(std::vector<double> a, std::vector<double> b,
+                                     int k, double szum,
+                                     double umin, double umax, double ymin, double ymax)
+{
+    m_logika.setModelARX(a, b, k, szum, umin, umax, ymin, ymax);
+    ui->statusbar->showMessage("Zaktualizowano parametry ARX.");
 }
 
 void MainWindow::odswiezGUI() {
-    // 1. Blokada sygnałów (żeby nie wyzwalać slotów on_... przy ustawianiu)
     const QSignalBlocker bGen1(ui->comboTypSygnalu);
     const QSignalBlocker bGen2(ui->spinAmplituda);
     const QSignalBlocker bGen3(ui->spinOkres);
@@ -270,7 +260,6 @@ void MainWindow::odswiezGUI() {
     const QSignalBlocker bPid3(ui->spinPidTd);
     const QSignalBlocker bPid4(ui->comboMetCalk);
 
-    // 2. Obsługa Generatora (tak jak miałeś)
     auto gen = m_logika.pobierzGenerator();
     ui->comboTypSygnalu->setCurrentIndex((int)gen.getTypSygnalu());
     ui->spinAmplituda->setValue(gen.getAmplituda());
@@ -279,14 +268,12 @@ void MainWindow::odswiezGUI() {
     ui->spinSkladowaStala->setValue(gen.getSkladowaStala());
     ui->spinWypelnienie->setValue(gen.getWypelnienie());
 
-    // 3. Obsługa PID (TERAZ TAK SAMO JAK GENERATOR)
-    auto pid = m_logika.pobierzRegulator(); // Pobieramy kopię obiektu
+    auto pid = m_logika.pobierzRegulator();
     ui->spinPidKp->setValue(pid.getWzmocnienie());
     ui->spinPidTi->setValue(pid.getStalaCalk());
     ui->spinPidTd->setValue(pid.getStalaRozn());
     ui->comboMetCalk->setCurrentIndex((int)pid.getLiczCalk());
 
-    // 4. Odświeżenie stanu kontrolek (enabled/disabled)
     aktualizujParametryGeneratora();
 }
 
@@ -330,10 +317,6 @@ void MainWindow::wczytajKonfiguracje() {
     odswiezGUI();
     on_pushResetSym_clicked();
 }
-
-// ==========================================
-// SLOTY AUTO-CONNECT (Parametry)
-// ==========================================
 
 void MainWindow::on_spinAmplituda_valueChanged(double arg1) {
     Q_UNUSED(arg1);

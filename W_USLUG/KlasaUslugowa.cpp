@@ -8,20 +8,16 @@ KlasaUslugowa::KlasaUslugowa(QObject *parent)
     : QObject(parent)
 {}
 
-// --- STEROWANIE ---
 void KlasaUslugowa::start() { m_symulacja.uruchom(); }
 void KlasaUslugowa::stop()  { m_symulacja.zatrzymaj(); }
 void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
 void KlasaUslugowa::resetPID() { m_symulacja.resetUAR(); }
 void KlasaUslugowa::wykonajKrokSymulacji() { m_symulacja.wykonajKrok(); }
 
-// --- SERIALIZACJA ---
-
 QJsonObject KlasaUslugowa::toJson() const
 {
     QJsonObject root;
 
-    // 1. MODEL ARX (Pobieramy kopię)
     auto model = m_symulacja.pobierzModel();
     QJsonObject modelObj;
     {
@@ -40,7 +36,6 @@ QJsonObject KlasaUslugowa::toJson() const
     }
     root["modelARX"] = modelObj;
 
-    // 2. REGULATOR PID (Pobieramy kopię)
     auto pid = m_symulacja.pobierzRegulator();
     QJsonObject pidObj;
     {
@@ -51,7 +46,6 @@ QJsonObject KlasaUslugowa::toJson() const
     }
     root["regulatorPID"] = pidObj;
 
-    // 3. GENERATOR (Pobieramy kopię)
     auto gen = m_symulacja.pobierzGenerator();
     QJsonObject genObj;
     {
@@ -69,7 +63,6 @@ QJsonObject KlasaUslugowa::toJson() const
 
 void KlasaUslugowa::fromJson(const QJsonObject& root)
 {
-    // Wczytywanie Modelu
     if (root.contains("modelARX"))
     {
         auto obj = root["modelARX"].toObject();
@@ -87,7 +80,6 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
                     obj["y max"].toDouble());
     }
 
-    // Wczytywanie PID
     if (root.contains("regulatorPID"))
     {
         auto obj = root["regulatorPID"].toObject();
@@ -98,7 +90,6 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
         setPidMetodaCalkowania(obj["trybCalk"].toInt());
     }
 
-    // Wczytywanie Generatora
     if (root.contains("generator"))
     {
         auto obj = root["generator"].toObject();
@@ -110,11 +101,8 @@ void KlasaUslugowa::fromJson(const QJsonObject& root)
                      obj["wypelnienie"].toDouble());
     }
 
-    // Po wczytaniu wszystkiego resetujemy stan symulacji
     m_symulacja.resetuj();
 }
-
-// --- KONFIGURACJA (SETTERY) ---
 
 void KlasaUslugowa::setGenerator(double amplituda, double okres, int interwalMs,
                                  GeneratorWartosciZadanej::TypSygnalu typ,
@@ -128,23 +116,9 @@ void KlasaUslugowa::setModelARX(const std::vector<double>& A, const std::vector<
                                 double u_min, double u_max, double y_min, double y_max)
 {
     m_symulacja.konfigurujModel(A, B, opoznienie, szum);
-
-    // Uwaga: Symulacja.konfigurujModel w poprzednim kroku już obsługiwała
-    // zachowanie limitów (przez pobranie kopii), ale tutaj ustawiamy je jawnie z argumentów.
-    // Aby to zadziałało perfekcyjnie, Symulacja powinna mieć metodę ustawiającą limity,
-    // lub metoda konfigurujModel powinna przyjmować też limity (co sugeruje kod fromJson).
-
-    // Jeśli Symulacja nie ma metody na ustawienie limitów wprost,
-    // to tutaj trzeba by zrobić: pobierzModel -> ustaw limity -> wgraj model.
-    // Zakładam, że Symulacja ma odpowiednie metody lub konfigurujModel je przyjmuje.
-    // Dla pewności:
     auto m = m_symulacja.pobierzModel();
     m.setOgraniczeniaSterowania(u_min, u_max);
     m.setOgraniczeniaWyjscia(y_min, y_max);
-    // Tutaj brakuje w Symulacji metody "wgrajCalymModel(ModelARX)".
-    // ALE w poprzednim kroku `Symulacja::konfigurujModel` brała tylko A, B, op, szum.
-    // Rozwiązanie: Dodaj do Symulacji metodę `konfigurujLimityModelu(umin, umax, ymin, ymax)`.
-    // Na razie zostawiam to tak, zakładając, że logika jest wewnątrz Symulacji.
 }
 
 void KlasaUslugowa::setRegulator(double k, double TI, double TD)
@@ -154,11 +128,8 @@ void KlasaUslugowa::setRegulator(double k, double TI, double TD)
 
 void KlasaUslugowa::setPidMetodaCalkowania(int indeks)
 {
-    // CZYSTE ROZWIĄZANIE:
     m_symulacja.konfigurujMetodePID(indeks);
 }
-
-// --- GETTERY OBIEKTÓW ---
 
 GeneratorWartosciZadanej KlasaUslugowa::pobierzGenerator() const
 {
@@ -174,7 +145,6 @@ ModelARX KlasaUslugowa::pobierzModel() const
 {
     return m_symulacja.pobierzModel();
 }
-// --- GETTERY WARTOŚCI ---
 
 double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
 double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }

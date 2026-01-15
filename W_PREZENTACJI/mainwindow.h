@@ -21,18 +21,19 @@ public:
     ~MainWindow();
 
 private slots:
-    // Obsługa przycisków
     void on_pushStart_clicked();
     void on_pushStop_clicked();
     void on_pushResetSym_clicked();
     void on_pushConfigARX_clicked();
 
-    // Logika i aktualizacja
     void aktualizujSymulacje();
     void aktualizujParametryGeneratora();
     void aktualizujParametryPID();
 
-    // JSON
+    void odbierzParametryARX(std::vector<double> a, std::vector<double> b,
+                             int k, double szum,
+                             double umin, double umax, double ymin, double ymax);
+
     void zapiszKonfiguracje();
     void wczytajKonfiguracje();
 
@@ -66,37 +67,24 @@ private:
     QTimer *m_timerSymulacji;
     KlasaUslugowa m_logika;
 
-    // --- WYKRESY (Zredukowana liczba wskaźników) ---
-    // 1. Wykres Główny (Zadana + Wyjście)
     QChart *m_chartOutput;
     QLineSeries *m_seriesZadana;
     QLineSeries *m_seriesWyjscie;
 
-    // 2. Wykres Uchybu
     QChart *m_chartError;
     QLineSeries *m_seriesUchyb;
 
-    // 3. Wykres Sterowania
     QChart *m_chartControl;
     QLineSeries *m_seriesSterowanie;
 
-    // 4. Wykres PID
     QChart *m_chartPID;
     QLineSeries *m_seriesP;
     QLineSeries *m_seriesI;
     QLineSeries *m_seriesD;
 
-    // --- HELPERY (DRY & Composition) ---
-    // Tworzy wykres i widok, zwraca parę wskaźników
     std::pair<QChart*, QChartView*> stworzWykres(QString tytul, QString osY);
-
-    // Dodaje serię danych do wykresu i zwraca wskaźnik do niej
     QLineSeries* dodajSerie(QChart* chart, QString nazwa, QColor kolor);
-
-    // Odpowiada za przesuwanie okna czasowego (scroll) i autoskalowanie Y
     void zarzadzajWykresem(QChart* chart, double t);
-
-    // Pomocnicza do odświeżania kontrolek GUI po wczytaniu pliku/resecie
     void odswiezGUI();
 };
 

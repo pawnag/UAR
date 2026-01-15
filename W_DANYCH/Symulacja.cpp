@@ -14,8 +14,6 @@ Symulacja::Symulacja(GeneratorWartosciZadanej i_generator, ProstyUAR i_prostyUAR
 
 void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum)
 {
-    // Aby skorzystać z grupowej metody konfigurujModel w ProstyUAR,
-    // musimy pobrać aktualne limity (żeby ich niechcący nie wyzerować)
     ModelARX temp = m_prostyUAR.pobierzModel();
 
     m_prostyUAR.konfigurujModel(A, B, opoznienie, szum,
@@ -25,9 +23,7 @@ void Symulacja::konfigurujModel(const std::vector<double>& A, const std::vector<
 
 void Symulacja::konfigurujRegulator(double k, double ti, double td)
 {
-    // Podobnie dla regulatora - musimy zachować obecną metodę całkowania
     RegulatorPID temp = m_prostyUAR.pobierzRegulator();
-
     m_prostyUAR.konfigurujRegulator(k, ti, td, (int)temp.getLiczCalk());
 }
 
@@ -81,18 +77,14 @@ void Symulacja::resetuj()
 
 void Symulacja::wykonajKrok()
 {
-    // 1. Generacja Wartości Zadanej
     m_wartoscZadana = m_generator.generuj();
     m_generator.krokSymulacji();
 
-    // 2. Symulacja Pętli UAR
     m_wartoscWyjscie = m_prostyUAR.symuluj(m_wartoscZadana);
 
-    // 3. Pobranie wyników
     m_uchyb = m_prostyUAR.getOstatniUchyb();
     m_sterowanie = m_prostyUAR.getOstatnieSterowanie();
 
-    // 4. Aktualizacja Czasu
     double dt_sec = m_generator.getInterwal() / 1000.0;
     m_czas += dt_sec;
 }
@@ -101,8 +93,6 @@ void Symulacja::resetUAR()
 {
     m_prostyUAR.reset();
 }
-
-// --- Gettery Fasadowe (Pobierają kopię modelu i zwracają wartość) ---
 
 std::vector<double> Symulacja::getModelA() const { return m_prostyUAR.pobierzModel().getA(); }
 std::vector<double> Symulacja::getModelB() const { return m_prostyUAR.pobierzModel().getB(); }
@@ -122,8 +112,6 @@ double Symulacja::getUchyb() const { return m_uchyb; }
 double Symulacja::getCzas() const { return m_czas; }
 bool Symulacja::czyDziala() const { return m_czyDziala; }
 int Symulacja::getInterwalMs() const { return m_generator.getInterwal(); }
-
-// --- Pobieranie Kopii Obiektów ---
 
 GeneratorWartosciZadanej Symulacja::pobierzGenerator() const
 {

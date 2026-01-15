@@ -8,7 +8,6 @@ ParametryARX::ParametryARX(QWidget *parent) :
     ui(new Ui::ParametryARX)
 {
     ui->setupUi(this);
-    //setWindowTitle("Konfiguracja Modelu ARX");
 }
 
 ParametryARX::~ParametryARX()
@@ -18,7 +17,6 @@ ParametryARX::~ParametryARX()
 
 void ParametryARX::ustawAktualne(ModelARX model)
 {
-    // Pobieramy dane bezpośrednio z obiektu modelu
     QString strA = vectorToString(model.getA());
     QString strB = vectorToString(model.getB());
 
@@ -35,7 +33,6 @@ void ParametryARX::ustawAktualne(ModelARX model)
     ui->spinMinY->setValue(model.getYMIN());
     ui->spinMaxY->setValue(model.getYMAX());
 
-    // Aktualizacja etykiety informacyjnej
     if (ui->labelCurrentSummary) {
         QString info = QString("Obecne parametry:\nA: [%1]\nB: [%2]\nk: %3, Szum: %4")
         .arg(strA)
@@ -46,15 +43,11 @@ void ParametryARX::ustawAktualne(ModelARX model)
     }
 }
 
-// --- ZMODYFIKOWANA METODA ---
 void ParametryARX::on_pushZapisz_clicked()
 {
-    // 1. Pobieranie danych
     std::vector<double> tempA = stringToVector(ui->editA->text());
     std::vector<double> tempB = stringToVector(ui->editB->text());
 
-    // 2. AUTOMATYCZNA KOREKTA (zamiast błędu)
-    // Jeśli wektor ma mniej niż 3 elementy, dopychamy zerami do 3.
     while (tempA.size() < 3) {
         tempA.push_back(0.0);
     }
@@ -63,7 +56,6 @@ void ParametryARX::on_pushZapisz_clicked()
         tempB.push_back(0.0);
     }
 
-    // Pobranie reszty wartości
     int opoznienie = ui->spinOpoznienie->value();
     double szum = (ui->spinZaklocenie) ? ui->spinZaklocenie->value() : 0.0;
     double uMin = ui->spinMinU->value();
@@ -71,16 +63,13 @@ void ParametryARX::on_pushZapisz_clicked()
     double yMin = ui->spinMinY->value();
     double yMax = ui->spinMaxY->value();
 
-    // Walidację logiczną (min < max) zostawiamy, bo to błąd krytyczny dla wykresu
     if (uMin >= uMax) {
         QMessageBox::warning(this, "Błąd", "Min U musi być mniejsze od Max U!");
         return;
     }
 
-    // 3. Emisja sygnału ze skorygowanymi wektorami (tempA/tempB mają teraz min. 3 el.)
     emit zglosNoweParametry(tempA, tempB, opoznienie, szum, uMin, uMax, yMin, yMax);
 
-    // 4. Zamknięcie okna
     this->accept();
 }
 
@@ -89,7 +78,6 @@ void ParametryARX::on_pushAnuluj_clicked()
     this->reject();
 }
 
-// --- POMOCNICZE ---
 std::vector<double> ParametryARX::stringToVector(const QString& str) const
 {
     std::vector<double> vec;

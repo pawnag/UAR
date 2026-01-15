@@ -55,7 +55,6 @@ void RegulatorPID::setLiczCalk(LiczCalk tryb)
 {
     if (tryb == m_trybCalk) return;
 
-    // Przeliczenie całki przy zmianie trybu
     if (tryb == LiczCalk::Wew)
     {
         // Zewnętrzny -> Wewnętrzny: całka = całka / TI
