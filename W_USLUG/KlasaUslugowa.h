@@ -2,7 +2,6 @@
 #define KLASAUSLUGOWA_H
 
 #include <QObject>
-#include <QTimer>
 #include <QJsonObject>
 #include <vector>
 #include "W_DANYCH/Symulacja.h"
@@ -22,18 +21,19 @@ public:
     void stop();
     void reset();
     void resetPID();
-    void setInterwal(int ms);
+    void setInterwal(int ms); // To było w błędzie, ale musi tu być
     bool czyDziala() const;
 
-    // Settery (bez zmian)
-    void setGenerator(double amplituda, double okres, int interwalMs,
-                      GeneratorWartosciZadanej::TypSygnalu typ,
-                      double skladowa, double wypelnienie);
-    void setRegulator(double k, double TI, double TD);
-    void setPidMetodaCalkowania(int indeks);
-    void setModelARX(const std::vector<double>& A, const std::vector<double>& B,
-                     int opoznienie, double szum,
-                     double u_min, double u_max, double y_min, double y_max);
+    // --- SETTERY KONFIGURACYJNE (Dopasowane nazwy do MainWindow) ---
+    void ustawGenerator(double amplituda, double okres, int interwalMs,
+                        int typ, // int zamiast enuma dla uproszczenia GUI
+                        double skladowa, double wypelnienie);
+
+    void ustawPID(double k, double TI, double TD, int metoda);
+
+    void ustawModel(const std::vector<double>& A, const std::vector<double>& B,
+                    int opoznienie, double szum,
+                    double u_min, double u_max, double y_min, double y_max);
 
     // --- GETTERY DANYCH CHWILOWYCH (do wykresów) ---
     double getCzas() const;
@@ -41,37 +41,41 @@ public:
     double getWartoscWyjscie() const;
     double getSterowanie() const;
     double getUchyb() const;
+
+    // Składowe PID (Dopasowane do MainWindow)
     double getPidLastP() const;
     double getPidLastI() const;
     double getPidLastD() const;
 
-    // --- NOWE GETTERY KONFIGURACYJNE (Do GUI - typy proste) ---
-    // Generator
+    // --- GETTERY KONFIGURACYJNE ---
     double getGenAmplituda() const;
     double getGenOkres() const;
     int    getGenInterwal() const;
     double getGenSkladowa() const;
     double getGenWypelnienie() const;
-    int    getGenTyp() const; // Zwraca int (indeks combo boxa)
+    int    getGenTyp() const;
 
-    // Regulator PID
     double getPidKp() const;
     double getPidTi() const;
     double getPidTd() const;
-    int    getPidMetodaCalkowania() const; // Zwraca int (indeks combo boxa)
+    int    getPidMetodaCalkowania() const;
 
-    // Model ARX (Potrzebne do okna dialogowego, ew. tutaj też proste typy)
-    // Zostawiam pobierzModel() jako wyjątek dla okna dialogowego,
-    // lub można rozbić na getModelA(), getModelB()...
-    ModelARX pobierzModel() const;
+    // Nowa metoda: Pobiera parametry modelu "luzem" (przez referencje)
+    void pobierzModel(std::vector<double>& A, std::vector<double>& B,
+                      int& opoznienie, double& szum,
+                      double& uMin, double& uMax, double& yMin, double& yMax) const;
 
     // Serializacja
+    void zapiszKonfiguracje(const QString& sciezka);
+    void wczytajKonfiguracje(const QString& sciezka);
+
+    // Zachowujemy JSON wewnętrznie
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
 
 signals:
-    void noweDaneDostepne();
-
+    // Sygnał "rozbity" na typy proste (zgodnie z życzeniem)
+    void noweDane(double czas, double zadana, double wyjscie, double sterowanie, double uchyb);
 };
 
 #endif // KLASAUSLUGOWA_H

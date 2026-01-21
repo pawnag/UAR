@@ -1,7 +1,6 @@
 #ifndef PARAMETRYARX_H
 #define PARAMETRYARX_H
 
-#include "ModelARX.h"
 #include <QDialog>
 #include <vector>
 
@@ -15,11 +14,17 @@ public:
     explicit ParametryARX(QWidget *parent = nullptr);
     ~ParametryARX();
 
-    void ustawAktualne(ModelARX model);
+    // Nowa metoda: przyjmuje typy proste, zamiast obiektu ModelARX
+    void ustawDane(const std::vector<double>& a, const std::vector<double>& b,
+                   int opoznienie, double szum,
+                   double umin, double umax, double ymin, double ymax);
+
 signals:
+    // Sygnał zwracający dane
     void zglosNoweParametry(std::vector<double> a, std::vector<double> b,
                             int opoznienie, double szum,
                             double umin, double umax, double ymin, double ymax);
+
 private slots:
     void on_pushZapisz_clicked();
     void on_pushAnuluj_clicked();

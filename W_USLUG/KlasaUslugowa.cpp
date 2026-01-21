@@ -1,61 +1,52 @@
 #include "KlasaUslugowa.h"
-// #include <QJsonArray> -> Już niepotrzebne
-// #include <QJsonDocument>
+#include <QFile>
+#include <QJsonDocument>
 
 KlasaUslugowa::KlasaUslugowa(QObject *parent)
     : QObject(parent)
 {
     m_symulacja.setParent(this);
-    connect(&m_symulacja, &Symulacja::krokWykonany, this, &KlasaUslugowa::noweDaneDostepne);
+
+    // Lambda: Przechwytujemy sygnał z symulacji i emitujemy "płaskie" dane do GUI
+    connect(&m_symulacja, &Symulacja::krokWykonany, this, [this]() {
+        emit noweDane(
+            m_symulacja.getCzas(),
+            m_symulacja.getWartoscZadana(),
+            m_symulacja.getWartoscWyjscie(),
+            m_symulacja.getSterowanie(),
+            m_symulacja.getUchyb()
+            );
+    });
 }
 
-// ---------------------------------------------------------
-// JSON (TERAZ TYLKO DELEGACJA)
-// ---------------------------------------------------------
-
-QJsonObject KlasaUslugowa::toJson() const
-{
-    // Warstwa usług tylko prosi warstwę danych o zrzut
-    return m_symulacja.toJson();
-}
-
-void KlasaUslugowa::fromJson(const QJsonObject& root)
-{
-    // Przekazujemy JSON do symulacji
-    m_symulacja.fromJson(root);
-
-    // Po wczytaniu danych odświeżamy GUI, żeby pokazało nowe nastawy
-    emit noweDaneDostepne();
-}
-
-// --- POZOSTAŁE METODY (BEZ ZMIAN - DELEGACJA) ---
-
+// --- STEROWANIE ---
 void KlasaUslugowa::start() { m_symulacja.uruchom(); }
 void KlasaUslugowa::stop() { m_symulacja.zatrzymaj(); }
 bool KlasaUslugowa::czyDziala() const { return m_symulacja.czyDziala(); }
-
-void KlasaUslugowa::reset() {
-    m_symulacja.resetuj();
-    emit noweDaneDostepne();
-}
+void KlasaUslugowa::reset() { m_symulacja.resetuj(); }
 void KlasaUslugowa::resetPID() { m_symulacja.resetUAR(); }
 void KlasaUslugowa::setInterwal(int ms) { m_symulacja.setInterwal(ms); }
 
-void KlasaUslugowa::setGenerator(double a, double T, int dt, GeneratorWartosciZadanej::TypSygnalu typ, double skl, double wyp) {
-    m_symulacja.konfigurujGenerator(a, T, dt, typ, skl, wyp);
+// --- SETTERY (Dopasowanie nazw) ---
+void KlasaUslugowa::ustawGenerator(double a, double T, int dt, int typ, double skl, double wyp) {
+    // Rzutowanie int na enum
+    auto typEnum = static_cast<GeneratorWartosciZadanej::TypSygnalu>(typ);
+    m_symulacja.konfigurujGenerator(a, T, dt, typEnum, skl, wyp);
 }
-void KlasaUslugowa::setRegulator(double k, double ti, double td) {
+
+void KlasaUslugowa::ustawPID(double k, double ti, double td, int metoda) {
     m_symulacja.konfigurujRegulator(k, ti, td);
+    m_symulacja.konfigurujMetodePID(metoda);
 }
-void KlasaUslugowa::setPidMetodaCalkowania(int i) {
-    m_symulacja.konfigurujMetodePID(i);
-}
-void KlasaUslugowa::setModelARX(const std::vector<double>& A, const std::vector<double>& B, int k, double szum, double umin, double umax, double ymin, double ymax) {
-    m_symulacja.konfigurujModel(A, B, k, szum);
+
+void KlasaUslugowa::ustawModel(const std::vector<double>& A, const std::vector<double>& B,
+                               int opoznienie, double szum,
+                               double umin, double umax, double ymin, double ymax) {
+    m_symulacja.konfigurujModel(A, B, opoznienie, szum);
     m_symulacja.ustawOgraniczenia(umin, umax, ymin, ymax);
 }
 
-// Gettery
+// --- GETTERY DANYCH CHWILOWYCH ---
 double KlasaUslugowa::getCzas() const { return m_symulacja.getCzas(); }
 double KlasaUslugowa::getWartoscZadana() const { return m_symulacja.getWartoscZadana(); }
 double KlasaUslugowa::getWartoscWyjscie() const { return m_symulacja.getWartoscWyjscie(); }
@@ -66,6 +57,7 @@ double KlasaUslugowa::getPidLastP() const { return m_symulacja.pobierzRegulator(
 double KlasaUslugowa::getPidLastI() const { return m_symulacja.pobierzRegulator().getLastI(); }
 double KlasaUslugowa::getPidLastD() const { return m_symulacja.pobierzRegulator().getLastD(); }
 
+// --- GETTERY KONFIGURACYJNE ---
 double KlasaUslugowa::getGenAmplituda() const { return m_symulacja.pobierzGenerator().getAmplituda(); }
 double KlasaUslugowa::getGenOkres() const { return m_symulacja.pobierzGenerator().getOkresRzeczywisty(); }
 int KlasaUslugowa::getGenInterwal() const { return m_symulacja.pobierzGenerator().getInterwal(); }
@@ -78,4 +70,35 @@ double KlasaUslugowa::getPidTi() const { return m_symulacja.pobierzRegulator().g
 double KlasaUslugowa::getPidTd() const { return m_symulacja.pobierzRegulator().getStalaRozn(); }
 int KlasaUslugowa::getPidMetodaCalkowania() const { return static_cast<int>(m_symulacja.pobierzRegulator().getLiczCalk()); }
 
-ModelARX KlasaUslugowa::pobierzModel() const { return m_symulacja.pobierzModel(); }
+// --- POBIERANIE MODELU (Przez referencje) ---
+void KlasaUslugowa::pobierzModel(std::vector<double>& A, std::vector<double>& B,
+                                 int& opoznienie, double& szum,
+                                 double& uMin, double& uMax, double& yMin, double& yMax) const
+{
+    ModelARX m = m_symulacja.pobierzModel();
+    A = m.getA();
+    B = m.getB();
+    opoznienie = m.getOpoznienieTransportowe();
+    szum = m.getOdchylenieStandardoweSzumu();
+    uMin = m.getUMIN();
+    uMax = m.getUMAX();
+    yMin = m.getYMIN();
+    yMax = m.getYMAX();
+}
+
+// --- JSON ---
+QJsonObject KlasaUslugowa::toJson() const { return m_symulacja.toJson(); }
+void KlasaUslugowa::fromJson(const QJsonObject& root) { m_symulacja.fromJson(root); emit noweDane(0,0,0,0,0); /*Odśwież*/ }
+
+void KlasaUslugowa::zapiszKonfiguracje(const QString& sciezka) {
+    QFile file(sciezka);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(toJson()).toJson());
+    }
+}
+void KlasaUslugowa::wczytajKonfiguracje(const QString& sciezka) {
+    QFile file(sciezka);
+    if (file.open(QIODevice::ReadOnly)) {
+        fromJson(QJsonDocument::fromJson(file.readAll()).object());
+    }
+}

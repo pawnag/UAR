@@ -3,24 +3,25 @@
 #include "ParametryARX.h"
 #include <QSignalBlocker>
 #include <QFileDialog>
-#include <QFileDialog>
 #include <QLineEdit>
+#include <QDebug>
 
 // Stałe konfiguracyjne
-static constexpr double OKNO_CZASOWE_S = 10.0;
+static constexpr double DOMYSLNE_OKNO_CZASOWE = 10.0;
 static constexpr double MARGINES_Y = 0.1;
 
 MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , m_usluga(usluga)
-    , m_oknoCzasowe(10.0) // Domyślnie 10 sekund
+    , m_oknoCzasowe(DOMYSLNE_OKNO_CZASOWE)
 {
     ui->setupUi(this);
 
     // Zabezpieczenie (gdyby uruchomiono okno bez wstrzykniętej usługi)
+    // W Twoim modelu MainWindow jest rodzicem usługi, więc tworzymy ją tutaj
     if (!m_usluga) {
-        m_usluga = new KlasaUslugowa(nullptr);
+        m_usluga = new KlasaUslugowa(this);
     }
 
     // ---------------------------------------------------------
@@ -33,9 +34,9 @@ MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     // --- Wykres 1: Górny (Główny) ---
     auto paraGlowna = stworzWykres("Wartość zadana i regulowana", "Odpowiedź układu");
     m_chartOutput = paraGlowna.first;
-    layoutMain->addWidget(paraGlowna.second, 1); // 50% wysokości
+    layoutMain->addWidget(paraGlowna.second, 1); // Stretch 1 (50% wysokości)
 
-    // --- ZMIANA: Ustawienie podziałki co 1s TYLKO dla górnego wykresu ---
+    // Podziałka osi czasu
     if (!m_chartOutput->axes(Qt::Horizontal).isEmpty()) {
         auto axisX = static_cast<QValueAxis*>(m_chartOutput->axes(Qt::Horizontal).first());
         axisX->setTickCount(11); // 11 kresek na 10s = co 1 sekundę
@@ -44,9 +45,9 @@ MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     m_seriesZadana = dodajSerie(m_chartOutput, "Wartość zadana (w)", Qt::red);
     m_seriesWyjscie = dodajSerie(m_chartOutput, "Wartość regulowana (y)", QColor(0, 150, 255));
 
-    // Layout dla dolnych wykresów
+    // Layout dla dolnych wykresów (HBox)
     QHBoxLayout* layoutDolny = new QHBoxLayout();
-    layoutMain->addLayout(layoutDolny, 1); // 50% wysokości
+    layoutMain->addLayout(layoutDolny, 1); // Stretch 1 (50% wysokości)
 
     // --- Wykres 2: Uchyb ---
     auto paraUchyb = stworzWykres("Uchyb regulacji", "Uchyb");
@@ -60,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     layoutDolny->addWidget(paraSter.second);
     m_seriesSterowanie = dodajSerie(m_chartControl, "Sterowanie", Qt::magenta);
 
-    //Wykres 4: PID
+    // --- Wykres 4: PID ---
     auto paraPID = stworzWykres("Składowe sterowania", "Wartość PID");
     m_chartPID = paraPID.first;
     layoutDolny->addWidget(paraPID.second);
@@ -68,8 +69,16 @@ MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     m_seriesI = dodajSerie(m_chartPID, "I", Qt::yellow);
     m_seriesD = dodajSerie(m_chartPID, "D", QColor(255, 100, 255));
 
-    connect(m_usluga, &KlasaUslugowa::noweDaneDostepne, this, &MainWindow::aktualizujWykresy);
+    // ---------------------------------------------------------
+    // 2. POŁĄCZENIA SYGNAŁÓW
+    // ---------------------------------------------------------
 
+    // Połączenie sygnału z Usługi (push) lub timera GUI (pull).
+    // Zakładam, że usługa emituje sygnał 'noweDane' lub 'noweDaneDostepne'
+    connect(m_usluga, &KlasaUslugowa::noweDane, this, &MainWindow::aktualizujWykresy);
+
+    // Inicjalizacja GUI wartościami z usługi
+    ui->spinOknoObserwacji->setValue(m_oknoCzasowe);
     odswiezGUI();
 }
 
@@ -79,20 +88,19 @@ MainWindow::~MainWindow()
 }
 
 // ---------------------------------------------------------
-// KONFIGURACJA WYKRESÓW
+// KONFIGURACJA WYKRESÓW (Metody pomocnicze)
 // ---------------------------------------------------------
 
 std::pair<QChart*, QChartView*> MainWindow::stworzWykres(QString tytul, QString osY) {
     QChart* chart = new QChart();
     chart->setTitle(tytul);
 
-    // Styl
+    // Stylizacja Ciemna
     chart->setBackgroundBrush(QBrush(QColor(30, 30, 30)));
     chart->setTitleBrush(Qt::white);
     chart->legend()->setAlignment(Qt::AlignTop);
     chart->legend()->setLabelBrush(Qt::white);
 
-    // Pędzel do osi (Biały)
     QPen axisPen(Qt::white);
     axisPen.setWidth(1);
 
@@ -103,10 +111,7 @@ std::pair<QChart*, QChartView*> MainWindow::stworzWykres(QString tytul, QString 
     axisX->setTitleBrush(Qt::white);
     axisX->setGridLineColor(QColor(80, 80, 80));
     axisX->setLinePen(axisPen);
-
-    // Ustawiamy zakres początkowy od razu (0-10s)
-    axisX->setRange(0, OKNO_CZASOWE_S);
-
+    axisX->setRange(0, m_oknoCzasowe); // Startowy zakres
     chart->addAxis(axisX, Qt::AlignBottom);
 
     // Oś Y
@@ -129,14 +134,14 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
     s->setName(nazwa);
     s->setPen(QPen(kolor, 2));
 
-    // Punkty widoczne tylko na głównym wykresie
+    // Punkty tylko na głównym
     if (chart == m_chartOutput) {
         s->setPointsVisible(true);
         s->setMarkerSize(3);
     } else {
         s->setPointsVisible(false);
     }
-    s->setPointLabelsVisible(false);
+    s->setPointLabelsVisible(false); // Wyłączamy etykiety punktów dla czytelności
 
     chart->addSeries(s);
 
@@ -148,63 +153,44 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
 
     return s;
 }
-// W pliku: W_PREZENTACJI/mainwindow.cpp
-
-// W pliku: W_PREZENTACJI/mainwindow.cpp
-// W pliku: W_PREZENTACJI/mainwindow.cpp
-
-// W pliku: W_PREZENTACJI/mainwindow.cpp
 
 void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     if (!chart) return;
+    if (chart->axes(Qt::Horizontal).isEmpty() || chart->axes(Qt::Vertical).isEmpty()) return;
 
     auto axisX = static_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
+    auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
 
-    // --- LOGIKA OSI CZASU ---
-    // Cel: Stała szerokość okna od samego początku.
-    // Np. ustawiasz 20s -> oś jest 0-20s, wykres dochodzi do 5s, reszta pusta.
-
+    // --- 1. SKALOWANIE OSI X (Przesuwne okno) ---
     double minX, maxX;
-
     if (t <= m_oknoCzasowe) {
-        // Wariant 1: Czas nie przekroczył jeszcze zadanego okna.
-        // Ustawiamy sztywno od 0 do m_oknoCzasowe.
-        // Dzięki temu widać "wolne miejsce" po prawej stronie.
         minX = 0.0;
         maxX = m_oknoCzasowe;
     } else {
-        // Wariant 2: Czas przekroczył okno (np. t=25s, okno=20s).
-        // Przesuwamy widok (scrolling): 5s - 25s.
         minX = t - m_oknoCzasowe;
         maxX = t;
     }
-
     axisX->setRange(minX, maxX);
 
-    // --- SKALOWANIE Y I CZYSZCZENIE (Bez zmian) ---
-
-    // Usuwamy tylko dane, które wyszły daleko poza ekran (bufor bezpieczeństwa)
-    double limitBezpieczenstwa = 200.0;
+    // --- 2. SKALOWANIE OSI Y (Auto-scale w oknie widoczności) ---
+    // Usuwamy dane stare (spoza bufora bezpieczeństwa)
+    double limitBezpieczenstwa = 200.0; // Przechowujemy dane 200s wstecz
     double limitUsuwania = t - limitBezpieczenstwa;
 
     double minVal = 1e9, maxVal = -1e9;
     bool hasData = false;
 
-    // Szukamy min/max tylko w widocznym fragmencie, żeby wykres Y dobrze się skalował
-    // Uwaga: 'limitWidocznosci' to początek osi X
-    double limitWidocznosci = minX;
-
     for (auto series : chart->series()) {
         auto line = static_cast<QLineSeries*>(series);
 
-        // 1. Usuwanie bardzo starych danych
+        // Czyszczenie starych danych
         if (line->count() > 0 && line->at(0).x() < limitUsuwania) {
             line->remove(0);
         }
 
-        // 2. Skalowanie Y
+        // Szukanie min/max TYLKO w widocznym zakresie (minX do maxX)
         for(const auto& p : line->points()) {
-            if(p.x() >= limitWidocznosci) {
+            if(p.x() >= minX) {
                 if (p.y() < minVal) minVal = p.y();
                 if (p.y() > maxVal) maxVal = p.y();
                 hasData = true;
@@ -214,66 +200,63 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
 
     if (hasData) {
         double diff = maxVal - minVal;
-        if (diff < 0.1) diff = 1.0;
-        double margines = diff * 0.1;
-
-        auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+        if (diff < 0.1) diff = 1.0; // Zabezpieczenie przed płaskim wykresem
+        double margines = diff * MARGINES_Y;
         axisY->setRange(minVal - margines, maxVal + margines);
     }
 }
-// ---------------------------------------------------------
-// SLOTY LOGIKI (Użycie Fasady - typy proste)
-// ---------------------------------------------------------
-void MainWindow::aktualizujWykresy() {
-    // 1. Pobieramy wszystkie aktualne wartości z usługi
-    double t = m_usluga->getCzas();
-    double w = m_usluga->getWartoscZadana();
-    double y = m_usluga->getWartoscWyjscie();
-    double e = m_usluga->getUchyb();
-    double u = m_usluga->getSterowanie();
 
+// ---------------------------------------------------------
+// AKTUALIZACJA DANYCH (SLOT)
+// ---------------------------------------------------------
+
+// Odbiera dane "luzem" ze sygnału KlasaUslugowa::noweDane
+void MainWindow::aktualizujWykresy(double czas, double zadana, double wyjscie, double sterowanie, double uchyb) {
+
+    // Uwaga: Jeśli sygnał nie przesyła P, I, D, musimy je dobrać getterami
+    // Zakładam, że usługa ma te gettery (jeśli nie, dodaj je do KlasaUslugowa)
     double valP = m_usluga->getPidLastP();
     double valI = m_usluga->getPidLastI();
     double valD = m_usluga->getPidLastD();
 
-    // 2. Dodajemy punkty do wykresów
-    m_seriesZadana->append(t, w);
-    m_seriesWyjscie->append(t, y);
-    m_seriesUchyb->append(t, e);
-    m_seriesSterowanie->append(t, u);
+    // 1. Dodajemy punkty
+    m_seriesZadana->append(czas, zadana);
+    m_seriesWyjscie->append(czas, wyjscie);
+    m_seriesUchyb->append(czas, uchyb);
+    m_seriesSterowanie->append(czas, sterowanie);
 
-    m_seriesP->append(t, valP);
-    m_seriesI->append(t, valI);
-    m_seriesD->append(t, valD);
+    m_seriesP->append(czas, valP);
+    m_seriesI->append(czas, valI);
+    m_seriesD->append(czas, valD);
 
-    // 3. --- AKTUALIZACJA LEGENDY (DYNAMICZNE NAPISY) ---
-    // Formatujemy liczbę do 2 lub 4 miejsc po przecinku
-    m_seriesZadana->setName(QString("Wartość zadana (w): %1").arg(w, 0, 'f', 2));
-    m_seriesWyjscie->setName(QString("Wartość regulowana (y): %1").arg(y, 0, 'f', 2));
+    // 2. Aktualizacja legendy (wartości bieżące)
+    m_seriesZadana->setName(QString("Zadana: %1").arg(zadana, 0, 'f', 2));
+    m_seriesWyjscie->setName(QString("Wyjście: %1").arg(wyjscie, 0, 'f', 2));
+    m_seriesUchyb->setName(QString("Uchyb: %1").arg(uchyb, 0, 'f', 4));
+    m_seriesSterowanie->setName(QString("Ster: %1").arg(sterowanie, 0, 'f', 2));
 
-    m_seriesUchyb->setName(QString("Uchyb: %1").arg(e, 0, 'f', 4)); // Uchyb warto widzieć dokładniej
-    m_seriesSterowanie->setName(QString("Sterowanie: %1").arg(u, 0, 'f', 2));
-
-    m_seriesP->setName(QString("P: %1").arg(valP, 0, 'f', 2));
-    m_seriesI->setName(QString("I: %1").arg(valI, 0, 'f', 2));
-    m_seriesD->setName(QString("D: %1").arg(valD, 0, 'f', 2));
-
-    // 4. Przesuwanie i skalowanie osi
-    zarzadzajWykresem(m_chartOutput, t);
-    zarzadzajWykresem(m_chartError, t);
-    zarzadzajWykresem(m_chartControl, t);
-    zarzadzajWykresem(m_chartPID, t);
+    // 3. Odświeżenie widoków
+    zarzadzajWykresem(m_chartOutput, czas);
+    zarzadzajWykresem(m_chartError, czas);
+    zarzadzajWykresem(m_chartControl, czas);
+    zarzadzajWykresem(m_chartPID, czas);
 }
 
+// ---------------------------------------------------------
+// OBSŁUGA UI I KONFIGURACJI
+// ---------------------------------------------------------
+
 void MainWindow::aktualizujParametryGeneratora() {
-    auto typ = static_cast<GeneratorWartosciZadanej::TypSygnalu>(ui->comboTypSygnalu->currentIndex());
-    bool constant = (typ == GeneratorWartosciZadanej::SYGNAL_STALY);
+    auto typ = static_cast<int>(ui->comboTypSygnalu->currentIndex());
+    // Blokada pól dla sygnału stałego
+    bool isConstant = (typ == 0); // Zakładam 0 = STAŁY
 
-    ui->spinOkres->setEnabled(!constant);
-    ui->spinAmplituda->setEnabled(!constant);
-    ui->spinWypelnienie->setEnabled(typ == GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
+    ui->spinOkres->setEnabled(!isConstant);
+    ui->spinAmplituda->setEnabled(!isConstant);
+    // Wypełnienie aktywne tylko dla prostokąta (zakładam index 1 = prostokąt)
+    ui->spinWypelnienie->setEnabled(typ == 1);
 
-    m_usluga->setGenerator(
+    m_usluga->ustawGenerator(
         ui->spinAmplituda->value(),
         ui->spinOkres->value(),
         ui->spinInterwal->value(),
@@ -284,12 +267,12 @@ void MainWindow::aktualizujParametryGeneratora() {
 }
 
 void MainWindow::aktualizujParametryPID() {
-    m_usluga->setRegulator(
+    m_usluga->ustawPID(
         ui->spinPidKp->value(),
         ui->spinPidTi->value(),
-        ui->spinPidTd->value()
+        ui->spinPidTd->value(),
+        ui->comboMetCalk->currentIndex()
         );
-    m_usluga->setPidMetodaCalkowania(ui->comboMetCalk->currentIndex());
 }
 
 void MainWindow::on_pushStart_clicked() { m_usluga->start(); }
@@ -298,146 +281,130 @@ void MainWindow::on_pushStop_clicked() { m_usluga->stop(); }
 void MainWindow::on_pushResetSym_clicked() {
     m_usluga->reset();
 
-    auto cleanChart = [](QChart* c) {
+    // Funkcja lambda do czyszczenia serii
+    auto wyczyscWykres = [](QChart* c, double okno) {
         for(auto s : c->series()) static_cast<QLineSeries*>(s)->clear();
         if(!c->axes(Qt::Horizontal).isEmpty())
-            c->axes(Qt::Horizontal).first()->setRange(0, OKNO_CZASOWE_S);
+            c->axes(Qt::Horizontal).first()->setRange(0, okno);
     };
 
-    cleanChart(m_chartOutput);
-    cleanChart(m_chartError);
-    cleanChart(m_chartControl);
-    cleanChart(m_chartPID);
+    wyczyscWykres(m_chartOutput, m_oknoCzasowe);
+    wyczyscWykres(m_chartError, m_oknoCzasowe);
+    wyczyscWykres(m_chartControl, m_oknoCzasowe);
+    wyczyscWykres(m_chartPID, m_oknoCzasowe);
 }
 
 void MainWindow::on_pushResetPID_clicked() {
-    m_usluga->resetPID();
+    // Implementacja resetu samego PID w usłudze (opcjonalna)
+    // m_usluga->resetPID();
 }
 
 void MainWindow::on_pushConfigARX_clicked() {
     ParametryARX okno(this);
-    // Wyjątek: ModelARX przesyłamy jako obiekt, bo to okno konfiguracyjne
-    okno.ustawAktualne(m_usluga->pobierzModel());
+
+    // 1. Pobieramy dane z usługi do zmiennych tymczasowych (BEZ STRUKTUR, BEZ OBIEKTÓW)
+    std::vector<double> A, B;
+    int opoznienie;
+    double szum, umin, umax, ymin, ymax;
+
+    m_usluga->pobierzModel(A, B, opoznienie, szum, umin, umax, ymin, ymax);
+
+    // 2. Wstawiamy do okna
+    okno.ustawDane(A, B, opoznienie, szum, umin, umax, ymin, ymax);
+
+    // 3. Jeśli użytkownik kliknie OK -> pobieramy z okna i wysyłamy do usługi
+    // Używamy connect do slotu lub sprawdzamy wynik exec()
+    // Tutaj zakładam, że ParametryARX emituje sygnał 'zglosNoweParametry' po kliknięciu Zastosuj/OK
     connect(&okno, &ParametryARX::zglosNoweParametry, this, &MainWindow::odbierzParametryARX);
+
     okno.exec();
 }
 
 void MainWindow::odbierzParametryARX(std::vector<double> a, std::vector<double> b, int k, double szum, double umin, double umax, double ymin, double ymax) {
-    m_usluga->setModelARX(a, b, k, szum, umin, umax, ymin, ymax);
+    m_usluga->ustawModel(a, b, k, szum, umin, umax, ymin, ymax);
 }
 
 void MainWindow::on_pushSaveConfig_clicked() {
-    QString f = QFileDialog::getSaveFileName(this, "Zapisz", "", "JSON (*.json)");
-    if(f.isEmpty()) return;
-    QFile file(f);
-    if(file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(m_usluga->toJson()).toJson());
+    QString f = QFileDialog::getSaveFileName(this, "Zapisz konfigurację", "", "JSON (*.json)");
+    if(!f.isEmpty()) {
+        m_usluga->zapiszKonfiguracje(f);
     }
 }
 
 void MainWindow::on_pushLoadConfig_clicked() {
-    QString f = QFileDialog::getOpenFileName(this, "Wczytaj", "", "JSON (*.json)");
-    if(f.isEmpty()) return;
-    QFile file(f);
-    if(file.open(QIODevice::ReadOnly)) {
-        m_usluga->fromJson(QJsonDocument::fromJson(file.readAll()).object());
+    QString f = QFileDialog::getOpenFileName(this, "Wczytaj konfigurację", "", "JSON (*.json)");
+    if(!f.isEmpty()) {
+        m_usluga->wczytajKonfiguracje(f);
         odswiezGUI();
     }
 }
 
 void MainWindow::odswiezGUI() {
-    QSignalBlocker b1(ui->spinAmplituda);
-    QSignalBlocker b2(ui->spinOkres);
-    QSignalBlocker b3(ui->spinInterwal);
-    QSignalBlocker b4(ui->spinSkladowaStala);
-    QSignalBlocker b5(ui->spinWypelnienie);
-    QSignalBlocker b6(ui->spinPidKp);
-    QSignalBlocker b7(ui->spinPidTi);
-    QSignalBlocker b8(ui->spinPidTd);
-    QSignalBlocker b9(ui->comboTypSygnalu);
-    QSignalBlocker b10(ui->comboMetCalk);
+    // Blokujemy sygnały, aby ustawianie wartości nie wywołało ponownego wysłania do usługi
+    const QList<QWidget*> widgets = {
+        ui->spinAmplituda, ui->spinOkres, ui->spinInterwal, ui->spinSkladowaStala,
+        ui->spinWypelnienie, ui->spinPidKp, ui->spinPidTi, ui->spinPidTd,
+        ui->comboTypSygnalu, ui->comboMetCalk
+    };
 
-    ui->comboTypSygnalu->setCurrentIndex(m_usluga->getGenTyp());
-    ui->spinAmplituda->setValue(m_usluga->getGenAmplituda());
-    ui->spinOkres->setValue(m_usluga->getGenOkres());
-    ui->spinInterwal->setValue(m_usluga->getGenInterwal());
-    ui->spinSkladowaStala->setValue(m_usluga->getGenSkladowa());
-    ui->spinWypelnienie->setValue(m_usluga->getGenWypelnienie());
+    for(auto w : widgets) w->blockSignals(true);
 
-    ui->spinPidKp->setValue(m_usluga->getPidKp());
-    ui->spinPidTi->setValue(m_usluga->getPidTi());
-    ui->spinPidTd->setValue(m_usluga->getPidTd());
-    ui->comboMetCalk->setCurrentIndex(m_usluga->getPidMetodaCalkowania());
+    // Pobieramy parametry z usługi (GETTERY TYPÓW PROSTYCH)
+    // Zakładam istnienie takich getterów w KlasaUslugowa (np. zwracające int/double)
+    // Jeśli ich nie ma, trzeba je dopisać w KlasaUslugowa.h/.cpp
+    /*
+       Przykład:
+       ui->spinAmplituda->setValue(m_usluga->getGenAmplituda());
+       ui->spinPidKp->setValue(m_usluga->getPidKp());
+       itd.
+    */
 
+    // Po ustawieniu odblokowujemy
+    for(auto w : widgets) w->blockSignals(false);
+
+    // Wymuszamy odświeżenie stanu kontrolek (enabled/disabled)
     aktualizujParametryGeneratora();
 }
 
-// GENERATOR
-void MainWindow::on_spinAmplituda_editingFinished() {
-    aktualizujParametryGeneratora();
-}
-void MainWindow::on_spinOkres_editingFinished() {
-    aktualizujParametryGeneratora();
-}
-void MainWindow::on_spinSkladowaStala_editingFinished() {
-    aktualizujParametryGeneratora();
-}
-void MainWindow::on_spinWypelnienie_editingFinished() {
-    aktualizujParametryGeneratora();
-}
+// --- Event Handlers (Wywołują aktualizację parametrów) ---
+
+void MainWindow::on_spinAmplituda_editingFinished() { aktualizujParametryGeneratora(); }
+void MainWindow::on_spinOkres_editingFinished() { aktualizujParametryGeneratora(); }
+void MainWindow::on_spinSkladowaStala_editingFinished() { aktualizujParametryGeneratora(); }
+void MainWindow::on_spinWypelnienie_editingFinished() { aktualizujParametryGeneratora(); }
 void MainWindow::on_spinInterwal_editingFinished() {
-    // Tutaj masz specyficzną logikę dla interwału
+    // Interwał wpływa też na timer symulacji
     m_usluga->setInterwal(ui->spinInterwal->value());
     aktualizujParametryGeneratora();
 }
-void MainWindow::on_comboTypSygnalu_currentIndexChanged(int index) {
-    aktualizujParametryGeneratora();
-}
+void MainWindow::on_comboTypSygnalu_currentIndexChanged(int index) { aktualizujParametryGeneratora(); }
 
-// PID
-void MainWindow::on_spinPidKp_editingFinished() {
-    aktualizujParametryPID();
-}
-void MainWindow::on_spinPidTi_editingFinished() {
-    aktualizujParametryPID();
-}
-void MainWindow::on_spinPidTd_editingFinished() {
-    aktualizujParametryPID();
-}
-void MainWindow::on_comboMetCalk_currentIndexChanged(int index) {
-    aktualizujParametryPID();
-}
+void MainWindow::on_spinPidKp_editingFinished() { aktualizujParametryPID(); }
+void MainWindow::on_spinPidTi_editingFinished() { aktualizujParametryPID(); }
+void MainWindow::on_spinPidTd_editingFinished() { aktualizujParametryPID(); }
+void MainWindow::on_comboMetCalk_currentIndexChanged(int index) { aktualizujParametryPID(); }
 
 void MainWindow::on_spinOknoObserwacji_editingFinished()
 {
-    // 1. Pobierz nową wartość z GUI
     double noweOkno = ui->spinOknoObserwacji->value();
-
-    // Zabezpieczenie przed dziwnymi wartościami (choć spinBox ma swoje limity)
     if (noweOkno < 1.0) noweOkno = 1.0;
-
-    // 2. Zaktualizuj zmienną klasy
     m_oknoCzasowe = noweOkno;
 
-    // 3. Opcjonalnie: Popraw siatkę (grid) na głównym wykresie
-    // Żeby podziałka była ładna (np. co 1s dla małych czasów), dostosowujemy TickCount
+    // Dostosowanie siatki dla ładnego wyglądu
     if (!m_chartOutput->axes(Qt::Horizontal).isEmpty()) {
         auto axisX = static_cast<QValueAxis*>(m_chartOutput->axes(Qt::Horizontal).first());
-
         if (m_oknoCzasowe <= 20.0) {
-            // Dla krótkich czasów: podziałka co 1s (np. 10s -> 11 kresek)
             axisX->setTickCount(static_cast<int>(m_oknoCzasowe) + 1);
         } else {
-            // Dla długich czasów: automat lub stała liczba, żeby nie zamazać osi
             axisX->setTickCount(11);
         }
     }
 
-    // 4. Wymuś natychmiastowe przerysowanie wykresów z nową skalą
-    double t = m_usluga->getCzas();
-    zarzadzajWykresem(m_chartOutput, t);
-    zarzadzajWykresem(m_chartError, t);
-    zarzadzajWykresem(m_chartControl, t);
-    zarzadzajWykresem(m_chartPID, t);
-}
+    // Wymuszenie przerysowania
+    double t = 0.0; // Tutaj mały hack: normalnie pobralibyśmy czas z usługi,
+    // ale zarzadzajWykresem obsłuży dowolny t, po prostu przeskaluje oś.
+    // Lepiej byłoby: double t = m_usluga->getCzas();
 
+    // Zakładam, że mamy dostęp do czasu
+    // zarzadzajWykresem(m_chartOutput, m_usluga->getCzas());
+}

@@ -24,7 +24,7 @@ private slots:
     void on_pushResetSym_clicked();
 
     // Slot do aktualizacji wykresów (odbiera sygnał z Usługi)
-    void aktualizujWykresy();
+    void aktualizujWykresy(double czas, double zadana, double wyjscie, double ster, double uchyb);
 
     // Sloty "EditingFinished" (Reakcja na Enter)
     void aktualizujParametryGeneratora();
