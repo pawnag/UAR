@@ -25,7 +25,7 @@ void ModelARX::ustawRozkladSzumu(double odchylenie)
 
 void ModelARX::inicjalizujBufory()
 {
-    m_u.assign(std::max<size_t>(1, m_ot + m_B.size()), 0.0); // Minimum 1, jeśli inaczej -> dla wek. A o rozm. 1 i ot. = 2. ustawia [0.0, 0.0]
+    m_u.assign(std::max<size_t>(1, m_ot + m_B.size()), 0.0);
     m_y.assign(std::max<size_t>(1, m_A.size()), 0.0);
 }
 
@@ -74,7 +74,6 @@ void ModelARX::aktualizuj(const std::vector<double>& A, const std::vector<double
     setA(A); setB(B); setOpoznienieTransportowe(opoznienie); setOdchylenieStandardoweSzumu(szum);
 }
 
-// Helper do dopychania zer na początek bufora (zachowanie historii)
 void dopasujBufor(std::deque<double>& buf, size_t minSize)
 {
     if (buf.size() < minSize) buf.insert(buf.begin(), minSize - buf.size(), 0.0);

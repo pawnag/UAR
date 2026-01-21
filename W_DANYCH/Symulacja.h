@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QTimer>
-#include <QJsonObject> // Dodane
-#include <QJsonArray>  // Dodane
+#include <QJsonObject>
+#include <QJsonArray>
 #include <vector>
 #include "GeneratorWartosciZadanej.h"
 #include "ProstyUAR.h"
@@ -30,11 +30,9 @@ private:
 public:
     explicit Symulacja(QObject *parent = nullptr);
 
-    // --- Metody JSON (Nowe) ---
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& json);
 
-    // ... reszta metod bez zmian ...
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum = 0.0);
     void ustawOgraniczenia(double u_min, double u_max, double y_min, double y_max);
     void konfigurujRegulator(double k, double ti, double td);
@@ -50,7 +48,6 @@ public:
     void wykonajKrok();
     void resetUAR();
 
-    // Gettery (bez zmian)
     std::vector<double> getModelA() const;
     std::vector<double> getModelB() const;
     int getModelOpoznienie() const;

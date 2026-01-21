@@ -11,11 +11,6 @@ TestyDodatkowe::TestyDodatkowe(QObject *parent)
 
 namespace TESTY_Dodatkowe {
 
-// --- TE FUNKCJE ZOSTAJĄ BEZ ZMIAN (używają cerr) ---
-//funkcje przeniesione do "W_TESTY/Testy.h"
-
-// --- TUTAJ ZMIENIAMY cout NA cerr ---
-
 void wykonaj_wszystkie_testy() {
     std::cerr << "\n=== DODATKOWE TESTY DLA ROZNYCH KLAS ===" << std::endl; // Zmiana na cerr
 
@@ -36,11 +31,11 @@ void wykonaj_wszystkie_testy() {
 
     wynikiTestow();
 
-    std::cerr << "=== KONIEC DODATKOWYCH TESTOW ===" << std::endl; // Zmiana na cerr
+    std::cerr << "=== KONIEC DODATKOWYCH TESTOW ===" << std::endl;
 }
 
 void test_generator_sygnal_staly() {
-    //std::cerr << "Generator -> test sygnalu stalego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu stalego: ";
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -60,7 +55,7 @@ void test_generator_sygnal_staly() {
 }
 
 void test_generator_sygnal_sinusoidalny() {
-    //std::cerr << "Generator -> test sygnalu sinusoidalnego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu sinusoidalnego: ";
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
@@ -83,7 +78,7 @@ void test_generator_sygnal_sinusoidalny() {
 }
 
 void test_generator_sygnal_prostokatny() {
-    //std::cerr << "Generator -> test sygnalu prostokatnego: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test sygnalu prostokatnego: ";
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY);
@@ -107,7 +102,7 @@ void test_generator_sygnal_prostokatny() {
 }
 
 void test_generator_zmiana_parametrow() {
-    //std::cerr << "Generator -> test zmiany parametrow: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test zmiany parametrow: ";
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_STALY);
@@ -137,7 +132,7 @@ void test_generator_zmiana_parametrow() {
 }
 
 void test_generator_zerowa_amplituda() {
-    //std::cerr << "Generator -> test zerowej amplitudy: "; // Zmiana na cerr
+    //std::cerr << "Generator -> test zerowej amplitudy: ";
     try {
         GeneratorWartosciZadanej generator;
         generator.setTypSygnalu(GeneratorWartosciZadanej::SYGNAL_SINUSOIDALNY);
@@ -160,7 +155,7 @@ void test_generator_zerowa_amplituda() {
 }
 
 void test_regulator_reset_calki() {
-    //std::cerr << "RegulatorPID -> test resetu calki: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test resetu calki: ";
     try {
         RegulatorPID regulator(0.5, 1.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -182,7 +177,7 @@ void test_regulator_reset_calki() {
 }
 
 void test_regulator_zmiana_trybu_calkowania() {
-    //std::cerr << "RegulatorPID -> test zmiany trybu calkowania: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test zmiany trybu calkowania: ";
     try {
         RegulatorPID regulator(1.0, 2.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -204,7 +199,7 @@ void test_regulator_zmiana_trybu_calkowania() {
 }
 
 void test_regulator_skladowa_D() {
-    //std::cerr << "RegulatorPID -> test skladowa D: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test skladowa D: ";
     try {
         RegulatorPID regulator(1.0, 0.0, 1.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -223,7 +218,7 @@ void test_regulator_skladowa_D() {
 }
 
 void test_regulator_brak_akcji() {
-    //std::cerr << "RegulatorPID -> test braku akcji: "; // Zmiana na cerr
+    //std::cerr << "RegulatorPID -> test braku akcji: ";
     try {
         RegulatorPID regulator(0.0, 0.0, 0.0);
         regulator.setLiczCalk(RegulatorPID::LiczCalk::Zew);
@@ -244,9 +239,6 @@ void test_regulator_brak_akcji() {
 void test_symulacja_tylko_generator() {
     try {
         Symulacja simulation;
-
-        // POPRAWKA: Konfigurujemy symulację tak, aby pasowała do oczekiwań (5.0)
-        // Wcześniej konfigurowałeś prostokąt 1.0, a oczekiwałeś 5.0 ze zmiennej lokalnej.
         simulation.konfigurujGenerator(0.0, 1.0, 100, GeneratorWartosciZadanej::SYGNAL_STALY, 5.0, 0.5);
 
         std::vector<double> setpointValues;
@@ -265,11 +257,8 @@ void test_symulacja_generator_i_model() {
     try {
         Symulacja simulation;
 
-        // Generator: Skok jednostkowy (Prostokąt, Ampl=1.0, Offset=0.0 -> stan wysoki = 1.0)
         simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
 
-        // POPRAWKA: Musisz skonfigurować model w symulacji!
-        // Parametry z Twojego testu: A=[-0.4], B=[0.6], k=1
         simulation.konfigurujModel({-0.4}, {0.6}, 1);
 
         std::vector<double> outputs;
@@ -278,9 +267,6 @@ void test_symulacja_generator_i_model() {
             outputs.push_back(simulation.getWartoscWyjscie());
         }
 
-        // T0: u=1.0 (start), y=0 (opóźnienie k=1) -> wyjscie=0
-        // T1: u=1.0, y(1) = 0.6*u(0) - (-0.4)*y(0) = 0.6*1.0 - 0 = 0.6
-        // T2: u=1.0, y(2) = 0.6*u(1) - (-0.4)*y(1) = 0.6*1.0 + 0.4*0.6 = 0.6 + 0.24 = 0.84
         std::vector<double> expected = { 0.0, 0.6, 0.84 };
         myAssert("Symulacja - test generator i model", expected, outputs);
     }
@@ -291,13 +277,8 @@ void test_symulacja_pelny_uar() {
     try {
         Symulacja simulation;
 
-        // Generator: Skok 1.0
         simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
-
-        // POPRAWKA: Konfiguracja Modelu (A=[-0.4], B=[0.6], k=1)
         simulation.konfigurujModel({-0.4}, {0.6}, 1);
-
-        // POPRAWKA: Konfiguracja Regulatora (Kp=0.5, Ti=1.0, Td=0.0)
         simulation.konfigurujRegulator(0.5, 1.0, 0.0);
 
         std::vector<double> outputs;
@@ -306,10 +287,6 @@ void test_symulacja_pelny_uar() {
             outputs.push_back(simulation.getWartoscWyjscie());
         }
 
-        // Obliczenia ręczne (dla weryfikacji):
-        // Krok 1: e=1, Up=0.5, Ui=1.0 -> u=1.5. Model(k=1) -> y=0.0.
-        // Krok 2: e=1, Up=0.5, Ui+=1.0(2.0) -> u=2.5. Model: y = 0.6*1.5 + 0.4*0 = 0.9.
-        // Krok 3: e=0.1, Up=0.05, Ui+=0.1(2.1) -> u=2.15. Model: y = 0.6*2.5 + 0.4*0.9 = 1.5 + 0.36 = 1.86.
         std::vector<double> expected = { 0.0, 0.9, 1.86 };
         myAssert("Symulacja - test pelny UAR", expected, outputs);
     }

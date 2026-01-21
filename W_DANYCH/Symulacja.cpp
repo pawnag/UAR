@@ -15,15 +15,10 @@ Symulacja::Symulacja(QObject *parent)
     connect(m_timer, &QTimer::timeout, this, &Symulacja::onTimerTimeout);
 }
 
-// ---------------------------------------------------------
-// SERIALIZACJA JSON (PRZENIESIONE Z KLASY USŁUGOWEJ)
-// ---------------------------------------------------------
-
 QJsonObject Symulacja::toJson() const
 {
     QJsonObject root;
 
-    // 1. Model ARX
     ModelARX model = m_prostyUAR.pobierzModel();
     QJsonObject modelObj;
     {
@@ -42,7 +37,6 @@ QJsonObject Symulacja::toJson() const
     }
     root["modelARX"] = modelObj;
 
-    // 2. Regulator PID
     RegulatorPID pid = m_prostyUAR.pobierzRegulator();
     QJsonObject pidObj;
     {
@@ -53,8 +47,6 @@ QJsonObject Symulacja::toJson() const
     }
     root["regulatorPID"] = pidObj;
 
-    // 3. Generator
-    // Korzystamy bezpośrednio z m_generator, bo jesteśmy wewnątrz klasy
     QJsonObject genObj;
     {
         genObj["typ"] = static_cast<int>(m_generator.getTypSygnalu());
@@ -71,7 +63,6 @@ QJsonObject Symulacja::toJson() const
 
 void Symulacja::fromJson(const QJsonObject& root)
 {
-    // Zatrzymaj symulację przed zmianą parametrów
     bool dzialalo = m_czyDziala;
     zatrzymaj();
 
@@ -107,14 +98,8 @@ void Symulacja::fromJson(const QJsonObject& root)
             );
     }
 
-    // Reset stanu po wczytaniu
     resetuj();
-
-    // Jeśli działało wcześniej, można ewentualnie wznowić, ale bezpieczniej zostawić stop
-    // if(dzialalo) uruchom();
 }
-
-// --- POZOSTAŁE METODY (SKRÓCONE DLA CZYTELNOŚCI - BEZ ZMIAN) ---
 
 void Symulacja::onTimerTimeout() {
     wykonajKrok();

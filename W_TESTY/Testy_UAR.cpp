@@ -6,21 +6,16 @@
 #include <memory>
 #include <thread>
 
-// --- ZMIANA: Poprawne ścieżki do plików w folderze obok ---
 #include "W_TESTY/Testy.h"
 #include "W_DANYCH/ModelARX.h"
 #include "W_DANYCH/RegulatorPID.h"
 #include "W_DANYCH/GeneratorWartosciZadanej.h"
 #include "W_DANYCH/ProstyUAR.h"
-#include "W_DANYCH/Symulacja.h" // Odkomentuj jeśli chcesz testować klasę Symulacja
-#include "W_TESTY/TestyDodatkowe.h"      // Odkomentuj jeśli masz ten plik
+#include "W_DANYCH/Symulacja.h"
+#include "W_TESTY/TestyDodatkowe.h"
 
-// --- KONFIGURACJA TRYBU ---
-// Odkomentuj jedną z poniższych linii, aby wybrać tryb działania:
 #define DEBUG  // Tryb testów jednostkowych
 // #define MAIN   // Tryb symulacji konsolowej (stary main)
-
-// Funkcje pomocnicze dla testów:
 
 /*
 void raportBleduSekwencji(const std::vector<double>& spodz, const std::vector<double>& fakt)

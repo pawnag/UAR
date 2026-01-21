@@ -14,13 +14,11 @@ public:
     explicit ParametryARX(QWidget *parent = nullptr);
     ~ParametryARX();
 
-    // Nowa metoda: przyjmuje typy proste, zamiast obiektu ModelARX
     void ustawDane(const std::vector<double>& a, const std::vector<double>& b,
                    int opoznienie, double szum,
                    double umin, double umax, double ymin, double ymax);
 
 signals:
-    // Sygnał zwracający dane
     void zglosNoweParametry(std::vector<double> a, std::vector<double> b,
                             int opoznienie, double szum,
                             double umin, double umax, double ymin, double ymax);

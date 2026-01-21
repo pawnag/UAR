@@ -14,12 +14,8 @@ int main(int argc, char *argv[])
     uruchomWszystkieTesty();
     QApplication a(argc, argv);
 
-    // 1. Warstwa Usług (Logika) - tworzona na stosie, niezależna
     KlasaUslugowa usluga;
 
-    // 2. Warstwa Prezentacji (GUI)
-    // Wstrzykujemy wskaźnik do usługi.
-    // NIE ustawiamy rodzica (parent), żeby zachować luźne powiązanie.
     MainWindow w(nullptr, &usluga);
 
     w.show();

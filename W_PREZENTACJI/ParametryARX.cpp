@@ -15,7 +15,6 @@ ParametryARX::~ParametryARX()
     delete ui;
 }
 
-// Implementacja nowej metody
 void ParametryARX::ustawDane(const std::vector<double>& a, const std::vector<double>& b,
                              int opoznienie, double szum,
                              double umin, double umax, double ymin, double ymax)
@@ -48,7 +47,6 @@ void ParametryARX::on_pushZapisz_clicked()
     std::vector<double> tempA = stringToVector(ui->editA->text());
     std::vector<double> tempB = stringToVector(ui->editB->text());
 
-    // Zabezpieczenie minimalnego rozmiaru
     while (tempA.size() < 3) tempA.push_back(0.0);
     while (tempB.size() < 3) tempB.push_back(0.0);
 

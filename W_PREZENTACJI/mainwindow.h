@@ -14,7 +14,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    // Wstrzykiwanie zależności: wskaźnik do KlasaUslugowa
     explicit MainWindow(QWidget *parent = nullptr, KlasaUslugowa *usluga = nullptr);
     ~MainWindow();
 
@@ -23,15 +22,12 @@ private slots:
     void on_pushStop_clicked();
     void on_pushResetSym_clicked();
 
-    // Slot do aktualizacji wykresów (odbiera sygnał z Usługi)
     void aktualizujWykresy(double czas, double zadana, double wyjscie, double ster, double uchyb);
 
-    // Sloty "EditingFinished" (Reakcja na Enter)
     void aktualizujParametryGeneratora();
     void aktualizujParametryPID();
     void on_spinInterwal_editingFinished();
 
-    // Reszta slotów (ARX, Config)
     void on_pushConfigARX_clicked();
     void odbierzParametryARX(std::vector<double> a, std::vector<double> b, int k, double szum, double umin, double umax, double ymin, double ymax);
     void on_pushSaveConfig_clicked();

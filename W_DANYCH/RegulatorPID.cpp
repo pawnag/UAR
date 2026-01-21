@@ -46,9 +46,7 @@ void RegulatorPID::resetuj()
     m_calka = 0.0;
     m_e_prev = 0.0;
 
-    //m_lastP = 0.0;
     m_lastI = 0.0;
-    //m_lastD = 0.0;
 }
 
 void RegulatorPID::setLiczCalk(LiczCalk tryb)
@@ -57,7 +55,6 @@ void RegulatorPID::setLiczCalk(LiczCalk tryb)
 
     if (tryb == LiczCalk::Wew)
     {
-        // Zewnętrzny -> Wewnętrzny: całka = całka / TI
         if (m_TI > 0.0)
         {
             m_calka /= m_TI;
@@ -65,7 +62,6 @@ void RegulatorPID::setLiczCalk(LiczCalk tryb)
     }
     else
     {
-        // Wewnętrzny -> Zewnętrzny: całka = całka * TI
         if (m_TI > 0.0)
         {
             m_calka *= m_TI;
