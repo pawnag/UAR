@@ -54,6 +54,8 @@ private slots:
 
     void on_comboMetCalk_currentIndexChanged(int index);
 
+    void resetSymulacji();
+
 private:
     Ui::MainWindow *ui;
     KlasaUslugowa *m_usluga; // Wskaźnik (Asocjacja)

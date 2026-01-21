@@ -81,23 +81,22 @@ std::pair<QChart*, QChartView*> MainWindow::stworzWykres(QString tytul, QString 
     QPen axisPen(Qt::white);
     axisPen.setWidth(1);
 
-    // Oś X
     QValueAxis *axisX = new QValueAxis;
     axisX->setTitleText("Czas [s]");
     axisX->setLabelsBrush(Qt::white);
     axisX->setTitleBrush(Qt::white);
     axisX->setGridLineColor(QColor(80, 80, 80));
     axisX->setLinePen(axisPen);
-    axisX->setRange(0, m_oknoCzasowe); // Startowy zakres
+    axisX->setRange(0, m_oknoCzasowe);
     chart->addAxis(axisX, Qt::AlignBottom);
 
-    // Oś Y
     QValueAxis *axisY = new QValueAxis;
     axisY->setTitleText(osY);
     axisY->setLabelsBrush(Qt::white);
     axisY->setTitleBrush(Qt::white);
     axisY->setGridLineColor(QColor(80, 80, 80));
     axisY->setLinePen(axisPen);
+    axisY->setRange(-0.1, 0.1);
     chart->addAxis(axisY, Qt::AlignLeft);
 
     QChartView* view = new QChartView(chart);
@@ -130,57 +129,63 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
     return s;
 }
 
-void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
+void MainWindow::zarzadzajWykresem(QChart* chart, double t)
+{
     if (!chart) return;
     if (chart->axes().isEmpty()) return;
-    // Oś X
-    double minX = 0.0;
-    double maxX = 10.0; // Wartość tymczasowa
-    if (t > m_oknoCzasowe) { // Efekt płynnego wykresu
-        minX = t - m_oknoCzasowe;
-        maxX = t;
-    } else {
+
+    auto axisX = static_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
+    double minX = axisX->min();
+    double maxX = axisX->max();
+    double currentWidth = maxX - minX;
+
+    if (currentWidth <= 0.0) {
         minX = 0.0;
         maxX = m_oknoCzasowe;
+        currentWidth = m_oknoCzasowe;
     }
-    // Ustawiamy zakres na osi poziomej
-    chart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
 
-    // Oś Y
-    double yMin = 1000.0;
-    double yMax = -1000.0;
+    if (std::abs(currentWidth - m_oknoCzasowe) > 1e-6) {
+        maxX = minX + m_oknoCzasowe;
+    }
+
+    if (t > maxX) {
+        minX = t - m_oknoCzasowe;
+        maxX = t;
+    }
+
+    axisX->setRange(minX, maxX);
+
+    double yMin = 1e9;
+    double yMax = -1e9;
     bool saDane = false;
-    double czasDoUsuniecia = t - 200.0; // Bufor potrzebny żeby dało się zmieniać okno czasowe
 
     for (auto series : chart->series()) {
         auto linia = static_cast<QLineSeries*>(series);
 
-        // Usuwamy stare punkty
-        if (linia->count() > 0) {
-            if (linia->at(0).x() < czasDoUsuniecia) {
-                linia->remove(0);
-            }
+        while (linia->count() > 0 && linia->at(0).x() < minX) {
+            linia->remove(0);
         }
-        // Szukamy po punktach które są widoczne
+
         for (auto p : linia->points()) {
-            if (p.x() >= minX) {
-                if (p.y() < yMin) {
-                    yMin = p.y();
-                }
-                if (p.y() > yMax) {
-                    yMax = p.y();
-                }
+            if (p.x() >= minX && p.x() <= maxX) {
+                yMin = std::min(yMin, p.y());
+                yMax = std::max(yMax, p.y());
                 saDane = true;
             }
         }
     }
+
     if (saDane) {
         double roznica = yMax - yMin;
-        if (roznica < 0.1) { roznica = 1.0; }
-        double margines = roznica * 0.1; // 10% maginesu góra dół
-        chart->axes(Qt::Vertical).first()->setRange(yMin - margines, yMax + margines);
+        if (roznica < 0.1) roznica = 1.0;
+        double margines = roznica * 0.1;
+
+        auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+        axisY->setRange(yMin - margines, yMax + margines);
     }
 }
+
 
 void MainWindow::aktualizujWykresy(double czas, double zadana, double wyjscie, double sterowanie, double uchyb) {
 
@@ -188,7 +193,6 @@ void MainWindow::aktualizujWykresy(double czas, double zadana, double wyjscie, d
     double valI = m_usluga->getPidLastI();
     double valD = m_usluga->getPidLastD();
 
-    // Dodajemy punkty
     m_seriesZadana->append(czas, zadana);
     m_seriesWyjscie->append(czas, wyjscie);
     m_seriesUchyb->append(czas, uchyb);
@@ -198,13 +202,11 @@ void MainWindow::aktualizujWykresy(double czas, double zadana, double wyjscie, d
     m_seriesI->append(czas, valI);
     m_seriesD->append(czas, valD);
 
-    // Aktualizacja legendy (wartości bieżące)
     m_seriesZadana->setName(QString("Zadana: %1").arg(zadana, 0, 'f', 2));
     m_seriesWyjscie->setName(QString("Wyjście: %1").arg(wyjscie, 0, 'f', 2));
     m_seriesUchyb->setName(QString("Uchyb: %1").arg(uchyb, 0, 'f', 4));
     m_seriesSterowanie->setName(QString("Ster: %1").arg(sterowanie, 0, 'f', 2));
 
-    // Odświeżenie widoków
     zarzadzajWykresem(m_chartOutput, czas);
     zarzadzajWykresem(m_chartError, czas);
     zarzadzajWykresem(m_chartControl, czas);
@@ -244,7 +246,10 @@ void MainWindow::on_pushStop_clicked() { m_usluga->stop(); }
 
 void MainWindow::on_pushResetSym_clicked() {
     m_usluga->reset();
+    resetSymulacji();
+}
 
+void MainWindow::resetSymulacji() {
     auto wyczyscWykres = [](QChart* c, double okno) {
         for(auto s : c->series()) static_cast<QLineSeries*>(s)->clear();
         if(!c->axes(Qt::Horizontal).isEmpty())
@@ -258,8 +263,7 @@ void MainWindow::on_pushResetSym_clicked() {
 }
 
 void MainWindow::on_pushResetPID_clicked() {
-    // Implementacja resetu samego PID w usłudze (opcjonalna)
-    // m_usluga->resetPID();
+    m_usluga->resetPID();
 }
 
 void MainWindow::on_pushConfigARX_clicked() {
@@ -291,7 +295,6 @@ void MainWindow::on_pushSaveConfig_clicked() {
     }
 }
 
-
 void MainWindow::on_pushLoadConfig_clicked() {
     QString f = QFileDialog::getOpenFileName(this, "Wczytaj konfigurację", "", "JSON (*.json)");
     if(!f.isEmpty()) {
@@ -304,6 +307,7 @@ void MainWindow::on_pushLoadConfig_clicked() {
 
         m_usluga->fromJson(doc.object());
         odswiezGUI();
+        resetSymulacji();
     }
 }
 
@@ -360,15 +364,13 @@ void MainWindow::on_spinOknoObserwacji_editingFinished()
     if (noweOkno < 1.0) noweOkno = 1.0;
     m_oknoCzasowe = noweOkno;
 
-    if (!m_chartOutput->axes(Qt::Horizontal).isEmpty()) {
-        auto axisX = static_cast<QValueAxis*>(m_chartOutput->axes(Qt::Horizontal).first());
-        axisX->setRange(0, m_oknoCzasowe);
-        if (m_oknoCzasowe <= 20.0) {
-            axisX->setTickCount(static_cast<int>(m_oknoCzasowe) + 1);
-        } else {
-            axisX->setTickCount(11);
-        }
-    }
-
-    double t = 0.0;
+    double t = m_usluga->getCzas();
+    zarzadzajWykresem(m_chartOutput, t);
+    zarzadzajWykresem(m_chartError, t);
+    zarzadzajWykresem(m_chartControl, t);
+    zarzadzajWykresem(m_chartPID, t);
 }
+
+
+
+
