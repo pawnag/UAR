@@ -60,9 +60,6 @@ public:
                       int& opoznienie, double& szum,
                       double& uMin, double& uMax, double& yMin, double& yMax) const;
 
-    void zapiszKonfiguracje(const QString& sciezka);
-    void wczytajKonfiguracje(const QString& sciezka);
-
     QJsonObject toJson() const;
     void fromJson(const QJsonObject& obj);
 

@@ -285,17 +285,33 @@ void MainWindow::odbierzParametryARX(std::vector<double> a, std::vector<double> 
 void MainWindow::on_pushSaveConfig_clicked() {
     QString f = QFileDialog::getSaveFileName(this, "Zapisz konfigurację", "", "JSON (*.json)");
     if(!f.isEmpty()) {
-        m_usluga->zapiszKonfiguracje(f);
+
+        QFile file(f);
+        if (!file.open(QIODevice::WriteOnly)) return;
+
+        QJsonDocument doc(m_usluga->toJson());
+        file.write(doc.toJson());
+        file.close();
     }
 }
+
 
 void MainWindow::on_pushLoadConfig_clicked() {
     QString f = QFileDialog::getOpenFileName(this, "Wczytaj konfigurację", "", "JSON (*.json)");
     if(!f.isEmpty()) {
-        m_usluga->wczytajKonfiguracje(f);
+
+        QFile file(f);
+        if (!file.open(QIODevice::ReadOnly)) return;
+
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        if (!doc.isObject()) return;
+
+        m_usluga->fromJson(doc.object());
         odswiezGUI();
     }
 }
+
+
 
 void MainWindow::odswiezGUI() {
     const QList<QWidget*> widgets = {

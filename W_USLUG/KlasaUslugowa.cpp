@@ -83,18 +83,12 @@ void KlasaUslugowa::pobierzModel(std::vector<double>& A, std::vector<double>& B,
 }
 
 // JSON
-QJsonObject KlasaUslugowa::toJson() const { return m_symulacja.toJson(); }
-void KlasaUslugowa::fromJson(const QJsonObject& root) { m_symulacja.fromJson(root); emit noweDane(0,0,0,0,0); /*Odśwież*/ }
+QJsonObject KlasaUslugowa::toJson() const {
+    return m_symulacja.toJson();
+}
 
-void KlasaUslugowa::zapiszKonfiguracje(const QString& sciezka) {
-    QFile file(sciezka);
-    if (file.open(QIODevice::WriteOnly)) {
-        file.write(QJsonDocument(toJson()).toJson());
-    }
+void KlasaUslugowa::fromJson(const QJsonObject& root) {
+    m_symulacja.fromJson(root);
+    reset();
 }
-void KlasaUslugowa::wczytajKonfiguracje(const QString& sciezka) {
-    QFile file(sciezka);
-    if (file.open(QIODevice::ReadOnly)) {
-        fromJson(QJsonDocument::fromJson(file.readAll()).object());
-    }
-}
+

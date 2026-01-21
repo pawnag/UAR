@@ -97,8 +97,6 @@ void Symulacja::fromJson(const QJsonObject& root)
             obj["wypelnienie"].toDouble()
             );
     }
-
-    resetuj();
 }
 
 void Symulacja::onTimerTimeout() {
