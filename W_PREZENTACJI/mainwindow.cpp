@@ -155,54 +155,76 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
 }
 
 void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
+    // Podstawowe zabezpieczenie, żeby program się nie wyłączył
     if (!chart) return;
-    if (chart->axes(Qt::Horizontal).isEmpty() || chart->axes(Qt::Vertical).isEmpty()) return;
+    if (chart->axes().isEmpty()) return;
 
-    auto axisX = static_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
-    auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
+    // --- 1. USTAWIANIE OSI X (CZASU) ---
+    double minX = 0.0;
+    double maxX = 10.0; // Wartość tymczasowa
 
-    // --- 1. SKALOWANIE OSI X (Przesuwne okno) ---
-    double minX, maxX;
-    if (t <= m_oknoCzasowe) {
-        minX = 0.0;
-        maxX = m_oknoCzasowe;
-    } else {
+    if (t > m_oknoCzasowe) {
+        // Czas przekroczył rozmiar okna - przesuwamy wykres ("płyniemy")
         minX = t - m_oknoCzasowe;
         maxX = t;
+    } else {
+        // Jesteśmy na początku symulacji - okno stoi w miejscu
+        minX = 0.0;
+        maxX = m_oknoCzasowe;
     }
-    axisX->setRange(minX, maxX);
 
-    // --- 2. SKALOWANIE OSI Y (Auto-scale w oknie widoczności) ---
-    // Usuwamy dane stare (spoza bufora bezpieczeństwa)
-    double limitBezpieczenstwa = 200.0; // Przechowujemy dane 200s wstecz
-    double limitUsuwania = t - limitBezpieczenstwa;
+    // Ustawiamy zakres na osi poziomej
+    chart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
 
-    double minVal = 1e9, maxVal = -1e9;
-    bool hasData = false;
 
+    // --- 2. SKALOWANIE OSI Y (Wartości) ---
+
+    // Zmienne do szukania minimum i maksimum
+    double yMin = 1000.0;
+    double yMax = -1000.0;
+    bool saDane = false; // Czy w ogóle mamy co rysować?
+
+    // Kiedy usuwać stare dane? (zapas 200 sekund wstecz)
+    double czasDoUsuniecia = t - 200.0;
+
+    // Przeglądamy wszystkie linie na wykresie
     for (auto series : chart->series()) {
-        auto line = static_cast<QLineSeries*>(series);
+        auto linia = static_cast<QLineSeries*>(series);
 
-        // Czyszczenie starych danych
-        if (line->count() > 0 && line->at(0).x() < limitUsuwania) {
-            line->remove(0);
+        // A. Usuwanie starych punktów, żeby nie zapchać pamięci
+        if (linia->count() > 0) {
+            if (linia->at(0).x() < czasDoUsuniecia) {
+                linia->remove(0);
+            }
         }
 
-        // Szukanie min/max TYLKO w widocznym zakresie (minX do maxX)
-        for(const auto& p : line->points()) {
-            if(p.x() >= minX) {
-                if (p.y() < minVal) minVal = p.y();
-                if (p.y() > maxVal) maxVal = p.y();
-                hasData = true;
+        // B. Szukanie min/max, ale TYLKO w tym co widać na ekranie
+        for (auto p : linia->points()) {
+            if (p.x() >= minX) {
+                if (p.y() < yMin) {
+                    yMin = p.y();
+                }
+                if (p.y() > yMax) {
+                    yMax = p.y();
+                }
+                saDane = true;
             }
         }
     }
 
-    if (hasData) {
-        double diff = maxVal - minVal;
-        if (diff < 0.1) diff = 1.0; // Zabezpieczenie przed płaskim wykresem
-        double margines = diff * MARGINES_Y;
-        axisY->setRange(minVal - margines, maxVal + margines);
+    // Jeśli znaleźliśmy jakieś punkty, ustawiamy oś pionową
+    if (saDane) {
+        double roznica = yMax - yMin;
+
+        // Zabezpieczenie: jak linia jest prosta, to zróbmy mały zakres, żeby nie było błędu
+        if (roznica < 0.1) {
+            roznica = 1.0;
+        }
+
+        // Dodajemy 10% marginesu z góry i z dołu, żeby wykres nie dotykał ramek
+        double margines = roznica * 0.1;
+
+        chart->axes(Qt::Vertical).first()->setRange(yMin - margines, yMax + margines);
     }
 }
 
