@@ -415,6 +415,7 @@ void MainWindow::on_spinOknoObserwacji_editingFinished()
     // Dostosowanie siatki dla ładnego wyglądu
     if (!m_chartOutput->axes(Qt::Horizontal).isEmpty()) {
         auto axisX = static_cast<QValueAxis*>(m_chartOutput->axes(Qt::Horizontal).first());
+        axisX->setRange(0, m_oknoCzasowe);
         if (m_oknoCzasowe <= 20.0) {
             axisX->setTickCount(static_cast<int>(m_oknoCzasowe) + 1);
         } else {
