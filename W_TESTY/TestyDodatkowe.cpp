@@ -12,7 +12,7 @@ TestyDodatkowe::TestyDodatkowe(QObject *parent)
 namespace TESTY_Dodatkowe {
 
 void wykonaj_wszystkie_testy() {
-    std::cerr << "\n=== DODATKOWE TESTY DLA ROZNYCH KLAS ===" << std::endl; // Zmiana na cerr
+    std::cerr << "\n=== DODATKOWE TESTY DLA ROZNYCH KLAS ===" << std::endl;
 
     test_generator_sygnal_staly();
     test_generator_sygnal_sinusoidalny();

@@ -58,10 +58,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    KlasaUslugowa *m_usluga; // Wskaźnik (Asocjacja)
+    KlasaUslugowa *m_usluga;
     double m_oknoCzasowe;
 
-    // Wykresy
     QChart *m_chartOutput, *m_chartError, *m_chartControl, *m_chartPID;
     QLineSeries *m_seriesZadana, *m_seriesWyjscie;
     QLineSeries *m_seriesUchyb, *m_seriesSterowanie;

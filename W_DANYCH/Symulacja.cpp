@@ -66,7 +66,6 @@ void Symulacja::fromJson(const QJsonObject& root)
     bool dzialalo = m_czyDziala;
     zatrzymaj();
 
-    // 1. Model ARX
     if (root.contains("modelARX")) {
         auto obj = root["modelARX"].toObject();
         std::vector<double> A, B;
@@ -78,14 +77,12 @@ void Symulacja::fromJson(const QJsonObject& root)
                           obj["y min"].toDouble(), obj["y max"].toDouble());
     }
 
-    // 2. Regulator PID
     if (root.contains("regulatorPID")) {
         auto obj = root["regulatorPID"].toObject();
         konfigurujRegulator(obj["k"].toDouble(), obj["TI"].toDouble(), obj["TD"].toDouble());
         konfigurujMetodePID(obj["trybCalk"].toInt());
     }
 
-    // 3. Generator
     if (root.contains("generator")) {
         auto obj = root["generator"].toObject();
         konfigurujGenerator(

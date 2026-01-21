@@ -335,10 +335,10 @@ void MainWindow::odswiezGUI() {
     ui->comboMetCalk->setCurrentIndex(m_usluga->getPidMetodaCalkowania());
 
     int typ = ui->comboTypSygnalu->currentIndex();
-    bool isConstant = (typ == 0); // Zakładam stały
+    bool isConstant = (typ == 0);
     ui->spinOkres->setEnabled(!isConstant);
     ui->spinAmplituda->setEnabled(!isConstant);
-    ui->spinWypelnienie->setEnabled(typ == 1); // Zakładam Prostokąt
+    ui->spinWypelnienie->setEnabled(typ == 1);
 
     for(auto w : widgets) w->blockSignals(false);
 }
