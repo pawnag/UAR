@@ -224,19 +224,41 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
 // ---------------------------------------------------------
 // SLOTY LOGIKI (Użycie Fasady - typy proste)
 // ---------------------------------------------------------
-
 void MainWindow::aktualizujWykresy() {
+    // 1. Pobieramy wszystkie aktualne wartości z usługi
     double t = m_usluga->getCzas();
+    double w = m_usluga->getWartoscZadana();
+    double y = m_usluga->getWartoscWyjscie();
+    double e = m_usluga->getUchyb();
+    double u = m_usluga->getSterowanie();
 
-    m_seriesZadana->append(t, m_usluga->getWartoscZadana());
-    m_seriesWyjscie->append(t, m_usluga->getWartoscWyjscie());
-    m_seriesUchyb->append(t, m_usluga->getUchyb());
-    m_seriesSterowanie->append(t, m_usluga->getSterowanie());
+    double valP = m_usluga->getPidLastP();
+    double valI = m_usluga->getPidLastI();
+    double valD = m_usluga->getPidLastD();
 
-    m_seriesP->append(t, m_usluga->getPidLastP());
-    m_seriesI->append(t, m_usluga->getPidLastI());
-    m_seriesD->append(t, m_usluga->getPidLastD());
+    // 2. Dodajemy punkty do wykresów
+    m_seriesZadana->append(t, w);
+    m_seriesWyjscie->append(t, y);
+    m_seriesUchyb->append(t, e);
+    m_seriesSterowanie->append(t, u);
 
+    m_seriesP->append(t, valP);
+    m_seriesI->append(t, valI);
+    m_seriesD->append(t, valD);
+
+    // 3. --- AKTUALIZACJA LEGENDY (DYNAMICZNE NAPISY) ---
+    // Formatujemy liczbę do 2 lub 4 miejsc po przecinku
+    m_seriesZadana->setName(QString("Wartość zadana (w): %1").arg(w, 0, 'f', 2));
+    m_seriesWyjscie->setName(QString("Wartość regulowana (y): %1").arg(y, 0, 'f', 2));
+
+    m_seriesUchyb->setName(QString("Uchyb: %1").arg(e, 0, 'f', 4)); // Uchyb warto widzieć dokładniej
+    m_seriesSterowanie->setName(QString("Sterowanie: %1").arg(u, 0, 'f', 2));
+
+    m_seriesP->setName(QString("P: %1").arg(valP, 0, 'f', 2));
+    m_seriesI->setName(QString("I: %1").arg(valI, 0, 'f', 2));
+    m_seriesD->setName(QString("D: %1").arg(valD, 0, 'f', 2));
+
+    // 4. Przesuwanie i skalowanie osi
     zarzadzajWykresem(m_chartOutput, t);
     zarzadzajWykresem(m_chartError, t);
     zarzadzajWykresem(m_chartControl, t);
