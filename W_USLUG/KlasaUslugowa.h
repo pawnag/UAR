@@ -13,7 +13,6 @@ class KlasaUslugowa : public QObject
 
 private:
     Symulacja m_symulacja;
-    QTimer *m_timer;
 
 public:
     explicit KlasaUslugowa(QObject *parent = nullptr);
@@ -73,8 +72,6 @@ public:
 signals:
     void noweDaneDostepne();
 
-private slots:
-    void cyklSymulacji();
 };
 
 #endif // KLASAUSLUGOWA_H

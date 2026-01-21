@@ -148,32 +148,63 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
 
     return s;
 }
+// W pliku: W_PREZENTACJI/mainwindow.cpp
+
+// W pliku: W_PREZENTACJI/mainwindow.cpp
+// W pliku: W_PREZENTACJI/mainwindow.cpp
+
+// W pliku: W_PREZENTACJI/mainwindow.cpp
 
 void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     if (!chart) return;
 
     auto axisX = static_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
 
-    // Przesuwanie okna tylko gdy czas przekroczy 10s
-    if (t > m_oknoCzasowe)
-        axisX->setRange(t - m_oknoCzasowe, t);
-    else
-        axisX->setRange(0, m_oknoCzasowe);
+    // --- LOGIKA OSI CZASU ---
+    // Cel: Stała szerokość okna od samego początku.
+    // Np. ustawiasz 20s -> oś jest 0-20s, wykres dochodzi do 5s, reszta pusta.
 
-    // Skalowanie Y
+    double minX, maxX;
+
+    if (t <= m_oknoCzasowe) {
+        // Wariant 1: Czas nie przekroczył jeszcze zadanego okna.
+        // Ustawiamy sztywno od 0 do m_oknoCzasowe.
+        // Dzięki temu widać "wolne miejsce" po prawej stronie.
+        minX = 0.0;
+        maxX = m_oknoCzasowe;
+    } else {
+        // Wariant 2: Czas przekroczył okno (np. t=25s, okno=20s).
+        // Przesuwamy widok (scrolling): 5s - 25s.
+        minX = t - m_oknoCzasowe;
+        maxX = t;
+    }
+
+    axisX->setRange(minX, maxX);
+
+    // --- SKALOWANIE Y I CZYSZCZENIE (Bez zmian) ---
+
+    // Usuwamy tylko dane, które wyszły daleko poza ekran (bufor bezpieczeństwa)
+    double limitBezpieczenstwa = 200.0;
+    double limitUsuwania = t - limitBezpieczenstwa;
+
     double minVal = 1e9, maxVal = -1e9;
     bool hasData = false;
-    double limitCzasu = (t > m_oknoCzasowe) ? (t - m_oknoCzasowe) : 0.0;
+
+    // Szukamy min/max tylko w widocznym fragmencie, żeby wykres Y dobrze się skalował
+    // Uwaga: 'limitWidocznosci' to początek osi X
+    double limitWidocznosci = minX;
 
     for (auto series : chart->series()) {
         auto line = static_cast<QLineSeries*>(series);
 
-        if (line->count() > 0 && line->at(0).x() < limitCzasu - 1.0) {
+        // 1. Usuwanie bardzo starych danych
+        if (line->count() > 0 && line->at(0).x() < limitUsuwania) {
             line->remove(0);
         }
 
+        // 2. Skalowanie Y
         for(const auto& p : line->points()) {
-            if(p.x() >= limitCzasu) {
+            if(p.x() >= limitWidocznosci) {
                 if (p.y() < minVal) minVal = p.y();
                 if (p.y() > maxVal) maxVal = p.y();
                 hasData = true;
@@ -184,11 +215,12 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     if (hasData) {
         double diff = maxVal - minVal;
         if (diff < 0.1) diff = 1.0;
+        double margines = diff * 0.1;
+
         auto axisY = static_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
-        axisY->setRange(minVal - diff * MARGINES_Y, maxVal + diff * MARGINES_Y);
+        axisY->setRange(minVal - margines, maxVal + margines);
     }
 }
-
 // ---------------------------------------------------------
 // SLOTY LOGIKI (Użycie Fasady - typy proste)
 // ---------------------------------------------------------
@@ -375,7 +407,7 @@ void MainWindow::on_spinOknoObserwacji_editingFinished()
             axisX->setTickCount(static_cast<int>(m_oknoCzasowe) + 1);
         } else {
             // Dla długich czasów: automat lub stała liczba, żeby nie zamazać osi
-            axisX->setTickCount(6); // np. 5 przedziałów
+            axisX->setTickCount(11);
         }
     }
 

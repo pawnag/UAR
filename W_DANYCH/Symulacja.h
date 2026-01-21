@@ -1,17 +1,23 @@
 #ifndef SYMULACJA_H
 #define SYMULACJA_H
 
+#include <QObject>
+#include <QTimer>
+#include <QJsonObject> // Dodane
+#include <QJsonArray>  // Dodane
 #include <vector>
 #include "GeneratorWartosciZadanej.h"
 #include "ProstyUAR.h"
 
-class Symulacja
+class Symulacja : public QObject
 {
+    Q_OBJECT
+
 private:
     GeneratorWartosciZadanej m_generator;
     ProstyUAR m_prostyUAR;
+    QTimer *m_timer;
 
-    // Stan symulacji
     bool m_czyDziala;
     double m_czas;
 
@@ -22,42 +28,41 @@ private:
     double m_uchyb;
 
 public:
-    Symulacja(GeneratorWartosciZadanej i_generator = GeneratorWartosciZadanej(),
-              ProstyUAR i_prostyUAR = ProstyUAR());
+    explicit Symulacja(QObject *parent = nullptr);
 
+    // --- Metody JSON (Nowe) ---
+    QJsonObject toJson() const;
+    void fromJson(const QJsonObject& json);
+
+    // ... reszta metod bez zmian ...
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum = 0.0);
-
-    // --- NOWA METODA (Naprawa błędu C2039) ---
     void ustawOgraniczenia(double u_min, double u_max, double y_min, double y_max);
-
     void konfigurujRegulator(double k, double ti, double td);
     void konfigurujMetodePID(int indeksMetody);
-
     void konfigurujGenerator(double ampl, double okres, int interwal,
                              GeneratorWartosciZadanej::TypSygnalu typ,
                              double skladowa, double wypelnienie);
 
     void uruchom();
     void zatrzymaj();
+    void setInterwal(int ms);
     void resetuj();
     void wykonajKrok();
     void resetUAR();
 
+    // Gettery (bez zmian)
     std::vector<double> getModelA() const;
     std::vector<double> getModelB() const;
     int getModelOpoznienie() const;
     double getModelSzum() const;
-
     double getModelUMIN() const;
     double getModelUMAX() const;
     double getModelYMIN() const;
     double getModelYMAX() const;
-
     double getWartoscZadana() const;
     double getWartoscWyjscie() const;
     double getSterowanie() const;
     double getUchyb() const;
-
     double getCzas() const;
     bool czyDziala() const;
     int getInterwalMs() const;
@@ -65,6 +70,12 @@ public:
     GeneratorWartosciZadanej pobierzGenerator() const;
     ModelARX pobierzModel() const;
     RegulatorPID pobierzRegulator() const;
+
+signals:
+    void krokWykonany();
+
+private slots:
+    void onTimerTimeout();
 };
 
 #endif // SYMULACJA_H
