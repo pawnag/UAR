@@ -27,6 +27,9 @@ public:
 
     void konfigurujModel(const std::vector<double>& A, const std::vector<double>& B, int opoznienie, double szum = 0.0);
 
+    // --- NOWA METODA (Naprawa błędu C2039) ---
+    void ustawOgraniczenia(double u_min, double u_max, double y_min, double y_max);
+
     void konfigurujRegulator(double k, double ti, double td);
     void konfigurujMetodePID(int indeksMetody);
 
@@ -36,9 +39,9 @@ public:
 
     void uruchom();
     void zatrzymaj();
-    void resetuj();       // Reset wszystkiego (czas, gener, uar)
+    void resetuj();
     void wykonajKrok();
-    void resetUAR();      // Reset tylko UAR (np. po zmianie nastaw)
+    void resetUAR();
 
     std::vector<double> getModelA() const;
     std::vector<double> getModelB() const;
@@ -57,7 +60,7 @@ public:
 
     double getCzas() const;
     bool czyDziala() const;
-    int getInterwalMs() const; // Z generatora
+    int getInterwalMs() const;
 
     GeneratorWartosciZadanej pobierzGenerator() const;
     ModelARX pobierzModel() const;
