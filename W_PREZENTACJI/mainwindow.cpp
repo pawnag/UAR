@@ -5,6 +5,8 @@
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QFile>
 
 static constexpr double DOMYSLNE_OKNO_CZASOWE = 10.0;
 static constexpr double MARGINES_Y = 0.1;
@@ -131,35 +133,35 @@ QLineSeries* MainWindow::dodajSerie(QChart* chart, QString nazwa, QColor kolor) 
 void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
     if (!chart) return;
     if (chart->axes().isEmpty()) return;
-
+    // Oś X
     double minX = 0.0;
-    double maxX = 10.0;
-
-    if (t > m_oknoCzasowe) {
+    double maxX = 10.0; // Wartość tymczasowa
+    if (t > m_oknoCzasowe) { // Efekt płynnego wykresu
         minX = t - m_oknoCzasowe;
         maxX = t;
     } else {
         minX = 0.0;
         maxX = m_oknoCzasowe;
     }
-
+    // Ustawiamy zakres na osi poziomej
     chart->axes(Qt::Horizontal).first()->setRange(minX, maxX);
 
+    // Oś Y
     double yMin = 1000.0;
     double yMax = -1000.0;
     bool saDane = false;
-
-    double czasDoUsuniecia = t - 200.0;
+    double czasDoUsuniecia = t - 200.0; // Bufor potrzebny żeby dało się zmieniać okno czasowe
 
     for (auto series : chart->series()) {
         auto linia = static_cast<QLineSeries*>(series);
 
+        // Usuwamy stare punkty
         if (linia->count() > 0) {
             if (linia->at(0).x() < czasDoUsuniecia) {
                 linia->remove(0);
             }
         }
-
+        // Szukamy po punktach które są widoczne
         for (auto p : linia->points()) {
             if (p.x() >= minX) {
                 if (p.y() < yMin) {
@@ -172,16 +174,10 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t) {
             }
         }
     }
-
     if (saDane) {
         double roznica = yMax - yMin;
-
-        if (roznica < 0.1) {
-            roznica = 1.0;
-        }
-
-        double margines = roznica * 0.1;
-
+        if (roznica < 0.1) { roznica = 1.0; }
+        double margines = roznica * 0.1; // 10% maginesu góra dół
         chart->axes(Qt::Vertical).first()->setRange(yMin - margines, yMax + margines);
     }
 }
@@ -322,8 +318,25 @@ void MainWindow::odswiezGUI() {
 
     for(auto w : widgets) w->blockSignals(true);
 
+    ui->comboTypSygnalu->setCurrentIndex(m_usluga->getGenTyp());
+    ui->spinAmplituda->setValue(m_usluga->getGenAmplituda());
+    ui->spinOkres->setValue(m_usluga->getGenOkres());
+    ui->spinInterwal->setValue(m_usluga->getGenInterwal());
+    ui->spinSkladowaStala->setValue(m_usluga->getGenSkladowa());
+    ui->spinWypelnienie->setValue(m_usluga->getGenWypelnienie());
+
+    ui->spinPidKp->setValue(m_usluga->getPidKp());
+    ui->spinPidTi->setValue(m_usluga->getPidTi());
+    ui->spinPidTd->setValue(m_usluga->getPidTd());
+    ui->comboMetCalk->setCurrentIndex(m_usluga->getPidMetodaCalkowania());
+
+    int typ = ui->comboTypSygnalu->currentIndex();
+    bool isConstant = (typ == 0); // Zakładam stały
+    ui->spinOkres->setEnabled(!isConstant);
+    ui->spinAmplituda->setEnabled(!isConstant);
+    ui->spinWypelnienie->setEnabled(typ == 1); // Zakładam Prostokąt
+
     for(auto w : widgets) w->blockSignals(false);
-    aktualizujParametryGeneratora();
 }
 
 void MainWindow::on_spinAmplituda_editingFinished() { aktualizujParametryGeneratora(); }

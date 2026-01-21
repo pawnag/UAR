@@ -74,7 +74,7 @@ void ParametryARX::on_pushAnuluj_clicked()
 std::vector<double> ParametryARX::stringToVector(const QString& str) const
 {
     std::vector<double> vec;
-    QStringList list = str.split(' ', Qt::SkipEmptyParts); // Qt 5.15+ (Qt::SkipEmptyParts)
+    QStringList list = str.split(' ', Qt::SkipEmptyParts);
 
     for(const QString& s : list) {
         QString tempS = s;
