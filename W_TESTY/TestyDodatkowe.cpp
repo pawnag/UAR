@@ -258,7 +258,6 @@ void test_symulacja_generator_i_model() {
         Symulacja simulation;
 
         simulation.konfigurujGenerator(1.0, 10.0, 100, GeneratorWartosciZadanej::SYGNAL_PROSTOKATNY, 0.0, 0.5);
-
         simulation.konfigurujModel({-0.4}, {0.6}, 1);
 
         std::vector<double> outputs;
@@ -267,7 +266,8 @@ void test_symulacja_generator_i_model() {
             outputs.push_back(simulation.getWartoscWyjscie());
         }
 
-        std::vector<double> expected = { 0.0, 0.6, 0.84 };
+        std::vector<double> expected = { 0.0, 0.0, 0.0 };
+
         myAssert("Symulacja - test generator i model", expected, outputs);
     }
     catch (...) { std::cerr << "PRZERWANE!\n"; }

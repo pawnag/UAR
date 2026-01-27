@@ -14,9 +14,15 @@ double ProstyUAR::symuluj(double wartoscZadana)
 {
     double uchyb = wartoscZadana - m_ostatnieWyjscie;
     double sterowanie = m_regulator.symuluj(uchyb);
+
+    // Jeśli regulator zwraca 0 (jest wyłączony lub ma zerowe nastawy)
     if (sterowanie == 0.0)
     {
-        sterowanie = wartoscZadana;
+        // ZMIANA: Usunięto przypisanie 'sterowanie = wartoscZadana'.
+        // Dzięki temu sterowanie pozostaje 0.0, więc na model wchodzi 0.
+
+        // Resetujemy pamięć regulatora, aby uniknąć błędów integracji (windup)
+        // przy ponownym włączeniu, skoro traktujemy to jako stan "wyłączony".
         m_regulator.resetuj();
         m_ostatniUchyb = 0.0;
     }
@@ -24,9 +30,13 @@ double ProstyUAR::symuluj(double wartoscZadana)
     {
         m_ostatniUchyb = uchyb;
     }
+
+    // Teraz, jeśli sterowanie wynosi 0.0, do modelu trafi 0.0.
     double noweWyjscie = m_model.symuluj(sterowanie);
+
     m_ostatnieSterowanie = sterowanie;
     m_ostatnieWyjscie = noweWyjscie;
+
     return noweWyjscie;
 }
 

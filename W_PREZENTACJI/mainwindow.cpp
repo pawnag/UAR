@@ -145,7 +145,7 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t)
         currentWidth = m_oknoCzasowe;
     }
 
-    if (std::abs(currentWidth - m_oknoCzasowe) > 1e-6) {
+    if (std::abs(currentWidth - m_oknoCzasowe) > 0,000001) {
         maxX = minX + m_oknoCzasowe;
     }
 
@@ -156,8 +156,8 @@ void MainWindow::zarzadzajWykresem(QChart* chart, double t)
 
     axisX->setRange(minX, maxX);
 
-    double yMin = 1e9;
-    double yMax = -1e9;
+    double yMin = 100000;
+    double yMax = -100000;
     bool saDane = false;
 
     for (auto series : chart->series()) {
@@ -373,4 +373,10 @@ void MainWindow::on_spinOknoObserwacji_editingFinished()
 
 
 
+
+
+void MainWindow::on_checkBox_toggled(bool checked)
+{
+
+}
 

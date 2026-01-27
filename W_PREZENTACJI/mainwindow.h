@@ -56,6 +56,8 @@ private slots:
 
     void resetSymulacji();
 
+    void on_checkBox_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
     KlasaUslugowa *m_usluga;
