@@ -71,7 +71,7 @@ private:
     std::pair<QChart*, QChartView*> stworzWykres(QString tytul, QString osY);
     QLineSeries* dodajSerie(QChart* chart, QString nazwa, QColor kolor);
     void zarzadzajWykresem(QChart* chart, double t);
-    void odswiezGUI();
+    //void odswiezGUI();
 };
 
 #endif // MAINWINDOW_H

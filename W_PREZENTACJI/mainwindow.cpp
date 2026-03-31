@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent, KlasaUslugowa *usluga)
     connect(m_usluga, &KlasaUslugowa::noweDane, this, &MainWindow::aktualizujWykresy);
 
     ui->spinOknoObserwacji->setValue(m_oknoCzasowe);
-    odswiezGUI();
+    //odswiezGUI();
 }
 
 MainWindow::~MainWindow()
@@ -306,42 +306,42 @@ void MainWindow::on_pushLoadConfig_clicked() {
         if (!doc.isObject()) return;
 
         m_usluga->fromJson(doc.object());
-        odswiezGUI();
+        //odswiezGUI();
         resetSymulacji();
     }
 }
 
 
 
-void MainWindow::odswiezGUI() {
-    const QList<QWidget*> widgets = {
-        ui->spinAmplituda, ui->spinOkres, ui->spinInterwal, ui->spinSkladowaStala,
-        ui->spinWypelnienie, ui->spinPidKp, ui->spinPidTi, ui->spinPidTd,
-        ui->comboTypSygnalu, ui->comboMetCalk
-    };
+// void MainWindow::odswiezGUI() {
+//     const QList<QWidget*> widgets = {
+//         ui->spinAmplituda, ui->spinOkres, ui->spinInterwal, ui->spinSkladowaStala,
+//         ui->spinWypelnienie, ui->spinPidKp, ui->spinPidTi, ui->spinPidTd,
+//         ui->comboTypSygnalu, ui->comboMetCalk
+//     };
 
-    for(auto w : widgets) w->blockSignals(true);
+//     for(auto w : widgets) w->blockSignals(true);
 
-    ui->comboTypSygnalu->setCurrentIndex(m_usluga->getGenTyp());
-    ui->spinAmplituda->setValue(m_usluga->getGenAmplituda());
-    ui->spinOkres->setValue(m_usluga->getGenOkres());
-    ui->spinInterwal->setValue(m_usluga->getGenInterwal());
-    ui->spinSkladowaStala->setValue(m_usluga->getGenSkladowa());
-    ui->spinWypelnienie->setValue(m_usluga->getGenWypelnienie());
+//     ui->comboTypSygnalu->setCurrentIndex(m_usluga->getGenTyp());
+//     ui->spinAmplituda->setValue(m_usluga->getGenAmplituda());
+//     ui->spinOkres->setValue(m_usluga->getGenOkres());
+//     ui->spinInterwal->setValue(m_usluga->getGenInterwal());
+//     ui->spinSkladowaStala->setValue(m_usluga->getGenSkladowa());
+//     ui->spinWypelnienie->setValue(m_usluga->getGenWypelnienie());
 
-    ui->spinPidKp->setValue(m_usluga->getPidKp());
-    ui->spinPidTi->setValue(m_usluga->getPidTi());
-    ui->spinPidTd->setValue(m_usluga->getPidTd());
-    ui->comboMetCalk->setCurrentIndex(m_usluga->getPidMetodaCalkowania());
+//     ui->spinPidKp->setValue(m_usluga->getPidKp());
+//     ui->spinPidTi->setValue(m_usluga->getPidTi());
+//     ui->spinPidTd->setValue(m_usluga->getPidTd());
+//     ui->comboMetCalk->setCurrentIndex(m_usluga->getPidMetodaCalkowania());
 
-    int typ = ui->comboTypSygnalu->currentIndex();
-    bool isConstant = (typ == 0);
-    ui->spinOkres->setEnabled(!isConstant);
-    ui->spinAmplituda->setEnabled(!isConstant);
-    ui->spinWypelnienie->setEnabled(typ == 1);
+//     int typ = ui->comboTypSygnalu->currentIndex();
+//     bool isConstant = (typ == 0);
+//     ui->spinOkres->setEnabled(!isConstant);
+//     ui->spinAmplituda->setEnabled(!isConstant);
+//     ui->spinWypelnienie->setEnabled(typ == 1);
 
-    for(auto w : widgets) w->blockSignals(false);
-}
+//     for(auto w : widgets) w->blockSignals(false);
+// }
 
 void MainWindow::on_spinAmplituda_editingFinished() { aktualizujParametryGeneratora(); }
 void MainWindow::on_spinOkres_editingFinished() { aktualizujParametryGeneratora(); }

@@ -27,7 +27,6 @@ Makefile*
 *.prl
 *.app
 moc_*.cpp
-ui_*.h
 qrc_*.cpp
 Thumbs.db
 *.res
@@ -97,7 +96,6 @@ debug/
 *.o
 *.obj
 *.moc
-*.ui
 moc_*.cpp
 .qmake.cache
 .qmake.stash
@@ -129,7 +127,6 @@ Desktop.ini
 *.o
 *.obj
 *.moc
-*.ui
 *.db
 *.idb
 *.pdb
@@ -139,8 +136,6 @@ Desktop.ini
 *.filters
 *.user
 
-# Pliki generowane przez Qt (bardzo ważne!)
-ui_*.h
 moc_*.cpp
 qrc_*.cpp
 Makefile*
